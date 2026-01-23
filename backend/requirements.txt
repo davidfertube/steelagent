@@ -10,3 +10,4 @@ pypdf
 python-dotenv
 tiktoken
 langchain-experimental
+azure-functions
