@@ -6,113 +6,210 @@ import { ArrowRight, Github, Zap, Shield, Database, Menu, X, FileText, Boxes } f
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { SearchForm } from "@/components/search-form";
 import { ResponseDisplay } from "@/components/response-display";
 import { HealthIndicator } from "@/components/health-indicator";
 import { Source } from "@/lib/api";
 
-// 3D Steel Crystal Lattice Structure (BCC - Body-Centered Cubic)
-function SteelCrystalVisualization() {
+// Linear-inspired 3D Geometric Visualization with Red Accent
+function GeometricVisualization() {
   return (
-    <div className="relative w-full max-w-lg mx-auto">
-      {/* Glow effect */}
-      <div className="absolute inset-0 bg-gradient-radial from-yellow/10 via-transparent to-transparent blur-3xl" />
+    <div className="relative w-full max-w-xl mx-auto h-[400px] lg:h-[500px]">
+      {/* Main 3D Scene */}
+      <div className="absolute inset-0 perspective-[1200px]">
+        {/* Rotating wireframe cube */}
+        <motion.div
+          className="absolute inset-0 flex items-center justify-center"
+          animate={{ rotateY: 360, rotateX: 15 }}
+          transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
+          style={{ transformStyle: "preserve-3d" }}
+        >
+          {/* Cube faces - wireframe style */}
+          <div className="relative w-48 h-48 lg:w-64 lg:h-64" style={{ transformStyle: "preserve-3d" }}>
+            {/* Front face */}
+            <div
+              className="absolute inset-0 border border-foreground/20"
+              style={{ transform: "translateZ(96px)" }}
+            />
+            {/* Back face */}
+            <div
+              className="absolute inset-0 border border-foreground/10"
+              style={{ transform: "translateZ(-96px)" }}
+            />
+            {/* Left face */}
+            <div
+              className="absolute inset-0 border border-foreground/15"
+              style={{ transform: "rotateY(-90deg) translateZ(96px)" }}
+            />
+            {/* Right face */}
+            <div
+              className="absolute inset-0 border border-foreground/15"
+              style={{ transform: "rotateY(90deg) translateZ(96px)" }}
+            />
+            {/* Top face */}
+            <div
+              className="absolute inset-0 border border-foreground/10"
+              style={{ transform: "rotateX(90deg) translateZ(96px)" }}
+            />
+            {/* Bottom face */}
+            <div
+              className="absolute inset-0 border border-foreground/10"
+              style={{ transform: "rotateX(-90deg) translateZ(96px)" }}
+            />
+          </div>
+        </motion.div>
 
-      <div className="perspective-1000 relative">
-        <div className="preserve-3d rotate-y-slow">
-          <svg
-            viewBox="0 0 400 400"
-            className="w-full h-full"
-            style={{ filter: "drop-shadow(0 0 30px rgba(0,0,0,0.1))" }}
-          >
-            {/* Background glow */}
-            <defs>
-              <radialGradient id="centerGlow" cx="50%" cy="50%" r="50%">
-                <stop offset="0%" stopColor="hsl(45, 93%, 47%)" stopOpacity="0.15" />
-                <stop offset="100%" stopColor="hsl(45, 93%, 47%)" stopOpacity="0" />
-              </radialGradient>
-              <linearGradient id="edgeGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-                <stop offset="0%" stopColor="currentColor" stopOpacity="0.6" />
-                <stop offset="100%" stopColor="currentColor" stopOpacity="0.2" />
-              </linearGradient>
-            </defs>
+        {/* THE RED SQUARE - Main accent element that pulses in/out */}
+        <motion.div
+          className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-16 h-16 lg:w-20 lg:h-20 bg-red-500"
+          animate={{
+            scale: [1, 1.2, 1, 0.8, 1],
+            rotateZ: [0, 90, 180, 270, 360],
+            opacity: [1, 0.9, 1, 0.9, 1],
+          }}
+          transition={{
+            duration: 8,
+            repeat: Infinity,
+            ease: "easeInOut",
+          }}
+          style={{ transformStyle: "preserve-3d" }}
+        />
 
-            <circle cx="200" cy="200" r="150" fill="url(#centerGlow)" />
+        {/* Secondary floating red squares */}
+        <motion.div
+          className="absolute top-[20%] right-[15%] w-8 h-8 lg:w-10 lg:h-10 bg-red-500/80"
+          animate={{
+            y: [0, -30, 0],
+            x: [0, 20, 0],
+            scale: [1, 0.8, 1],
+            opacity: [0.8, 0.4, 0.8],
+          }}
+          transition={{
+            duration: 6,
+            repeat: Infinity,
+            ease: "easeInOut",
+            delay: 1,
+          }}
+        />
+        <motion.div
+          className="absolute bottom-[25%] left-[20%] w-6 h-6 lg:w-8 lg:h-8 bg-red-500/60"
+          animate={{
+            y: [0, 25, 0],
+            x: [0, -15, 0],
+            scale: [0.8, 1.1, 0.8],
+            opacity: [0.6, 0.3, 0.6],
+          }}
+          transition={{
+            duration: 5,
+            repeat: Infinity,
+            ease: "easeInOut",
+            delay: 2,
+          }}
+        />
+        <motion.div
+          className="absolute top-[35%] left-[10%] w-4 h-4 lg:w-6 lg:h-6 bg-red-500/40"
+          animate={{
+            y: [0, -20, 0],
+            scale: [1, 0.6, 1],
+            opacity: [0.4, 0.8, 0.4],
+          }}
+          transition={{
+            duration: 4,
+            repeat: Infinity,
+            ease: "easeInOut",
+            delay: 0.5,
+          }}
+        />
+        <motion.div
+          className="absolute bottom-[15%] right-[25%] w-5 h-5 lg:w-7 lg:h-7 bg-red-500/50"
+          animate={{
+            y: [0, 20, 0],
+            x: [0, -10, 0],
+            scale: [1, 1.3, 1],
+            opacity: [0.5, 0.2, 0.5],
+          }}
+          transition={{
+            duration: 7,
+            repeat: Infinity,
+            ease: "easeInOut",
+            delay: 3,
+          }}
+        />
 
-            {/* Outer cube edges - BCC unit cell */}
-            <g className="text-foreground/30">
-              {/* Front face */}
-              <line x1="100" y1="100" x2="300" y2="100" stroke="url(#edgeGradient)" strokeWidth="1.5" />
-              <line x1="300" y1="100" x2="300" y2="300" stroke="url(#edgeGradient)" strokeWidth="1.5" />
-              <line x1="300" y1="300" x2="100" y2="300" stroke="url(#edgeGradient)" strokeWidth="1.5" />
-              <line x1="100" y1="300" x2="100" y2="100" stroke="url(#edgeGradient)" strokeWidth="1.5" />
+        {/* Floating particles/dots */}
+        {[...Array(12)].map((_, i) => (
+          <motion.div
+            key={i}
+            className="absolute w-1 h-1 lg:w-1.5 lg:h-1.5 rounded-full bg-foreground/30"
+            style={{
+              top: `${15 + Math.random() * 70}%`,
+              left: `${10 + Math.random() * 80}%`,
+            }}
+            animate={{
+              y: [0, -15 + Math.random() * 30, 0],
+              opacity: [0.3, 0.6, 0.3],
+            }}
+            transition={{
+              duration: 3 + Math.random() * 3,
+              repeat: Infinity,
+              ease: "easeInOut",
+              delay: Math.random() * 2,
+            }}
+          />
+        ))}
 
-              {/* Back face (offset for 3D effect) */}
-              <line x1="140" y1="60" x2="340" y2="60" stroke="url(#edgeGradient)" strokeWidth="1" opacity="0.5" />
-              <line x1="340" y1="60" x2="340" y2="260" stroke="url(#edgeGradient)" strokeWidth="1" opacity="0.5" />
-              <line x1="340" y1="260" x2="140" y2="260" stroke="url(#edgeGradient)" strokeWidth="1" opacity="0.5" />
-              <line x1="140" y1="260" x2="140" y2="60" stroke="url(#edgeGradient)" strokeWidth="1" opacity="0.5" />
-
-              {/* Connecting edges */}
-              <line x1="100" y1="100" x2="140" y2="60" stroke="url(#edgeGradient)" strokeWidth="1" opacity="0.4" />
-              <line x1="300" y1="100" x2="340" y2="60" stroke="url(#edgeGradient)" strokeWidth="1" opacity="0.4" />
-              <line x1="300" y1="300" x2="340" y2="260" stroke="url(#edgeGradient)" strokeWidth="1" opacity="0.4" />
-              <line x1="100" y1="300" x2="140" y2="260" stroke="url(#edgeGradient)" strokeWidth="1" opacity="0.4" />
-            </g>
-
-            {/* Diagonal connections to center atom (BCC structure) */}
-            <g className="text-yellow/40">
-              <line x1="100" y1="100" x2="200" y2="180" stroke="currentColor" strokeWidth="1" strokeDasharray="4,4" />
-              <line x1="300" y1="100" x2="200" y2="180" stroke="currentColor" strokeWidth="1" strokeDasharray="4,4" />
-              <line x1="300" y1="300" x2="200" y2="180" stroke="currentColor" strokeWidth="1" strokeDasharray="4,4" />
-              <line x1="100" y1="300" x2="200" y2="180" stroke="currentColor" strokeWidth="1" strokeDasharray="4,4" />
-              <line x1="140" y1="60" x2="200" y2="180" stroke="currentColor" strokeWidth="1" strokeDasharray="4,4" opacity="0.5" />
-              <line x1="340" y1="60" x2="200" y2="180" stroke="currentColor" strokeWidth="1" strokeDasharray="4,4" opacity="0.5" />
-              <line x1="340" y1="260" x2="200" y2="180" stroke="currentColor" strokeWidth="1" strokeDasharray="4,4" opacity="0.5" />
-              <line x1="140" y1="260" x2="200" y2="180" stroke="currentColor" strokeWidth="1" strokeDasharray="4,4" opacity="0.5" />
-            </g>
-
-            {/* Corner atoms (Iron atoms in BCC) */}
-            <g className="animate-pulse-glow">
-              {/* Front corners */}
-              <circle cx="100" cy="100" r="10" fill="currentColor" className="text-foreground" />
-              <circle cx="300" cy="100" r="10" fill="currentColor" className="text-foreground" />
-              <circle cx="300" cy="300" r="10" fill="currentColor" className="text-foreground" />
-              <circle cx="100" cy="300" r="10" fill="currentColor" className="text-foreground" />
-
-              {/* Back corners */}
-              <circle cx="140" cy="60" r="7" fill="currentColor" className="text-foreground/60" />
-              <circle cx="340" cy="60" r="7" fill="currentColor" className="text-foreground/60" />
-              <circle cx="340" cy="260" r="7" fill="currentColor" className="text-foreground/60" />
-              <circle cx="140" cy="260" r="7" fill="currentColor" className="text-foreground/60" />
-            </g>
-
-            {/* Center atom (Body center in BCC) - highlighted in yellow */}
-            <circle cx="200" cy="180" r="14" fill="hsl(45, 93%, 47%)" className="animate-pulse-glow" />
-            <circle cx="200" cy="180" r="20" fill="none" stroke="hsl(45, 93%, 47%)" strokeWidth="1" opacity="0.3" />
-            <circle cx="200" cy="180" r="26" fill="none" stroke="hsl(45, 93%, 47%)" strokeWidth="0.5" opacity="0.15" />
-
-            {/* Labels */}
-            <text x="200" y="350" textAnchor="middle" className="text-xs fill-muted-foreground font-mono tracking-wider">
-              BCC IRON CRYSTAL STRUCTURE
-            </text>
-
-            {/* Decorative orbits */}
-            <g className="text-border/30">
-              <ellipse cx="200" cy="180" rx="120" ry="40" fill="none" stroke="currentColor" strokeWidth="0.5" strokeDasharray="2,6" />
-              <ellipse cx="200" cy="180" rx="80" ry="100" fill="none" stroke="currentColor" strokeWidth="0.5" strokeDasharray="2,6" transform="rotate(60 200 180)" />
-            </g>
-          </svg>
-        </div>
+        {/* Connecting lines */}
+        <svg className="absolute inset-0 w-full h-full" style={{ opacity: 0.15 }}>
+          <motion.line
+            x1="30%" y1="30%" x2="70%" y2="70%"
+            stroke="currentColor"
+            strokeWidth="1"
+            animate={{ opacity: [0.1, 0.3, 0.1] }}
+            transition={{ duration: 3, repeat: Infinity }}
+          />
+          <motion.line
+            x1="70%" y1="30%" x2="30%" y2="70%"
+            stroke="currentColor"
+            strokeWidth="1"
+            animate={{ opacity: [0.3, 0.1, 0.3] }}
+            transition={{ duration: 3, repeat: Infinity, delay: 1.5 }}
+          />
+          <motion.line
+            x1="50%" y1="10%" x2="50%" y2="90%"
+            stroke="currentColor"
+            strokeWidth="0.5"
+            animate={{ opacity: [0.1, 0.2, 0.1] }}
+            transition={{ duration: 4, repeat: Infinity }}
+          />
+          <motion.line
+            x1="10%" y1="50%" x2="90%" y2="50%"
+            stroke="currentColor"
+            strokeWidth="0.5"
+            animate={{ opacity: [0.2, 0.1, 0.2] }}
+            transition={{ duration: 4, repeat: Infinity, delay: 2 }}
+          />
+        </svg>
       </div>
-
-      {/* Caption */}
-      <p className="text-center text-xs text-muted-foreground mt-4 font-mono">
-        Fe atoms in body-centered cubic lattice
-      </p>
     </div>
+  );
+}
+
+// Floating red square that appears across sections
+function FloatingRedSquare({ className = "" }: { className?: string }) {
+  return (
+    <motion.div
+      className={`absolute w-3 h-3 bg-red-500 ${className}`}
+      animate={{
+        y: [0, -10, 0],
+        opacity: [0.6, 1, 0.6],
+      }}
+      transition={{
+        duration: 3,
+        repeat: Infinity,
+        ease: "easeInOut",
+      }}
+    />
   );
 }
 
@@ -144,35 +241,35 @@ export default function Home() {
   }, []);
 
   return (
-    <div className="flex min-h-screen flex-col bg-background text-foreground">
+    <div className="flex min-h-screen flex-col bg-white text-foreground overflow-x-hidden">
       {/* Header */}
-      <header className="fixed top-0 left-0 right-0 z-50 bg-background/80 backdrop-blur-md border-b border-border/50">
+      <header className="fixed top-0 left-0 right-0 z-50 bg-white/90 backdrop-blur-md border-b border-black/5">
         <div className="container-center">
           <div className="flex h-16 items-center justify-between">
             {/* Logo */}
             <Link href="/" className="flex items-center gap-2">
-              <div className="w-8 h-8 rounded-lg bg-foreground flex items-center justify-center">
-                <Boxes className="w-4 h-4 text-background" />
+              <div className="w-8 h-8 bg-foreground flex items-center justify-center">
+                <Boxes className="w-4 h-4 text-white" />
               </div>
               <span className="text-lg font-semibold tracking-tight">SteelIntel</span>
             </Link>
 
             {/* Desktop Navigation */}
             <nav className="hidden md:flex items-center gap-8">
-              <Link href="#features" className="nav-link">
+              <Link href="#features" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
                 Features
               </Link>
-              <Link href="#demo" className="nav-link">
+              <Link href="#demo" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
                 Demo
               </Link>
-              <Link href="/docs" className="nav-link">
+              <Link href="/docs" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
                 Docs
               </Link>
               <a
                 href="https://github.com/davidfertube/knowledge_tool"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="nav-link"
+                className="text-sm text-muted-foreground hover:text-foreground transition-colors"
               >
                 GitHub
               </a>
@@ -181,7 +278,7 @@ export default function Home() {
 
             {/* Mobile menu button */}
             <button
-              className="md:hidden p-2 touch-target rounded-lg hover:bg-muted transition-colors"
+              className="md:hidden p-2 touch-target rounded hover:bg-black/5 transition-colors"
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
               aria-label="Toggle menu"
             >
@@ -200,26 +297,26 @@ export default function Home() {
             initial={{ opacity: 0, y: -10 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -10 }}
-            className="md:hidden border-t border-border bg-background"
+            className="md:hidden border-t border-black/5 bg-white"
           >
             <nav className="container-center py-6 space-y-1">
               <Link
                 href="#features"
-                className="block nav-link py-3 px-3 rounded-lg hover:bg-muted"
+                className="block py-3 px-3 text-sm text-muted-foreground hover:text-foreground hover:bg-black/5 rounded transition-colors"
                 onClick={() => setMobileMenuOpen(false)}
               >
                 Features
               </Link>
               <Link
                 href="#demo"
-                className="block nav-link py-3 px-3 rounded-lg hover:bg-muted"
+                className="block py-3 px-3 text-sm text-muted-foreground hover:text-foreground hover:bg-black/5 rounded transition-colors"
                 onClick={() => setMobileMenuOpen(false)}
               >
                 Demo
               </Link>
               <Link
                 href="/docs"
-                className="block nav-link py-3 px-3 rounded-lg hover:bg-muted"
+                className="block py-3 px-3 text-sm text-muted-foreground hover:text-foreground hover:bg-black/5 rounded transition-colors"
                 onClick={() => setMobileMenuOpen(false)}
               >
                 Docs
@@ -228,7 +325,7 @@ export default function Home() {
                 href="https://github.com/davidfertube/knowledge_tool"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="block nav-link py-3 px-3 rounded-lg hover:bg-muted"
+                className="block py-3 px-3 text-sm text-muted-foreground hover:text-foreground hover:bg-black/5 rounded transition-colors"
                 onClick={() => setMobileMenuOpen(false)}
               >
                 GitHub
@@ -244,9 +341,14 @@ export default function Home() {
 
       <main className="flex-1 pt-16">
         {/* Hero Section */}
-        <section className="section-hero bg-gradient-mesh">
+        <section className="relative py-16 sm:py-20 md:py-24 lg:py-32 overflow-hidden">
+          {/* Background floating red squares */}
+          <FloatingRedSquare className="top-20 left-[5%] hidden lg:block" />
+          <FloatingRedSquare className="top-40 right-[8%] hidden lg:block" />
+          <FloatingRedSquare className="bottom-32 left-[12%] hidden lg:block" />
+
           <div className="container-center">
-            <div className="grid lg:grid-cols-2 gap-12 lg:gap-20 items-center">
+            <div className="grid lg:grid-cols-2 gap-12 lg:gap-16 items-center">
               {/* Left: Text content */}
               <motion.div
                 initial={{ opacity: 0, y: 20 }}
@@ -254,15 +356,19 @@ export default function Home() {
                 transition={{ duration: 0.6 }}
                 className="text-center lg:text-left space-y-8"
               >
-                <div className="space-y-4">
-                  <Badge variant="secondary" className="badge-yellow">
+                <div className="space-y-6">
+                  <div className="inline-flex items-center gap-2 px-3 py-1 border border-black/10 rounded-full text-xs font-medium text-muted-foreground">
+                    <span className="w-2 h-2 bg-red-500 rounded-sm" />
                     AI-Powered Knowledge Engine
-                  </Badge>
-                  <h1 className="heading-hero">
+                  </div>
+                  <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-semibold tracking-tight leading-[1.1]">
                     The intelligent engine for{" "}
-                    <span className="underline-yellow">steel specifications</span>
+                    <span className="relative">
+                      steel specifications
+                      <span className="absolute -bottom-1 left-0 right-0 h-[3px] bg-red-500" />
+                    </span>
                   </h1>
-                  <p className="prose-body max-w-xl mx-auto lg:mx-0">
+                  <p className="text-lg text-muted-foreground max-w-xl mx-auto lg:mx-0 leading-relaxed">
                     Instant answers from your technical documents. Query ASTM standards,
                     material properties, and compliance requirements with AI-powered
                     semantic search and source citations.
@@ -270,11 +376,11 @@ export default function Home() {
                 </div>
 
                 <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
-                  <Button size="lg" className="btn-primary touch-target">
+                  <Button size="lg" className="bg-foreground text-white hover:bg-foreground/90 h-12 px-8">
                     Get Started
                     <ArrowRight className="ml-2 h-4 w-4" />
                   </Button>
-                  <Button size="lg" variant="outline" className="btn-secondary touch-target" asChild>
+                  <Button size="lg" variant="outline" className="border-black/20 hover:bg-black/5 h-12 px-8" asChild>
                     <a
                       href="https://github.com/davidfertube/knowledge_tool"
                       target="_blank"
@@ -287,39 +393,39 @@ export default function Home() {
                 </div>
 
                 {/* Stats */}
-                <div className="flex flex-wrap gap-8 justify-center lg:justify-start pt-4">
-                  <div className="text-center">
-                    <p className="text-2xl font-semibold">100K+</p>
+                <div className="flex flex-wrap gap-10 justify-center lg:justify-start pt-6">
+                  <div>
+                    <p className="text-3xl font-semibold">100K+</p>
                     <p className="text-sm text-muted-foreground">Vector capacity</p>
                   </div>
-                  <Separator orientation="vertical" className="h-12 hidden sm:block" />
-                  <div className="text-center">
-                    <p className="text-2xl font-semibold">50+</p>
-                    <p className="text-sm text-muted-foreground">Standards supported</p>
+                  <div>
+                    <p className="text-3xl font-semibold">50+</p>
+                    <p className="text-sm text-muted-foreground">Standards</p>
                   </div>
-                  <Separator orientation="vertical" className="h-12 hidden sm:block" />
-                  <div className="text-center">
-                    <p className="text-2xl font-semibold">&lt;2s</p>
-                    <p className="text-sm text-muted-foreground">Query response</p>
+                  <div>
+                    <p className="text-3xl font-semibold">&lt;2s</p>
+                    <p className="text-sm text-muted-foreground">Response time</p>
                   </div>
                 </div>
               </motion.div>
 
-              {/* Right: 3D Crystal visualization */}
+              {/* Right: 3D Geometric visualization */}
               <motion.div
                 initial={{ opacity: 0, scale: 0.95 }}
                 animate={{ opacity: 1, scale: 1 }}
                 transition={{ duration: 0.8, delay: 0.2 }}
                 className="hidden lg:block"
               >
-                <SteelCrystalVisualization />
+                <GeometricVisualization />
               </motion.div>
             </div>
           </div>
         </section>
 
         {/* Demo Section */}
-        <section id="demo" className="section-padding border-t border-border">
+        <section id="demo" className="relative py-16 sm:py-20 md:py-24 border-t border-black/5">
+          <FloatingRedSquare className="top-16 right-[6%] hidden lg:block" />
+
           <div className="container-narrow">
             <motion.div
               initial={{ opacity: 0, y: 20 }}
@@ -329,18 +435,21 @@ export default function Home() {
               className="space-y-12"
             >
               <div className="text-center space-y-4">
-                <Badge variant="secondary" className="text-xs tracking-wider">TRY IT NOW</Badge>
-                <h2 className="heading-section">
+                <div className="inline-flex items-center gap-2 px-3 py-1 border border-black/10 rounded-full text-xs font-medium text-muted-foreground">
+                  <span className="w-2 h-2 bg-red-500 rounded-sm" />
+                  TRY IT NOW
+                </div>
+                <h2 className="text-3xl sm:text-4xl md:text-5xl font-semibold tracking-tight">
                   Query your knowledge base
                 </h2>
-                <p className="prose-body max-w-2xl mx-auto">
+                <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
                   Ask questions about ASTM standards, material properties, or
                   compliance requirements. Get instant, cited answers.
                 </p>
               </div>
 
               {/* Search Card */}
-              <Card className="card-elevated border-0">
+              <Card className="border border-black/10 shadow-lg shadow-black/5">
                 <CardContent className="p-6 sm:p-8 lg:p-10">
                   <SearchForm
                     onResult={handleResult}
@@ -364,7 +473,10 @@ export default function Home() {
         </section>
 
         {/* Features Section */}
-        <section id="features" className="section-padding border-t border-border bg-muted/30">
+        <section id="features" className="relative py-16 sm:py-20 md:py-24 border-t border-black/5 bg-black/[0.02]">
+          <FloatingRedSquare className="top-24 left-[4%] hidden lg:block" />
+          <FloatingRedSquare className="bottom-20 right-[10%] hidden lg:block" />
+
           <div className="container-center">
             <motion.div
               initial={{ opacity: 0, y: 20 }}
@@ -373,147 +485,86 @@ export default function Home() {
               transition={{ duration: 0.6 }}
               className="text-center mb-16 space-y-4"
             >
-              <Badge variant="secondary" className="text-xs tracking-wider">WHY STEELINEL</Badge>
-              <h2 className="heading-section">
+              <div className="inline-flex items-center gap-2 px-3 py-1 border border-black/10 rounded-full text-xs font-medium text-muted-foreground">
+                <span className="w-2 h-2 bg-red-500 rounded-sm" />
+                WHY STEELINEL
+              </div>
+              <h2 className="text-3xl sm:text-4xl md:text-5xl font-semibold tracking-tight">
                 Built for engineering teams
               </h2>
-              <p className="prose-body max-w-2xl mx-auto">
+              <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
                 Designed specifically for material science and compliance verification workflows.
               </p>
             </motion.div>
 
             <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8">
-              {/* Feature 1 */}
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.5 }}
-              >
-                <Card className="card-subtle h-full">
-                  <CardContent className="p-6 lg:p-8 space-y-4">
-                    <div className="w-12 h-12 rounded-xl bg-muted flex items-center justify-center">
-                      <Zap className="w-6 h-6 text-foreground" strokeWidth={1.5} />
-                    </div>
-                    <h3 className="text-lg font-semibold">Instant Answers</h3>
-                    <p className="text-muted-foreground text-sm leading-relaxed">
-                      Get precise answers from your technical documents in seconds.
-                      No more manual searching through PDFs and spreadsheets.
-                    </p>
-                  </CardContent>
-                </Card>
-              </motion.div>
-
-              {/* Feature 2 */}
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.5, delay: 0.1 }}
-              >
-                <Card className="card-subtle h-full">
-                  <CardContent className="p-6 lg:p-8 space-y-4">
-                    <div className="w-12 h-12 rounded-xl bg-muted flex items-center justify-center">
-                      <FileText className="w-6 h-6 text-foreground" strokeWidth={1.5} />
-                    </div>
-                    <h3 className="text-lg font-semibold">Source Citations</h3>
-                    <p className="text-muted-foreground text-sm leading-relaxed">
-                      Every answer includes source citations with document name, page,
-                      and section. Verify compliance with traceable references.
-                    </p>
-                  </CardContent>
-                </Card>
-              </motion.div>
-
-              {/* Feature 3 */}
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.5, delay: 0.2 }}
-              >
-                <Card className="card-subtle h-full">
-                  <CardContent className="p-6 lg:p-8 space-y-4">
-                    <div className="w-12 h-12 rounded-xl bg-muted flex items-center justify-center">
-                      <Shield className="w-6 h-6 text-foreground" strokeWidth={1.5} />
-                    </div>
-                    <h3 className="text-lg font-semibold">Compliance Ready</h3>
-                    <p className="text-muted-foreground text-sm leading-relaxed">
-                      Verify compliance with ASTM, ASME, API, and NACE standards.
-                      Built for engineers who need audit-ready answers.
-                    </p>
-                  </CardContent>
-                </Card>
-              </motion.div>
-
-              {/* Feature 4 */}
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.5, delay: 0.3 }}
-              >
-                <Card className="card-subtle h-full">
-                  <CardContent className="p-6 lg:p-8 space-y-4">
-                    <div className="w-12 h-12 rounded-xl bg-muted flex items-center justify-center">
-                      <Database className="w-6 h-6 text-foreground" strokeWidth={1.5} />
-                    </div>
-                    <h3 className="text-lg font-semibold">Scale Ready</h3>
-                    <p className="text-muted-foreground text-sm leading-relaxed">
-                      Process hundreds of technical documents. Optimized vector pipeline
-                      handles large specification libraries efficiently.
-                    </p>
-                  </CardContent>
-                </Card>
-              </motion.div>
-
-              {/* Feature 5 */}
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.5, delay: 0.4 }}
-              >
-                <Card className="card-subtle h-full">
-                  <CardContent className="p-6 lg:p-8 space-y-4">
-                    <div className="w-12 h-12 rounded-xl bg-muted flex items-center justify-center">
-                      <Boxes className="w-6 h-6 text-foreground" strokeWidth={1.5} />
-                    </div>
-                    <h3 className="text-lg font-semibold">Semantic Search</h3>
-                    <p className="text-muted-foreground text-sm leading-relaxed">
-                      AI-powered semantic search understands engineering context.
-                      Find relevant information even with varied terminology.
-                    </p>
-                  </CardContent>
-                </Card>
-              </motion.div>
-
-              {/* Feature 6 */}
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.5, delay: 0.5 }}
-              >
-                <Card className="card-subtle h-full">
-                  <CardContent className="p-6 lg:p-8 space-y-4">
-                    <div className="w-12 h-12 rounded-xl bg-muted flex items-center justify-center">
-                      <Github className="w-6 h-6 text-foreground" strokeWidth={1.5} />
-                    </div>
-                    <h3 className="text-lg font-semibold">Open Source</h3>
-                    <p className="text-muted-foreground text-sm leading-relaxed">
-                      Fully open source and self-hostable. Deploy on your own
-                      infrastructure for maximum data security and control.
-                    </p>
-                  </CardContent>
-                </Card>
-              </motion.div>
+              {[
+                {
+                  icon: Zap,
+                  title: "Instant Answers",
+                  description: "Get precise answers from your technical documents in seconds. No more manual searching through PDFs and spreadsheets.",
+                  delay: 0,
+                },
+                {
+                  icon: FileText,
+                  title: "Source Citations",
+                  description: "Every answer includes source citations with document name, page, and section. Verify compliance with traceable references.",
+                  delay: 0.1,
+                },
+                {
+                  icon: Shield,
+                  title: "Compliance Ready",
+                  description: "Verify compliance with ASTM, ASME, API, and NACE standards. Built for engineers who need audit-ready answers.",
+                  delay: 0.2,
+                },
+                {
+                  icon: Database,
+                  title: "Scale Ready",
+                  description: "Process hundreds of technical documents. Optimized vector pipeline handles large specification libraries efficiently.",
+                  delay: 0.3,
+                },
+                {
+                  icon: Boxes,
+                  title: "Semantic Search",
+                  description: "AI-powered semantic search understands engineering context. Find relevant information even with varied terminology.",
+                  delay: 0.4,
+                },
+                {
+                  icon: Github,
+                  title: "Open Source",
+                  description: "Fully open source and self-hostable. Deploy on your own infrastructure for maximum data security and control.",
+                  delay: 0.5,
+                },
+              ].map((feature, index) => (
+                <motion.div
+                  key={index}
+                  initial={{ opacity: 0, y: 20 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ duration: 0.5, delay: feature.delay }}
+                >
+                  <Card className="h-full border border-black/10 hover:border-black/20 transition-colors bg-white">
+                    <CardContent className="p-6 lg:p-8 space-y-4">
+                      <div className="w-12 h-12 bg-black/5 flex items-center justify-center">
+                        <feature.icon className="w-6 h-6 text-foreground" strokeWidth={1.5} />
+                      </div>
+                      <h3 className="text-lg font-semibold">{feature.title}</h3>
+                      <p className="text-muted-foreground text-sm leading-relaxed">
+                        {feature.description}
+                      </p>
+                    </CardContent>
+                  </Card>
+                </motion.div>
+              ))}
             </div>
           </div>
         </section>
 
         {/* CTA Section */}
-        <section className="section-padding border-t border-border">
+        <section className="relative py-16 sm:py-20 md:py-24 border-t border-black/5">
+          <FloatingRedSquare className="top-12 left-[15%] hidden lg:block" />
+          <FloatingRedSquare className="bottom-16 right-[12%] hidden lg:block" />
+
           <div className="container-narrow text-center">
             <motion.div
               initial={{ opacity: 0, y: 20 }}
@@ -523,20 +574,20 @@ export default function Home() {
               className="space-y-8"
             >
               <div className="space-y-4">
-                <h2 className="heading-section">
-                  Ready to transform your document workflow?
+                <h2 className="text-3xl sm:text-4xl md:text-5xl font-semibold tracking-tight">
+                  Ready to transform your<br />document workflow?
                 </h2>
-                <p className="prose-body max-w-2xl mx-auto">
+                <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
                   Join engineering teams using SteelIntel to save hours of manual
-                  document searching every week. Get started in minutes.
+                  document searching every week.
                 </p>
               </div>
               <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                <Button size="lg" className="btn-primary touch-target">
+                <Button size="lg" className="bg-foreground text-white hover:bg-foreground/90 h-12 px-8">
                   Start Free Trial
                   <ArrowRight className="ml-2 h-4 w-4" />
                 </Button>
-                <Button size="lg" variant="outline" className="btn-secondary touch-target">
+                <Button size="lg" variant="outline" className="border-black/20 hover:bg-black/5 h-12 px-8">
                   Contact Sales
                 </Button>
               </div>
@@ -546,12 +597,12 @@ export default function Home() {
       </main>
 
       {/* Footer */}
-      <footer className="border-t border-border py-8 sm:py-12">
+      <footer className="border-t border-black/5 py-8 sm:py-12 bg-white">
         <div className="container-center">
           <div className="flex flex-col sm:flex-row items-center justify-between gap-6">
             <div className="flex items-center gap-3">
-              <div className="w-8 h-8 rounded-lg bg-foreground flex items-center justify-center">
-                <Boxes className="w-4 h-4 text-background" />
+              <div className="w-8 h-8 bg-foreground flex items-center justify-center">
+                <Boxes className="w-4 h-4 text-white" />
               </div>
               <div>
                 <span className="font-semibold">SteelIntel</span>
@@ -570,7 +621,7 @@ export default function Home() {
             </div>
             <div className="flex items-center gap-6">
               <HealthIndicator />
-              <Separator orientation="vertical" className="h-6" />
+              <Separator orientation="vertical" className="h-6 bg-black/10" />
               <a
                 href="https://github.com/davidfertube/knowledge_tool"
                 target="_blank"
@@ -581,7 +632,7 @@ export default function Home() {
               </a>
             </div>
           </div>
-          <Separator className="my-8" />
+          <Separator className="my-8 bg-black/5" />
           <p className="text-center text-sm text-muted-foreground">
             Open source AI-powered RAG for steel specifications and O&G documentation.
           </p>
