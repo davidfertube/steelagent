@@ -12,79 +12,37 @@ import { ResponseDisplay } from "@/components/response-display";
 import { HealthIndicator } from "@/components/health-indicator";
 import { Source } from "@/lib/api";
 
-// AI Face Recognition Visualization - Lines and Dots
-function AIFaceVisualization() {
-  // Face outline points (stylized AI face shape)
-  const facePoints = [
-    // Forehead curve
-    { x: 200, y: 60 },
-    { x: 240, y: 55 },
-    { x: 280, y: 60 },
-    { x: 310, y: 80 },
-    // Right side of face
-    { x: 330, y: 120 },
-    { x: 340, y: 170 },
-    { x: 335, y: 220 },
-    { x: 320, y: 270 },
-    // Chin
-    { x: 290, y: 310 },
-    { x: 250, y: 330 },
-    { x: 200, y: 340 },
-    { x: 150, y: 330 },
-    { x: 110, y: 310 },
-    // Left side of face
-    { x: 80, y: 270 },
-    { x: 65, y: 220 },
-    { x: 60, y: 170 },
-    { x: 70, y: 120 },
-    // Back to forehead
-    { x: 90, y: 80 },
-    { x: 120, y: 60 },
-    { x: 160, y: 55 },
+// Iron/Steel Crystal Lattice Visualization - BCC Structure
+function SteelCrystalVisualization() {
+  // Body-Centered Cubic (BCC) iron lattice - the crystal structure of steel
+  // Main cube vertices (8 corners)
+  const cubeVertices = [
+    { x: 120, y: 120, z: 0 },   // front-top-left
+    { x: 280, y: 120, z: 0 },   // front-top-right
+    { x: 280, y: 280, z: 0 },   // front-bottom-right
+    { x: 120, y: 280, z: 0 },   // front-bottom-left
+    { x: 160, y: 80, z: 1 },    // back-top-left
+    { x: 320, y: 80, z: 1 },    // back-top-right
+    { x: 320, y: 240, z: 1 },   // back-bottom-right
+    { x: 160, y: 240, z: 1 },   // back-bottom-left
   ];
 
-  // Eye points
-  const leftEye = [
-    { x: 130, y: 160 },
-    { x: 145, y: 150 },
-    { x: 165, y: 150 },
-    { x: 180, y: 160 },
-    { x: 165, y: 170 },
-    { x: 145, y: 170 },
+  // Center atom (BCC structure has atom in center)
+  const centerAtom = { x: 200, y: 180 };
+
+  // Additional lattice points for extended structure
+  const extendedPoints = [
+    { x: 60, y: 160 }, { x: 340, y: 160 },
+    { x: 200, y: 40 }, { x: 200, y: 320 },
+    { x: 80, y: 60 }, { x: 320, y: 60 },
+    { x: 80, y: 300 }, { x: 320, y: 300 },
   ];
 
-  const rightEye = [
-    { x: 220, y: 160 },
-    { x: 235, y: 150 },
-    { x: 255, y: 150 },
-    { x: 270, y: 160 },
-    { x: 255, y: 170 },
-    { x: 235, y: 170 },
-  ];
-
-  // Nose points
-  const nose = [
-    { x: 200, y: 180 },
-    { x: 190, y: 230 },
-    { x: 200, y: 245 },
-    { x: 210, y: 230 },
-  ];
-
-  // Mouth points
-  const mouth = [
-    { x: 150, y: 280 },
-    { x: 175, y: 275 },
-    { x: 200, y: 280 },
-    { x: 225, y: 275 },
-    { x: 250, y: 280 },
-  ];
-
-  // Neural network connection points
-  const neuralPoints = [
-    { x: 50, y: 100 }, { x: 30, y: 200 }, { x: 45, y: 300 },
-    { x: 350, y: 100 }, { x: 370, y: 200 }, { x: 355, y: 300 },
-    { x: 100, y: 30 }, { x: 200, y: 20 }, { x: 300, y: 30 },
-    { x: 100, y: 370 }, { x: 200, y: 380 }, { x: 300, y: 370 },
+  // Electron cloud points orbiting around atoms
+  const electronOrbits = [
+    { cx: 200, cy: 180, r: 40 },
+    { cx: 120, cy: 120, r: 25 },
+    { cx: 280, cy: 280, r: 25 },
   ];
 
   return (
@@ -94,175 +52,198 @@ function AIFaceVisualization() {
         className="w-full h-full"
         style={{ overflow: "visible" }}
       >
-        {/* Scanning lines effect */}
-        <motion.line
-          x1="0" y1="0" x2="400" y2="0"
-          stroke="rgba(239, 68, 68, 0.3)"
-          strokeWidth="2"
-          animate={{ y1: [0, 400, 0], y2: [0, 400, 0] }}
-          transition={{ duration: 4, repeat: Infinity, ease: "linear" }}
-        />
-
-        {/* Neural network connections to face */}
-        {neuralPoints.map((point, i) => (
-          <motion.g key={`neural-${i}`}>
-            <motion.line
-              x1={point.x}
-              y1={point.y}
-              x2={200}
-              y2={200}
-              stroke="black"
-              strokeWidth="0.5"
-              strokeDasharray="4,4"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: [0.1, 0.3, 0.1] }}
-              transition={{ duration: 2, repeat: Infinity, delay: i * 0.15 }}
-            />
-            <motion.circle
-              cx={point.x}
-              cy={point.y}
-              r="3"
-              fill="black"
-              animate={{
-                scale: [1, 1.5, 1],
-                opacity: [0.3, 0.6, 0.3]
-              }}
-              transition={{ duration: 2, repeat: Infinity, delay: i * 0.1 }}
-            />
-          </motion.g>
+        {/* Grid lines background */}
+        {[0, 1, 2, 3, 4].map((i) => (
+          <motion.line
+            key={`grid-h-${i}`}
+            x1="50"
+            y1={80 + i * 60}
+            x2="350"
+            y2={80 + i * 60}
+            stroke="black"
+            strokeWidth="0.3"
+            strokeDasharray="2,4"
+            animate={{ opacity: [0.1, 0.2, 0.1] }}
+            transition={{ duration: 3, repeat: Infinity, delay: i * 0.2 }}
+          />
         ))}
-
-        {/* Face outline with animated dots */}
-        {facePoints.map((point, i) => (
-          <motion.circle
-            key={`face-${i}`}
-            cx={point.x}
-            cy={point.y}
-            r="4"
-            fill="black"
-            animate={{
-              scale: [1, 1.3, 1],
-              opacity: [0.6, 1, 0.6],
-            }}
-            transition={{
-              duration: 1.5,
-              repeat: Infinity,
-              delay: i * 0.08,
-            }}
+        {[0, 1, 2, 3, 4].map((i) => (
+          <motion.line
+            key={`grid-v-${i}`}
+            x1={80 + i * 60}
+            y1="50"
+            x2={80 + i * 60}
+            y2="350"
+            stroke="black"
+            strokeWidth="0.3"
+            strokeDasharray="2,4"
+            animate={{ opacity: [0.1, 0.2, 0.1] }}
+            transition={{ duration: 3, repeat: Infinity, delay: i * 0.2 }}
           />
         ))}
 
-        {/* Face outline connections */}
+        {/* Cube edges - front face */}
         <motion.path
-          d={`M ${facePoints.map(p => `${p.x},${p.y}`).join(' L ')} Z`}
+          d="M 120 120 L 280 120 L 280 280 L 120 280 Z"
           fill="none"
           stroke="black"
-          strokeWidth="1.5"
-          strokeLinecap="round"
+          strokeWidth="2"
           initial={{ pathLength: 0 }}
           animate={{ pathLength: 1 }}
           transition={{ duration: 2, ease: "easeInOut" }}
         />
 
-        {/* Left eye */}
+        {/* Cube edges - back face */}
         <motion.path
-          d={`M ${leftEye.map(p => `${p.x},${p.y}`).join(' L ')} Z`}
+          d="M 160 80 L 320 80 L 320 240 L 160 240 Z"
           fill="none"
           stroke="black"
           strokeWidth="1.5"
-          animate={{ opacity: [0.7, 1, 0.7] }}
-          transition={{ duration: 2, repeat: Infinity }}
-        />
-        {leftEye.map((point, i) => (
-          <motion.circle
-            key={`left-eye-${i}`}
-            cx={point.x}
-            cy={point.y}
-            r="3"
-            fill="black"
-            animate={{ scale: [1, 1.2, 1] }}
-            transition={{ duration: 1, repeat: Infinity, delay: i * 0.1 }}
-          />
-        ))}
-        {/* Left pupil */}
-        <motion.circle
-          cx="155"
-          cy="160"
-          r="6"
-          fill="black"
-          animate={{ scale: [1, 0.8, 1] }}
-          transition={{ duration: 3, repeat: Infinity }}
+          strokeDasharray="4,2"
+          initial={{ pathLength: 0 }}
+          animate={{ pathLength: 1 }}
+          transition={{ duration: 2, delay: 0.3, ease: "easeInOut" }}
         />
 
-        {/* Right eye */}
-        <motion.path
-          d={`M ${rightEye.map(p => `${p.x},${p.y}`).join(' L ')} Z`}
-          fill="none"
-          stroke="black"
-          strokeWidth="1.5"
-          animate={{ opacity: [0.7, 1, 0.7] }}
-          transition={{ duration: 2, repeat: Infinity }}
-        />
-        {rightEye.map((point, i) => (
-          <motion.circle
-            key={`right-eye-${i}`}
-            cx={point.x}
-            cy={point.y}
-            r="3"
-            fill="black"
-            animate={{ scale: [1, 1.2, 1] }}
-            transition={{ duration: 1, repeat: Infinity, delay: i * 0.1 }}
+        {/* Connecting edges (front to back) */}
+        {[
+          [120, 120, 160, 80],
+          [280, 120, 320, 80],
+          [280, 280, 320, 240],
+          [120, 280, 160, 240],
+        ].map(([x1, y1, x2, y2], i) => (
+          <motion.line
+            key={`connect-${i}`}
+            x1={x1}
+            y1={y1}
+            x2={x2}
+            y2={y2}
+            stroke="black"
+            strokeWidth="1.5"
+            initial={{ pathLength: 0 }}
+            animate={{ pathLength: 1 }}
+            transition={{ duration: 1, delay: 0.5 + i * 0.1 }}
           />
         ))}
-        {/* Right pupil */}
-        <motion.circle
-          cx="245"
-          cy="160"
-          r="6"
-          fill="black"
-          animate={{ scale: [1, 0.8, 1] }}
-          transition={{ duration: 3, repeat: Infinity }}
-        />
 
-        {/* Nose */}
-        <motion.path
-          d={`M ${nose.map(p => `${p.x},${p.y}`).join(' L ')}`}
-          fill="none"
-          stroke="black"
-          strokeWidth="1.5"
-          animate={{ opacity: [0.5, 0.8, 0.5] }}
+        {/* Diagonal bonds to center atom (BCC structure) */}
+        {cubeVertices.map((vertex, i) => (
+          <motion.line
+            key={`bond-${i}`}
+            x1={vertex.x}
+            y1={vertex.y}
+            x2={centerAtom.x}
+            y2={centerAtom.y}
+            stroke="black"
+            strokeWidth="0.8"
+            strokeDasharray="3,3"
+            animate={{ opacity: [0.2, 0.5, 0.2] }}
+            transition={{ duration: 2, repeat: Infinity, delay: i * 0.1 }}
+          />
+        ))}
+
+        {/* Extended lattice connections */}
+        {extendedPoints.map((point, i) => (
+          <motion.line
+            key={`ext-${i}`}
+            x1={point.x}
+            y1={point.y}
+            x2={centerAtom.x}
+            y2={centerAtom.y}
+            stroke="black"
+            strokeWidth="0.5"
+            strokeDasharray="2,4"
+            animate={{ opacity: [0.1, 0.3, 0.1] }}
+            transition={{ duration: 2.5, repeat: Infinity, delay: i * 0.15 }}
+          />
+        ))}
+
+        {/* Electron orbits */}
+        {electronOrbits.map((orbit, i) => (
+          <motion.circle
+            key={`orbit-${i}`}
+            cx={orbit.cx}
+            cy={orbit.cy}
+            r={orbit.r}
+            fill="none"
+            stroke="black"
+            strokeWidth="0.5"
+            strokeDasharray="2,2"
+            animate={{ rotate: 360 }}
+            transition={{ duration: 10 + i * 2, repeat: Infinity, ease: "linear" }}
+            style={{ transformOrigin: `${orbit.cx}px ${orbit.cy}px` }}
+          />
+        ))}
+
+        {/* Orbiting electrons */}
+        {electronOrbits.map((orbit, i) => (
+          <motion.circle
+            key={`electron-${i}`}
+            cx={orbit.cx + orbit.r}
+            cy={orbit.cy}
+            r="3"
+            fill="#ef4444"
+            animate={{ rotate: 360 }}
+            transition={{ duration: 3 + i, repeat: Infinity, ease: "linear" }}
+            style={{ transformOrigin: `${orbit.cx}px ${orbit.cy}px` }}
+          />
+        ))}
+
+        {/* Corner atoms (Fe atoms) */}
+        {cubeVertices.map((vertex, i) => (
+          <motion.circle
+            key={`corner-${i}`}
+            cx={vertex.x}
+            cy={vertex.y}
+            r={vertex.z === 1 ? 6 : 8}
+            fill="black"
+            animate={{
+              scale: [1, 1.15, 1],
+              opacity: vertex.z === 1 ? [0.5, 0.7, 0.5] : [0.8, 1, 0.8],
+            }}
+            transition={{ duration: 2, repeat: Infinity, delay: i * 0.1 }}
+          />
+        ))}
+
+        {/* Center atom (larger, BCC characteristic) */}
+        <motion.circle
+          cx={centerAtom.x}
+          cy={centerAtom.y}
+          r="12"
+          fill="#ef4444"
+          animate={{
+            scale: [1, 1.2, 1],
+            opacity: [0.9, 1, 0.9],
+          }}
           transition={{ duration: 2.5, repeat: Infinity }}
         />
-        {nose.map((point, i) => (
-          <motion.circle
-            key={`nose-${i}`}
-            cx={point.x}
-            cy={point.y}
-            r="3"
-            fill="black"
-            animate={{ scale: [1, 1.3, 1] }}
-            transition={{ duration: 1.5, repeat: Infinity, delay: i * 0.15 }}
-          />
-        ))}
-
-        {/* Mouth */}
-        <motion.path
-          d={`M ${mouth.map(p => `${p.x},${p.y}`).join(' L ')}`}
+        <motion.circle
+          cx={centerAtom.x}
+          cy={centerAtom.y}
+          r="18"
           fill="none"
-          stroke="black"
-          strokeWidth="1.5"
-          animate={{ opacity: [0.5, 0.8, 0.5] }}
+          stroke="#ef4444"
+          strokeWidth="1"
+          animate={{
+            scale: [1, 1.3, 1],
+            opacity: [0.3, 0.6, 0.3],
+          }}
           transition={{ duration: 2, repeat: Infinity }}
         />
-        {mouth.map((point, i) => (
+
+        {/* Extended lattice points */}
+        {extendedPoints.map((point, i) => (
           <motion.circle
-            key={`mouth-${i}`}
+            key={`ext-atom-${i}`}
             cx={point.x}
             cy={point.y}
-            r="3"
+            r="4"
             fill="black"
-            animate={{ scale: [1, 1.2, 1] }}
-            transition={{ duration: 1.2, repeat: Infinity, delay: i * 0.1 }}
+            animate={{
+              scale: [1, 1.2, 1],
+              opacity: [0.3, 0.5, 0.3],
+            }}
+            transition={{ duration: 2, repeat: Infinity, delay: i * 0.12 }}
           />
         ))}
 
@@ -271,40 +252,16 @@ function AIFaceVisualization() {
           animate={{ opacity: [0.4, 0.8, 0.4] }}
           transition={{ duration: 1.5, repeat: Infinity }}
         >
-          {/* Top-left corner */}
-          <path d="M 50 80 L 50 50 L 80 50" fill="none" stroke="#ef4444" strokeWidth="3" />
-          {/* Top-right corner */}
-          <path d="M 320 50 L 350 50 L 350 80" fill="none" stroke="#ef4444" strokeWidth="3" />
-          {/* Bottom-left corner */}
-          <path d="M 50 320 L 50 350 L 80 350" fill="none" stroke="#ef4444" strokeWidth="3" />
-          {/* Bottom-right corner */}
-          <path d="M 320 350 L 350 350 L 350 320" fill="none" stroke="#ef4444" strokeWidth="3" />
+          <path d="M 40 60 L 40 40 L 60 40" fill="none" stroke="#ef4444" strokeWidth="3" />
+          <path d="M 340 40 L 360 40 L 360 60" fill="none" stroke="#ef4444" strokeWidth="3" />
+          <path d="M 40 340 L 40 360 L 60 360" fill="none" stroke="#ef4444" strokeWidth="3" />
+          <path d="M 340 360 L 360 360 L 360 340" fill="none" stroke="#ef4444" strokeWidth="3" />
         </motion.g>
 
-        {/* Red accent square in center */}
-        <motion.rect
-          x="185"
-          y="185"
-          width="30"
-          height="30"
-          fill="#ef4444"
-          animate={{
-            scale: [1, 1.2, 1],
-            opacity: [0.8, 1, 0.8],
-            rotate: [0, 90, 180, 270, 360],
-          }}
-          transition={{
-            duration: 8,
-            repeat: Infinity,
-            ease: "easeInOut",
-          }}
-          style={{ transformOrigin: "200px 200px" }}
-        />
-
-        {/* Data processing indicators */}
+        {/* Labels */}
         <motion.text
-          x="55"
-          y="45"
+          x="45"
+          y="35"
           fontSize="8"
           fill="black"
           opacity="0.5"
@@ -312,11 +269,11 @@ function AIFaceVisualization() {
           animate={{ opacity: [0.3, 0.6, 0.3] }}
           transition={{ duration: 1, repeat: Infinity }}
         >
-          ANALYZING...
+          Fe-BCC LATTICE
         </motion.text>
         <motion.text
-          x="290"
-          y="365"
+          x="280"
+          y="375"
           fontSize="8"
           fill="black"
           opacity="0.5"
@@ -324,7 +281,7 @@ function AIFaceVisualization() {
           animate={{ opacity: [0.3, 0.6, 0.3] }}
           transition={{ duration: 1, repeat: Infinity, delay: 0.5 }}
         >
-          AI PROCESSING
+          STEEL STRUCTURE
         </motion.text>
       </svg>
 
@@ -409,7 +366,7 @@ export default function Home() {
               <div className="w-8 h-8 bg-black flex items-center justify-center">
                 <Boxes className="w-4 h-4 text-white" />
               </div>
-              <span className="text-lg font-semibold tracking-tight text-black">SteelIntel</span>
+              <span className="text-lg font-semibold tracking-tight text-black">Steel Intelligent Knowledge Tool</span>
             </Link>
 
             {/* Desktop Navigation */}
@@ -538,14 +495,14 @@ export default function Home() {
                     Get Started
                     <ArrowRight className="ml-2 h-4 w-4" />
                   </Button>
-                  <Button size="lg" variant="outline" className="border-black/20 text-black hover:bg-black/5 h-12 px-8" asChild>
+                  <Button size="lg" variant="outline" className="border-black/20 bg-white text-black hover:bg-black/5 h-12 px-8" asChild>
                     <a
                       href="https://github.com/davidfertube/knowledge_tool"
                       target="_blank"
                       rel="noopener noreferrer"
                     >
                       <Github className="mr-2 h-4 w-4" />
-                      View Source
+                      View on GitHub
                     </a>
                   </Button>
                 </div>
@@ -574,7 +531,7 @@ export default function Home() {
                 transition={{ duration: 0.8, delay: 0.2 }}
                 className="hidden lg:block"
               >
-                <AIFaceVisualization />
+                <SteelCrystalVisualization />
               </motion.div>
             </div>
           </div>
@@ -645,7 +602,7 @@ export default function Home() {
             >
               <div className="inline-flex items-center gap-2 px-3 py-1 border border-black/10 rounded-full text-xs font-medium text-black/70">
                 <span className="w-2 h-2 bg-red-500 rounded-sm" />
-                WHY STEELINEL
+                WHY STEEL INTELLIGENT
               </div>
               <h2 className="text-3xl sm:text-4xl md:text-5xl font-semibold tracking-tight text-black">
                 Built for engineering teams
@@ -736,7 +693,7 @@ export default function Home() {
                   Ready to transform your<br />document workflow?
                 </h2>
                 <p className="text-lg text-black/70 max-w-2xl mx-auto">
-                  Join engineering teams using SteelIntel to save hours of manual
+                  Join engineering teams using Steel Intelligent Knowledge Tool to save hours of manual
                   document searching every week.
                 </p>
               </div>
@@ -763,7 +720,7 @@ export default function Home() {
                 <Boxes className="w-4 h-4 text-white" />
               </div>
               <div>
-                <span className="font-semibold text-black">SteelIntel</span>
+                <span className="font-semibold text-black">Steel Intelligent Knowledge Tool</span>
                 <span className="text-black/60 text-sm ml-2">
                   by{" "}
                   <a
