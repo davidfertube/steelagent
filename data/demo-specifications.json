@@ -1,0 +1,290 @@
+{
+  "specifications": [
+    {
+      "id": "astm-a106",
+      "standard": "ASTM A106",
+      "title": "Standard Specification for Seamless Carbon Steel Pipe for High-Temperature Service",
+      "grades": {
+        "Grade A": {
+          "yield_strength_min_ksi": 30,
+          "tensile_strength_min_ksi": 48,
+          "elongation_min_percent": 35,
+          "carbon_max_percent": 0.25,
+          "manganese_percent": "0.27-0.93",
+          "phosphorus_max_percent": 0.035,
+          "sulfur_max_percent": 0.035,
+          "silicon_min_percent": 0.10
+        },
+        "Grade B": {
+          "yield_strength_min_ksi": 35,
+          "tensile_strength_min_ksi": 60,
+          "elongation_min_percent": 30,
+          "carbon_max_percent": 0.30,
+          "manganese_percent": "0.29-1.06",
+          "phosphorus_max_percent": 0.035,
+          "sulfur_max_percent": 0.035,
+          "silicon_min_percent": 0.10
+        },
+        "Grade C": {
+          "yield_strength_min_ksi": 40,
+          "tensile_strength_min_ksi": 70,
+          "elongation_min_percent": 30,
+          "carbon_max_percent": 0.35,
+          "manganese_percent": "0.29-1.06",
+          "phosphorus_max_percent": 0.035,
+          "sulfur_max_percent": 0.035,
+          "silicon_min_percent": 0.10
+        }
+      },
+      "applications": [
+        "High-temperature service piping",
+        "Refinery process piping",
+        "Power plant steam lines",
+        "Heat exchangers"
+      ],
+      "max_service_temperature_f": 1000
+    },
+    {
+      "id": "astm-a53",
+      "standard": "ASTM A53",
+      "title": "Standard Specification for Pipe, Steel, Black and Hot-Dipped, Zinc-Coated, Welded and Seamless",
+      "types": {
+        "Type E": "Electric-resistance-welded",
+        "Type S": "Seamless"
+      },
+      "grades": {
+        "Grade A": {
+          "yield_strength_min_ksi": 30,
+          "tensile_strength_min_ksi": 48,
+          "carbon_max_percent": 0.25,
+          "manganese_max_percent": 0.95,
+          "phosphorus_max_percent": 0.05,
+          "sulfur_max_percent": 0.045
+        },
+        "Grade B": {
+          "yield_strength_min_ksi": 35,
+          "tensile_strength_min_ksi": 60,
+          "carbon_max_percent": 0.30,
+          "manganese_max_percent": 1.20,
+          "phosphorus_max_percent": 0.05,
+          "sulfur_max_percent": 0.045
+        }
+      },
+      "applications": [
+        "Ordinary uses in steam, water, gas, and air lines",
+        "Mechanical and pressure applications",
+        "Structural applications"
+      ]
+    },
+    {
+      "id": "astm-a333",
+      "standard": "ASTM A333",
+      "title": "Standard Specification for Seamless and Welded Steel Pipe for Low-Temperature Service",
+      "grades": {
+        "Grade 1": {
+          "yield_strength_min_ksi": 30,
+          "tensile_strength_min_ksi": 55,
+          "min_service_temperature_f": -50,
+          "carbon_max_percent": 0.30,
+          "manganese_percent": "0.40-1.06"
+        },
+        "Grade 3": {
+          "yield_strength_min_ksi": 35,
+          "tensile_strength_min_ksi": 65,
+          "min_service_temperature_f": -150,
+          "nickel_percent": "3.18-3.82"
+        },
+        "Grade 6": {
+          "yield_strength_min_ksi": 35,
+          "tensile_strength_min_ksi": 60,
+          "min_service_temperature_f": -50,
+          "carbon_max_percent": 0.30,
+          "manganese_percent": "0.29-1.06"
+        }
+      },
+      "applications": [
+        "Cryogenic service",
+        "LNG facilities",
+        "Cold climate pipelines",
+        "Refrigeration systems"
+      ]
+    },
+    {
+      "id": "aisi-4140",
+      "standard": "AISI 4140",
+      "title": "Chromium-Molybdenum Alloy Steel",
+      "chemical_composition": {
+        "carbon_percent": "0.38-0.43",
+        "chromium_percent": "0.80-1.10",
+        "molybdenum_percent": "0.15-0.25",
+        "manganese_percent": "0.75-1.00",
+        "silicon_percent": "0.15-0.35",
+        "phosphorus_max_percent": 0.035,
+        "sulfur_max_percent": 0.040
+      },
+      "mechanical_properties": {
+        "annealed": {
+          "hardness_bhn": 197,
+          "tensile_strength_ksi": 95,
+          "yield_strength_ksi": 60
+        },
+        "normalized": {
+          "hardness_bhn": 302,
+          "tensile_strength_ksi": 148,
+          "yield_strength_ksi": 95
+        },
+        "quenched_tempered_400f": {
+          "hardness_hrc": 54,
+          "tensile_strength_ksi": 280,
+          "yield_strength_ksi": 238
+        }
+      },
+      "nace_mr0175_compliance": {
+        "hardness_limit_hrc": 22,
+        "notes": "For sour service, hardness must not exceed 22 HRC per NACE MR0175/ISO 15156"
+      },
+      "applications": [
+        "Drill collars",
+        "Pump shafts",
+        "Gears and pinions",
+        "Tooling",
+        "High-stress components"
+      ]
+    },
+    {
+      "id": "nace-mr0175",
+      "standard": "NACE MR0175 / ISO 15156",
+      "title": "Petroleum and Natural Gas Industries - Materials for Use in H2S-containing Environments in Oil and Gas Production",
+      "carbon_steel_requirements": {
+        "hardness_limit_hrc": 22,
+        "hardness_limit_hbw": 248,
+        "yield_strength_max_ksi": 90,
+        "heat_treatment": "Normalized, normalized and tempered, or quenched and tempered"
+      },
+      "low_alloy_steel_requirements": {
+        "hardness_limit_hrc": 22,
+        "minimum_tempering_temperature_f": 1150,
+        "notes": "Some alloys like 4130 and 4140 require special heat treatment for sour service compliance"
+      },
+      "environmental_limits": {
+        "h2s_partial_pressure_threshold_psi": 0.05,
+        "ph_range": "3.5 to 6.5 for most severe conditions"
+      },
+      "applications": [
+        "Sour gas production",
+        "H2S service",
+        "Wellhead equipment",
+        "Downhole tubulars",
+        "Pipeline components in sour service"
+      ]
+    },
+    {
+      "id": "api-5l",
+      "standard": "API 5L",
+      "title": "Specification for Line Pipe",
+      "grades": {
+        "Grade B": {
+          "yield_strength_min_ksi": 35,
+          "tensile_strength_min_ksi": 60,
+          "smys_psi": 35000
+        },
+        "X42": {
+          "yield_strength_min_ksi": 42,
+          "tensile_strength_min_ksi": 60,
+          "smys_psi": 42000
+        },
+        "X52": {
+          "yield_strength_min_ksi": 52,
+          "tensile_strength_min_ksi": 66,
+          "smys_psi": 52000
+        },
+        "X60": {
+          "yield_strength_min_ksi": 60,
+          "tensile_strength_min_ksi": 75,
+          "smys_psi": 60000
+        },
+        "X65": {
+          "yield_strength_min_ksi": 65,
+          "tensile_strength_min_ksi": 77,
+          "smys_psi": 65000
+        },
+        "X70": {
+          "yield_strength_min_ksi": 70,
+          "tensile_strength_min_ksi": 82,
+          "smys_psi": 70000
+        },
+        "X80": {
+          "yield_strength_min_ksi": 80,
+          "tensile_strength_min_ksi": 90,
+          "smys_psi": 80000
+        }
+      },
+      "product_specification_levels": {
+        "PSL1": "Standard quality level",
+        "PSL2": "More stringent requirements for offshore and sour service"
+      },
+      "applications": [
+        "Oil and gas transmission pipelines",
+        "Gathering lines",
+        "Distribution systems"
+      ]
+    },
+    {
+      "id": "asme-b31-3",
+      "standard": "ASME B31.3",
+      "title": "Process Piping",
+      "allowable_stresses": {
+        "A106_Grade_B": {
+          "100F": 20000,
+          "200F": 20000,
+          "300F": 20000,
+          "400F": 20000,
+          "500F": 20000,
+          "600F": 18900,
+          "700F": 17300,
+          "800F": 14800,
+          "900F": 10800,
+          "1000F": 6500
+        }
+      },
+      "design_factors": {
+        "longitudinal_joint_factor_seamless": 1.0,
+        "longitudinal_joint_factor_erw": 0.85,
+        "temperature_derating_note": "Allowable stress decreases significantly above 650°F"
+      },
+      "key_requirements": [
+        "Wall thickness calculation per equation in para. 304.1.2",
+        "Pressure design per Chapter II",
+        "Materials per Chapter III",
+        "Examination per Chapter VI"
+      ]
+    }
+  ],
+  "common_queries": [
+    {
+      "query": "What is the yield strength of A106 Grade B?",
+      "answer": "ASTM A106 Grade B has a minimum yield strength of 35 ksi (241 MPa) and a minimum tensile strength of 60 ksi (415 MPa).",
+      "sources": ["ASTM A106, Table 1 - Tensile Requirements"]
+    },
+    {
+      "query": "Does 4140 steel meet NACE MR0175 requirements?",
+      "answer": "AISI 4140 can meet NACE MR0175 requirements for sour service, but ONLY if properly heat treated to achieve a maximum hardness of 22 HRC (248 HBW). In the quenched and tempered condition at 400°F, 4140 typically exceeds 50 HRC and would NOT be compliant. For sour service, 4140 must be normalized and tempered or quenched and tempered with a minimum tempering temperature of 1150°F to achieve the required hardness.",
+      "sources": ["NACE MR0175/ISO 15156-2, Table A.2", "AISI 4140 Steel Data Sheet"]
+    },
+    {
+      "query": "Compare A53 and A106 for high-temperature service",
+      "answer": "For high-temperature service, ASTM A106 is preferred over ASTM A53:\n\n• A106 is specifically designed for high-temperature service up to 1000°F\n• A106 Grade B has tighter chemistry controls (lower phosphorus/sulfur limits)\n• A106 requires hydrostatic testing at higher pressures\n• A53 is intended for ordinary uses (steam, water, gas lines) at lower temperatures\n• A106 is always seamless, while A53 can be welded (Type E) or seamless (Type S)\n\nFor refinery and power plant high-temperature piping, A106 is the industry standard.",
+      "sources": ["ASTM A106, Section 1 - Scope", "ASTM A53, Section 1 - Scope", "ASME B31.3 Table A-1"]
+    },
+    {
+      "query": "Maximum allowable hardness for sour service?",
+      "answer": "Per NACE MR0175/ISO 15156, the maximum allowable hardness for carbon and low-alloy steels in sour (H2S) service is:\n\n• 22 HRC (Rockwell C)\n• 248 HBW (Brinell)\n• 250 HV (Vickers)\n\nThis applies when H2S partial pressure exceeds 0.05 psi (0.3 kPa) in aqueous environments. Weld heat-affected zones must also meet this requirement.",
+      "sources": ["NACE MR0175/ISO 15156-2, Section 7.2", "NACE MR0175/ISO 15156-2, Table 1"]
+    },
+    {
+      "query": "What is ASTM A333 Grade 6 used for?",
+      "answer": "ASTM A333 Grade 6 is used for low-temperature service piping, specifically:\n\n• Minimum service temperature: -50°F (-46°C)\n• Applications: Cryogenic piping, LNG facilities, cold climate pipelines\n• Yield strength: 35 ksi minimum\n• Tensile strength: 60 ksi minimum\n• Requires Charpy impact testing at -50°F\n\nGrade 6 is the most commonly specified grade for low-temperature carbon steel pipe in the oil and gas industry.",
+      "sources": ["ASTM A333, Table 1", "ASTM A333, Section 6 - Mechanical Tests"]
+    }
+  ]
+}
