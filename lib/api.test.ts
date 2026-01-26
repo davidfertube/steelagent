@@ -35,7 +35,7 @@ describe('API Client', () => {
       expect(result).toEqual(mockResponse);
     });
 
-    it('should throw ApiRequestError on server error', async () => {
+    it('should fall back to demo mode on server error', async () => {
       mockFetch.mockResolvedValue({
         ok: false,
         status: 500,
@@ -43,11 +43,14 @@ describe('API Client', () => {
         json: () => Promise.resolve({ detail: 'Server error occurred' }),
       });
 
-      await expect(queryKnowledgeBase('test query')).rejects.toThrow(ApiRequestError);
-      await expect(queryKnowledgeBase('test query')).rejects.toThrow('Server error occurred');
+      // Demo fallback returns a response instead of throwing
+      const result = await queryKnowledgeBase('yield strength');
+      expect(result).toHaveProperty('response');
+      expect(result).toHaveProperty('sources');
+      expect(result.response).toContain('ASTM A106');
     });
 
-    it('should throw ApiRequestError with status text when no detail', async () => {
+    it('should fall back to demo mode on 404 error', async () => {
       mockFetch.mockResolvedValueOnce({
         ok: false,
         status: 404,
@@ -55,14 +58,19 @@ describe('API Client', () => {
         json: () => Promise.reject(new Error('Invalid JSON')),
       });
 
-      await expect(queryKnowledgeBase('test')).rejects.toThrow(ApiRequestError);
+      // Demo fallback returns a response instead of throwing
+      const result = await queryKnowledgeBase('nace compliance');
+      expect(result).toHaveProperty('response');
+      expect(result.response).toContain('NACE');
     });
 
-    it('should throw ApiRequestError on network error', async () => {
+    it('should fall back to demo mode on network error', async () => {
       mockFetch.mockRejectedValueOnce(new Error('Network error'));
 
-      await expect(queryKnowledgeBase('test')).rejects.toThrow(ApiRequestError);
-      await expect(queryKnowledgeBase('test')).rejects.toThrow('Unable to connect to the server');
+      // Demo fallback returns a response instead of throwing
+      const result = await queryKnowledgeBase('compare materials');
+      expect(result).toHaveProperty('response');
+      expect(result).toHaveProperty('sources');
     });
   });
 
