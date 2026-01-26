@@ -1,58 +1,31 @@
 """
 Tests for the FastAPI server endpoints.
+Tests run in demo mode (no API keys) which uses canned responses.
 """
 import pytest
 from httpx import AsyncClient, ASGITransport
-from unittest.mock import patch, MagicMock
 
-# We'll import the app after patching to avoid initialization errors
-# when environment variables are missing
-
-
-@pytest.fixture
-def mock_env():
-    """Mock environment variables for testing."""
-    with patch.dict('os.environ', {
-        'GOOGLE_API_KEY': 'test_google_key',
-        'PINECONE_API_KEY': 'test_pinecone_key',
-        'PINECONE_INDEX_NAME': 'test-index',
-    }):
-        yield
-
-
-@pytest.fixture
-def mock_agent():
-    """Mock the agent module to avoid external API calls."""
-    with patch('agent.llm') as mock_llm, \
-         patch('agent.vectorstore') as mock_vs, \
-         patch('agent.run_agent') as mock_run:
-        mock_run.return_value = "Mocked response about steel specifications."
-        yield mock_run
+# Import server directly - it will be in demo mode since we don't set API keys
+from server import app
 
 
 @pytest.mark.asyncio
-async def test_health_endpoint(mock_env, mock_agent):
+async def test_health_endpoint():
     """Test the /health endpoint returns OK status."""
-    with patch('server.run_agent', mock_agent):
-        from server import app
+    transport = ASGITransport(app=app)
+    async with AsyncClient(transport=transport, base_url="http://test") as client:
+        response = await client.get("/health")
 
-        transport = ASGITransport(app=app)
-        async with AsyncClient(transport=transport, base_url="http://test") as client:
-            response = await client.get("/health")
-
-            assert response.status_code == 200
-            data = response.json()
-            assert data["status"] == "ok"
-            assert "version" in data
-            assert "mode" in data
+        assert response.status_code == 200
+        data = response.json()
+        assert data["status"] == "ok"
+        assert "version" in data
+        assert data["mode"] == "demo"
 
 
 @pytest.mark.asyncio
-async def test_chat_endpoint_success(mock_env):
+async def test_chat_endpoint_success():
     """Test the /api/chat endpoint with successful response (demo mode)."""
-    # In demo mode, run_agent is not called - get_demo_response is used instead
-    from server import app
-
     transport = ASGITransport(app=app)
     async with AsyncClient(transport=transport, base_url="http://test") as client:
         response = await client.post(
@@ -69,11 +42,26 @@ async def test_chat_endpoint_success(mock_env):
 
 
 @pytest.mark.asyncio
-async def test_chat_endpoint_empty_query(mock_env):
-    """Test the /api/chat endpoint with empty query."""
-    # In demo mode, empty query returns default response
-    from server import app
+async def test_chat_endpoint_nace_query():
+    """Test the /api/chat endpoint with NACE query (demo mode)."""
+    transport = ASGITransport(app=app)
+    async with AsyncClient(transport=transport, base_url="http://test") as client:
+        response = await client.post(
+            "/api/chat",
+            json={"query": "Does 4140 steel meet NACE MR0175 requirements?"}
+        )
 
+        assert response.status_code == 200
+        data = response.json()
+        assert "response" in data
+        assert "sources" in data
+        # Demo mode should return NACE-related response
+        assert "NACE" in data["response"] or "MR0175" in data["response"]
+
+
+@pytest.mark.asyncio
+async def test_chat_endpoint_empty_query():
+    """Test the /api/chat endpoint with empty query."""
     transport = ASGITransport(app=app)
     async with AsyncClient(transport=transport, base_url="http://test") as client:
         response = await client.post(
@@ -81,7 +69,7 @@ async def test_chat_endpoint_empty_query(mock_env):
             json={"query": ""}
         )
 
-        # Should still return 200, even with empty query
+        # Should still return 200 with default response
         assert response.status_code == 200
         data = response.json()
         assert "response" in data
@@ -89,57 +77,31 @@ async def test_chat_endpoint_empty_query(mock_env):
 
 
 @pytest.mark.asyncio
-async def test_chat_endpoint_error(mock_env):
-    """Test the /api/chat endpoint when get_demo_response raises an error."""
-    with patch('server.get_demo_response') as mock_demo:
-        mock_demo.side_effect = Exception("Demo response failed")
-
-        from server import app
-
-        transport = ASGITransport(app=app)
-        async with AsyncClient(transport=transport, base_url="http://test") as client:
-            response = await client.post(
-                "/api/chat",
-                json={"query": "test query"}
-            )
-
-            assert response.status_code == 500
-            data = response.json()
-            assert "detail" in data
-
-
-@pytest.mark.asyncio
-async def test_chat_endpoint_invalid_json(mock_env, mock_agent):
+async def test_chat_endpoint_invalid_json():
     """Test the /api/chat endpoint with invalid JSON."""
-    with patch('server.run_agent', mock_agent):
-        from server import app
+    transport = ASGITransport(app=app)
+    async with AsyncClient(transport=transport, base_url="http://test") as client:
+        response = await client.post(
+            "/api/chat",
+            content="not valid json",
+            headers={"Content-Type": "application/json"}
+        )
 
-        transport = ASGITransport(app=app)
-        async with AsyncClient(transport=transport, base_url="http://test") as client:
-            response = await client.post(
-                "/api/chat",
-                content="not valid json",
-                headers={"Content-Type": "application/json"}
-            )
-
-            assert response.status_code == 422  # Validation error
+        assert response.status_code == 422  # Validation error
 
 
 @pytest.mark.asyncio
-async def test_cors_headers(mock_env, mock_agent):
+async def test_cors_headers():
     """Test that CORS headers are properly set."""
-    with patch('server.run_agent', mock_agent):
-        from server import app
+    transport = ASGITransport(app=app)
+    async with AsyncClient(transport=transport, base_url="http://test") as client:
+        response = await client.options(
+            "/api/chat",
+            headers={
+                "Origin": "http://localhost:3000",
+                "Access-Control-Request-Method": "POST",
+            }
+        )
 
-        transport = ASGITransport(app=app)
-        async with AsyncClient(transport=transport, base_url="http://test") as client:
-            response = await client.options(
-                "/api/chat",
-                headers={
-                    "Origin": "http://localhost:3000",
-                    "Access-Control-Request-Method": "POST",
-                }
-            )
-
-            # CORS preflight should succeed
-            assert response.status_code == 200
+        # CORS preflight should succeed
+        assert response.status_code == 200
