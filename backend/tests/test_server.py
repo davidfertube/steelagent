@@ -23,9 +23,9 @@ def mock_env():
 @pytest.fixture
 def mock_agent():
     """Mock the agent module to avoid external API calls."""
-    with patch('backend.agent.llm') as mock_llm, \
-         patch('backend.agent.vectorstore') as mock_vs, \
-         patch('backend.agent.run_agent') as mock_run:
+    with patch('agent.llm') as mock_llm, \
+         patch('agent.vectorstore') as mock_vs, \
+         patch('agent.run_agent') as mock_run:
         mock_run.return_value = "Mocked response about steel specifications."
         yield mock_run
 
@@ -33,64 +33,68 @@ def mock_agent():
 @pytest.mark.asyncio
 async def test_health_endpoint(mock_env, mock_agent):
     """Test the /health endpoint returns OK status."""
-    with patch('backend.server.run_agent', mock_agent):
-        from backend.server import app
+    with patch('server.run_agent', mock_agent):
+        from server import app
 
         transport = ASGITransport(app=app)
         async with AsyncClient(transport=transport, base_url="http://test") as client:
             response = await client.get("/health")
 
             assert response.status_code == 200
-            assert response.json() == {"status": "ok"}
+            data = response.json()
+            assert data["status"] == "ok"
+            assert "version" in data
+            assert "mode" in data
 
 
 @pytest.mark.asyncio
 async def test_chat_endpoint_success(mock_env):
-    """Test the /api/chat endpoint with successful response."""
-    with patch('backend.server.run_agent') as mock_run:
-        mock_run.return_value = "A106 Grade B has a minimum yield strength of 35,000 psi."
+    """Test the /api/chat endpoint with successful response (demo mode)."""
+    # In demo mode, run_agent is not called - get_demo_response is used instead
+    from server import app
 
-        from backend.server import app
+    transport = ASGITransport(app=app)
+    async with AsyncClient(transport=transport, base_url="http://test") as client:
+        response = await client.post(
+            "/api/chat",
+            json={"query": "What is the yield strength of A106 Grade B?"}
+        )
 
-        transport = ASGITransport(app=app)
-        async with AsyncClient(transport=transport, base_url="http://test") as client:
-            response = await client.post(
-                "/api/chat",
-                json={"query": "What is the yield strength of A106 Grade B?"}
-            )
-
-            assert response.status_code == 200
-            data = response.json()
-            assert "response" in data
-            assert "yield strength" in data["response"].lower() or "35,000" in data["response"]
+        assert response.status_code == 200
+        data = response.json()
+        assert "response" in data
+        assert "sources" in data
+        # Demo mode returns canned responses about ASTM A106
+        assert "A106" in data["response"] or "yield" in data["response"].lower()
 
 
 @pytest.mark.asyncio
 async def test_chat_endpoint_empty_query(mock_env):
     """Test the /api/chat endpoint with empty query."""
-    with patch('backend.server.run_agent') as mock_run:
-        mock_run.return_value = ""
+    # In demo mode, empty query returns default response
+    from server import app
 
-        from backend.server import app
+    transport = ASGITransport(app=app)
+    async with AsyncClient(transport=transport, base_url="http://test") as client:
+        response = await client.post(
+            "/api/chat",
+            json={"query": ""}
+        )
 
-        transport = ASGITransport(app=app)
-        async with AsyncClient(transport=transport, base_url="http://test") as client:
-            response = await client.post(
-                "/api/chat",
-                json={"query": ""}
-            )
-
-            # Should still return 200, even with empty query
-            assert response.status_code == 200
+        # Should still return 200, even with empty query
+        assert response.status_code == 200
+        data = response.json()
+        assert "response" in data
+        assert "sources" in data
 
 
 @pytest.mark.asyncio
 async def test_chat_endpoint_error(mock_env):
-    """Test the /api/chat endpoint when agent raises an error."""
-    with patch('backend.server.run_agent') as mock_run:
-        mock_run.side_effect = Exception("Agent processing failed")
+    """Test the /api/chat endpoint when get_demo_response raises an error."""
+    with patch('server.get_demo_response') as mock_demo:
+        mock_demo.side_effect = Exception("Demo response failed")
 
-        from backend.server import app
+        from server import app
 
         transport = ASGITransport(app=app)
         async with AsyncClient(transport=transport, base_url="http://test") as client:
@@ -107,8 +111,8 @@ async def test_chat_endpoint_error(mock_env):
 @pytest.mark.asyncio
 async def test_chat_endpoint_invalid_json(mock_env, mock_agent):
     """Test the /api/chat endpoint with invalid JSON."""
-    with patch('backend.server.run_agent', mock_agent):
-        from backend.server import app
+    with patch('server.run_agent', mock_agent):
+        from server import app
 
         transport = ASGITransport(app=app)
         async with AsyncClient(transport=transport, base_url="http://test") as client:
@@ -124,8 +128,8 @@ async def test_chat_endpoint_invalid_json(mock_env, mock_agent):
 @pytest.mark.asyncio
 async def test_cors_headers(mock_env, mock_agent):
     """Test that CORS headers are properly set."""
-    with patch('backend.server.run_agent', mock_agent):
-        from backend.server import app
+    with patch('server.run_agent', mock_agent):
+        from server import app
 
         transport = ASGITransport(app=app)
         async with AsyncClient(transport=transport, base_url="http://test") as client:

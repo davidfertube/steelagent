@@ -47,11 +47,11 @@ def mock_vectorstore():
 
 def test_retrieve_node(mock_env, mock_vectorstore):
     """Test that the retrieve node correctly fetches documents."""
-    with patch('backend.agent.vectorstore', mock_vectorstore), \
-         patch('backend.agent.llm', MagicMock()):
+    with patch('agent.vectorstore', mock_vectorstore), \
+         patch('agent.llm', MagicMock()):
 
         # Import after patching to avoid initialization errors
-        from backend.agent import retrieve
+        from agent import retrieve
 
         state = {
             "messages": [HumanMessage(content="What is the yield strength of A106 Grade B?")],
@@ -70,10 +70,10 @@ def test_retrieve_node(mock_env, mock_vectorstore):
 
 def test_retrieve_node_extracts_query(mock_env, mock_vectorstore):
     """Test that retrieve node extracts the last message as query."""
-    with patch('backend.agent.vectorstore', mock_vectorstore), \
-         patch('backend.agent.llm', MagicMock()):
+    with patch('agent.vectorstore', mock_vectorstore), \
+         patch('agent.llm', MagicMock()):
 
-        from backend.agent import retrieve
+        from agent import retrieve
 
         state = {
             "messages": [
@@ -92,10 +92,10 @@ def test_retrieve_node_extracts_query(mock_env, mock_vectorstore):
 
 def test_generate_node(mock_env, mock_llm, mock_vectorstore):
     """Test that the generate node produces a response."""
-    with patch('backend.agent.vectorstore', mock_vectorstore), \
-         patch('backend.agent.llm', mock_llm):
+    with patch('agent.vectorstore', mock_vectorstore), \
+         patch('agent.llm', mock_llm):
 
-        from backend.agent import generate
+        from agent import generate
 
         state = {
             "messages": [HumanMessage(content="What is A106 Grade B?")],
@@ -114,10 +114,10 @@ def test_generate_node(mock_env, mock_llm, mock_vectorstore):
 
 def test_generate_node_includes_context(mock_env, mock_llm, mock_vectorstore):
     """Test that generate node includes context in the prompt."""
-    with patch('backend.agent.vectorstore', mock_vectorstore), \
-         patch('backend.agent.llm', mock_llm):
+    with patch('agent.vectorstore', mock_vectorstore), \
+         patch('agent.llm', mock_llm):
 
-        from backend.agent import generate
+        from agent import generate
 
         context = "Important context about steel specifications."
         state = {
@@ -135,10 +135,10 @@ def test_generate_node_includes_context(mock_env, mock_llm, mock_vectorstore):
 
 def test_run_agent(mock_env, mock_llm, mock_vectorstore):
     """Test the full agent execution."""
-    with patch('backend.agent.vectorstore', mock_vectorstore), \
-         patch('backend.agent.llm', mock_llm):
+    with patch('agent.vectorstore', mock_vectorstore), \
+         patch('agent.llm', mock_llm):
 
-        from backend.agent import run_agent
+        from agent import run_agent
 
         result = run_agent("What is the yield strength of A106 Grade B?")
 
@@ -149,10 +149,10 @@ def test_run_agent(mock_env, mock_llm, mock_vectorstore):
 
 def test_agent_state_typing(mock_env):
     """Test that AgentState has correct typing."""
-    with patch('backend.agent.vectorstore', MagicMock()), \
-         patch('backend.agent.llm', MagicMock()):
+    with patch('agent.vectorstore', MagicMock()), \
+         patch('agent.llm', MagicMock()):
 
-        from backend.agent import AgentState
+        from agent import AgentState
 
         # AgentState should be a TypedDict with messages and context
         state: AgentState = {
@@ -169,10 +169,10 @@ def test_empty_context_handling(mock_env, mock_llm):
     mock_vs = MagicMock()
     mock_vs.similarity_search.return_value = []  # No documents found
 
-    with patch('backend.agent.vectorstore', mock_vs), \
-         patch('backend.agent.llm', mock_llm):
+    with patch('agent.vectorstore', mock_vs), \
+         patch('agent.llm', mock_llm):
 
-        from backend.agent import retrieve
+        from agent import retrieve
 
         state = {
             "messages": [HumanMessage(content="Unknown query")],
