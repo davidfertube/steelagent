@@ -1,155 +1,126 @@
-# SteelIntel - Implementation Tasks
+# Steel Agent - Launch Checklist
 
-## MVP Status: In Progress
-
-### Phase 1: Foundation (COMPLETED)
-- [x] Project structure setup (Next.js 16, FastAPI)
-- [x] Environment configuration (.env.example)
-- [x] CLAUDE.md documentation
-- [x] README.md with quick start
-- [x] Git repository setup
-
-### Phase 2: Core Features (COMPLETED)
-- [x] Frontend UI with search form
-- [x] Backend RAG pipeline (LangGraph)
-- [x] API integration (lib/api.ts)
-- [x] Response display with typewriter effect
-- [x] Health indicator component
-- [x] Mobile navigation
-
-### Phase 3: Source Citations (COMPLETED)
-- [x] Backend: Return sources with metadata in agent.py
-- [x] Backend: Update API response schema in server.py
-- [x] Backend: Ensure metadata stored in ingest.py
-- [x] Frontend: Update response types in lib/api.ts
-- [x] Frontend: Display expandable sources in response-display.tsx
-- [x] Frontend: Pass sources through page.tsx
-
-### Phase 4: UI/UX Polish (COMPLETED)
-- [x] Bittensor-inspired design system
-- [x] Clean typography with uppercase section labels
-- [x] Network visualization hero graphic
-- [x] Mobile-first responsive design
-- [x] Touch-friendly tap targets (44px minimum)
-- [x] Minimal input styling (underline style)
-- [x] Subtle animations (fade, slide, float)
-
-### Phase 5: Azure Deployment (COMPLETED)
-- [x] GitHub Actions workflow (azure-deploy.yml)
-- [x] Infrastructure deployment workflow (infra-deploy.yml)
-- [x] Bicep templates for Azure resources
-- [x] Azure Functions backend configuration
-- [x] DEPLOYMENT.md documentation
-
-### Phase 6: Testing (COMPLETED)
-- [x] Frontend unit tests (Vitest)
-- [x] Backend unit tests (pytest)
-- [x] CI/CD test workflow (test.yml)
-- [x] API client tests
-- [x] Search form tests
+## ✅ COMPLETED
+- [x] Frontend UI (Next.js 16)
+- [x] Backend RAG pipeline (FastAPI + LangGraph)
+- [x] Source citations with expandable previews
+- [x] Steel crystal visualization
+- [x] Mobile-responsive design
+- [x] Azure deployment infrastructure (Bicep)
+- [x] CI/CD pipelines (GitHub Actions)
+- [x] Unit tests (frontend + backend)
 
 ---
 
-## Upcoming Tasks
+## 🚀 YOUR TODO LIST (To Make It Production-Ready)
 
-### Phase 7: PhD Demo Preparation
-- [ ] Source 20-50 sample PDFs (ASTM, ASME, NACE)
-- [ ] Run document ingestion
-- [ ] Verify retrieval quality with test queries
-- [ ] Test compliance checking queries
-- [ ] Validate source citations accuracy
+### Step 1: Get API Keys (5 min)
+- [ ] **Google AI Studio** → https://aistudio.google.com/app/apikey
+  - Create API key, copy it
+- [ ] **Pinecone** → https://app.pinecone.io
+  - Sign up, create index named `steel-index` (dimension: 768, metric: cosine)
+  - Copy API key
 
-### Phase 8: Azure Deployment (Live)
-- [ ] Create Azure service principal
-- [ ] Configure GitHub secrets
-- [ ] Run infrastructure deployment
-- [ ] Deploy frontend to Static Web App
-- [ ] Deploy backend to Azure Functions
-- [ ] Configure CORS and environment variables
-- [ ] Verify end-to-end functionality
-
-### Phase 9: Portfolio Integration
-- [ ] Update portfolio project card
-- [ ] Create project screenshot (1200x630)
-- [ ] Write project description
-- [ ] Add live demo link
-- [ ] Remove/archive old RAG project
-
----
-
-## Quick Reference
-
-### Local Development
+### Step 2: Configure Environment (2 min)
+- [ ] Create `.env` file in project root:
 ```bash
-# Frontend
-npm run dev
-
-# Backend
-uvicorn backend.server:app --reload --port 8000
-
-# Tests
-npm test
-pytest backend/tests/
+cp .env.example .env
+```
+- [ ] Add your keys to `.env`:
+```
+GOOGLE_API_KEY=your_google_api_key
+PINECONE_API_KEY=your_pinecone_api_key
+PINECONE_INDEX_NAME=steel-index
 ```
 
-### Azure Deployment
-```bash
-# Infrastructure
-gh workflow run infra-deploy.yml -f environment=dev
+### Step 3: Add Documents (10 min)
+- [ ] Create `/data` folder if it doesn't exist
+- [ ] Add PDF documents (ASTM standards, material specs, etc.)
+- [ ] Recommended: Start with 5-10 PDFs for testing
 
-# Application
-git push origin main  # Triggers azure-deploy.yml
-```
-
-### Document Ingestion
+### Step 4: Ingest Documents (5 min)
 ```bash
-# Add PDFs to data/
+# Install Python dependencies
+pip install -r requirements.txt
+
+# Run ingestion
 python backend/ingest.py
 ```
 
+### Step 5: Start the App (1 min)
+```bash
+# Terminal 1 - Frontend
+npm run dev
+
+# Terminal 2 - Backend
+uvicorn backend.server:app --reload --port 8000
+```
+
+### Step 6: Test It
+- [ ] Open http://localhost:3000
+- [ ] Try these queries:
+  - "What is the yield strength of A106 Grade B?"
+  - "Does 4140 steel meet NACE MR0175 requirements?"
+  - "Compare A53 and A106 for high-temperature service"
+
 ---
 
-## Key Files
+## 🌐 AZURE DEPLOYMENT (Optional - For Live Demo)
 
-| File | Purpose |
+### Step 1: Azure Setup
+- [ ] Create Azure account (if needed)
+- [ ] Install Azure CLI: `brew install azure-cli`
+- [ ] Login: `az login`
+
+### Step 2: Create Service Principal
+```bash
+az ad sp create-for-rbac --name "steel-agent-gh" --role contributor \
+  --scopes /subscriptions/YOUR_SUBSCRIPTION_ID \
+  --sdk-auth
+```
+
+### Step 3: Add GitHub Secrets
+Go to: GitHub → Settings → Secrets → Actions
+- [ ] `AZURE_CLIENT_ID`
+- [ ] `AZURE_TENANT_ID`
+- [ ] `AZURE_SUBSCRIPTION_ID`
+- [ ] `GOOGLE_API_KEY`
+- [ ] `PINECONE_API_KEY`
+
+### Step 4: Deploy
+```bash
+# Deploy infrastructure
+gh workflow run infra-deploy.yml -f environment=dev
+
+# Push to trigger app deployment
+git push origin main
+```
+
+---
+
+## 📸 PORTFOLIO (After Launch)
+
+- [ ] Take screenshot (1200x630)
+- [ ] Update portfolio project card
+- [ ] Add live demo link
+
+---
+
+## Quick Commands
+
+| Task | Command |
 |------|---------|
-| `app/page.tsx` | Main landing page |
-| `components/search-form.tsx` | Search input with examples |
-| `components/response-display.tsx` | AI response with sources |
-| `lib/api.ts` | API client for backend |
-| `backend/agent.py` | LangGraph RAG pipeline |
-| `backend/server.py` | FastAPI endpoints |
-| `backend/ingest.py` | PDF ingestion |
-| `infra/main.bicep` | Azure infrastructure |
+| Start frontend | `npm run dev` |
+| Start backend | `uvicorn backend.server:app --reload --port 8000` |
+| Run tests | `npm test && pytest backend/tests/` |
+| Ingest docs | `python backend/ingest.py` |
+| Build | `npm run build` |
 
 ---
 
-## Environment Variables
+## URLs
 
-### Required
-- `GOOGLE_API_KEY` - Google AI Studio
-- `PINECONE_API_KEY` - Pinecone
-- `PINECONE_INDEX_NAME` - Index name (default: steel-index)
-
-### Optional
-- `NEXT_PUBLIC_API_URL` - Backend URL (default: http://localhost:8000)
-
----
-
-## Test Queries for PhD Demo
-
-1. **Material Properties**
-   - "What is the yield strength of A106 Grade B?"
-   - "Chemical composition requirements for A333 Grade 6?"
-
-2. **Compliance Checking**
-   - "Does 4140 steel meet NACE MR0175 requirements?"
-   - "What is the maximum allowable hardness for sour service?"
-
-3. **Comparison**
-   - "Compare A53 and A106 for high-temperature service"
-   - "Differences between ASTM A106 and A333?"
-
-4. **Specific Standards**
-   - "What does NACE MR0175 require for carbon steel?"
-   - "ASME B31.3 allowable stress for A106 Grade B at 400F?"
+- **Frontend**: http://localhost:3000
+- **Backend**: http://localhost:8000
+- **Health Check**: http://localhost:8000/health
+- **GitHub**: https://github.com/davidfertube/knowledge_tool

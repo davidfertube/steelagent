@@ -268,6 +268,21 @@ export function ResponseDisplay({ response, sources, error, isLoading }: Respons
               </div>
             </motion.div>
           )}
+
+          {/* Verification Notice */}
+          {isComplete && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 0.5 }}
+              className="mt-4 pt-4 border-t border-border"
+            >
+              <p className="text-xs text-muted-foreground flex items-center gap-1">
+                <AlertCircle className="h-3 w-3" />
+                AI-generated response. Always verify against original source documents before use.
+              </p>
+            </motion.div>
+          )}
         </motion.div>
       )}
     </AnimatePresence>

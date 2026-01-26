@@ -436,9 +436,11 @@ export default function Home() {
                 </div>
 
                 <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
-                  <Button size="lg" className="bg-black text-white hover:bg-black/90 h-12 px-8">
-                    Get Started
-                    <ArrowRight className="ml-2 h-4 w-4" />
+                  <Button size="lg" className="bg-black text-white hover:bg-black/90 h-12 px-8" asChild>
+                    <Link href="/pricing">
+                      Start Free Trial
+                      <ArrowRight className="ml-2 h-4 w-4" />
+                    </Link>
                   </Button>
                   <Button size="lg" variant="outline" className="border-black/20 bg-white text-black hover:bg-black/5 h-12 px-8" asChild>
                     <a
@@ -635,12 +637,16 @@ export default function Home() {
                 </p>
               </div>
               <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                <Button size="lg" className="bg-black text-white hover:bg-black/90 h-12 px-8">
-                  Start Free Trial
-                  <ArrowRight className="ml-2 h-4 w-4" />
+                <Button size="lg" className="bg-black text-white hover:bg-black/90 h-12 px-8" asChild>
+                  <Link href="/pricing">
+                    Start Free Trial
+                    <ArrowRight className="ml-2 h-4 w-4" />
+                  </Link>
                 </Button>
-                <Button size="lg" variant="outline" className="border-black/20 bg-white text-black hover:bg-black/5 h-12 px-8">
-                  Contact Sales
+                <Button size="lg" variant="outline" className="border-black/20 bg-white text-black hover:bg-black/5 h-12 px-8" asChild>
+                  <a href="mailto:sales@steelagent.io">
+                    Contact Sales
+                  </a>
                 </Button>
               </div>
             </motion.div>
@@ -688,6 +694,18 @@ export default function Home() {
           <p className="text-center text-sm text-black/60">
             Open source AI-powered RAG for steel specifications and O&G documentation.
           </p>
+          <p className="text-center text-xs text-black/40 mt-4 max-w-2xl mx-auto">
+            <strong>Disclaimer:</strong> Steel Agent provides AI-generated responses for reference only.
+            Always verify specifications against original source documents. Not intended for safety-critical
+            decisions without professional engineering review. Users are responsible for their own document licenses.
+          </p>
+          <div className="flex justify-center gap-4 mt-4 text-xs text-black/40">
+            <Link href="/terms" className="hover:text-black/60 transition-colors">Terms of Service</Link>
+            <span>·</span>
+            <Link href="/privacy" className="hover:text-black/60 transition-colors">Privacy Policy</Link>
+            <span>·</span>
+            <Link href="/pricing" className="hover:text-black/60 transition-colors">Pricing</Link>
+          </div>
         </div>
       </footer>
     </div>
