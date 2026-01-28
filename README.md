@@ -6,7 +6,7 @@
 
 **AI-powered compliance verification tool for O&G materials engineers.** Query steel specifications instantly with traceable citations for compliance reports.
 
-[Deploy on Vercel](https://vercel.com/new/clone?repository-url=https://github.com/davidfertube/steel-venture) | [Documentation](CLAUDE.md) | [Contributing](CONTRIBUTING.md)
+[Live Demo](https://steel-venture.vercel.app) | [Documentation](CLAUDE.md) | [Contributing](CONTRIBUTING.md)
 
 ---
 
@@ -43,42 +43,72 @@
 
 ---
 
-## How It Works
+## Architecture Deep Dive
 
+### RAG Pipeline Flow
+
+```mermaid
+graph LR
+    A[PDF Upload] --> B[Text Extraction<br/>unpdf]
+    B --> C[Chunking<br/>500 chars + overlap]
+    C --> D[Embedding<br/>gemini-embedding-001]
+    D --> E[pgvector<br/>HNSW index]
+
+    F[User Query] --> G[Query Embedding]
+    G --> H[Cosine Similarity<br/>top 5 chunks]
+    H --> I[LLM Context<br/>+ System Prompt]
+    I --> J[Cited Response]
 ```
-┌─────────────────────────────────────────────────────────────┐
-│                    RAG Pipeline                              │
-├─────────────────────────────────────────────────────────────┤
-│  1. Upload PDF specs (ASTM, NACE, API, company standards)   │
-│  2. AI extracts and indexes content with vector embeddings  │
-│  3. Query in natural language                               │
-│  4. Get answers with [1] [2] citations to source documents  │
-│  5. Click citation → jump to exact page in source PDF       │
-└─────────────────────────────────────────────────────────────┘
-```
 
-**Key Differentiator**: Not another AI chatbot. It's a **compliance verification engine** with traceable citations that engineers can cite in their reports.
-
----
-
-## Technical Architecture
+### Technical Stack
 
 | Component | Technology | Why This Choice |
 |-----------|------------|-----------------|
-| Frontend | Next.js 16, React 19 | Fast, modern, great DX |
-| Backend | Next.js API Routes | Serverless, no infra to manage |
-| LLM | Google Gemini 2.5 Flash | Fast, accurate, free tier |
-| Embeddings | Google gemini-embedding-001 | 3072 dims, excellent for technical docs |
-| Vector DB | Supabase pgvector | PostgreSQL-native, easy to scale |
-| Hosting | Vercel | One-click deploy, global CDN |
+| Frontend | Next.js 16, React 19 | RSC for performance, API routes = no separate backend |
+| Backend | Next.js API Routes | Serverless, scales to zero, no infra to manage |
+| LLM | Google Gemini 2.5 Flash | 1M token context, best cost/performance for technical docs |
+| Embeddings | Google gemini-embedding-001 | 3072 dims captures technical nuance, free tier |
+| Vector DB | Supabase pgvector | PostgreSQL-native, RLS built-in, familiar SQL |
+| Hosting | Vercel | One-click deploy, preview deployments, edge functions |
 
-### Cost Analysis
+### Why This Architecture Works
 
-| Tier | Monthly Cost | Capacity |
-|------|--------------|----------|
-| **Free** | $0 | 100 queries/day, demos |
-| **Production** | $80-155 | 10K queries/month |
-| **Enterprise** | $220-420 | Unlimited, dedicated support |
+1. **Serverless-First**: No servers to manage, scales to zero, pay-per-use
+2. **Single Database**: pgvector = vectors + metadata + auth all in PostgreSQL
+3. **Edge-Ready**: Vercel edge functions for low-latency global access
+4. **Cost-Optimized**: Free tier covers MVP, predictable scaling costs
+
+---
+
+## Engineering Decisions & Trade-offs
+
+### Why These Technology Choices?
+
+| Decision | Chosen | Alternatives Considered | Rationale |
+|----------|--------|------------------------|-----------|
+| **Vector DB** | Supabase pgvector | Pinecone, Weaviate, Qdrant | PostgreSQL-native = one fewer service, RLS built-in, familiar SQL |
+| **LLM** | Gemini 2.5 Flash | GPT-4, Claude | Best cost/performance for technical docs, 1M token context |
+| **Embeddings** | gemini-embedding-001 | OpenAI ada-002, Cohere | 3072 dims captures technical nuance, free tier generous |
+| **Framework** | Next.js 16 App Router | Remix, SvelteKit, Express+React | API routes = no separate backend, React 19 RSC for performance |
+| **Hosting** | Vercel | AWS, GCP, Railway | One-click deploy, preview deployments, edge functions |
+
+### What I'd Do Differently at Scale
+
+| Current Approach | Scale Problem | Production Solution |
+|-----------------|---------------|---------------------|
+| Naive chunking (500 chars) | Breaks tables mid-row | Semantic chunking with Unstructured.io |
+| Pure vector search | Misses exact codes like "UNS S31603" | Hybrid search (BM25 + vector) |
+| Single document | No multi-doc comparison | Document library with metadata filtering |
+| No auth | Public API abuse | Clerk + rate limiting with Upstash |
+
+### Security Model
+
+| Layer | Protection |
+|-------|------------|
+| Input | Zod validation, file type/size limits (50MB max) |
+| API | CORS configured, rate limiting (planned) |
+| Database | Row Level Security (RLS) on Supabase |
+| Secrets | Environment variables only, no hardcoded keys |
 
 ---
 
@@ -103,6 +133,16 @@ npm run dev
 
 ---
 
+## Cost Analysis
+
+| Tier | Monthly Cost | Capacity |
+|------|--------------|----------|
+| **Free** | $0 | 100 queries/day, demos |
+| **Production** | $80-155 | 10K queries/month |
+| **Enterprise** | $220-420 | Unlimited, dedicated support |
+
+---
+
 ## Roadmap
 
 ### MVP (Current)
@@ -110,6 +150,7 @@ npm run dev
 - [x] Semantic search with citations
 - [x] Google Gemini integration
 - [x] Lead capture for enterprise interest
+- [x] Auto-scroll UX with animations
 
 ### Phase 2 (Post-Launch)
 - [ ] **Unstructured.io integration** - Better table extraction for spec sheets
@@ -124,35 +165,59 @@ npm run dev
 
 ---
 
-## For Hiring Managers
+## Lessons Learned
 
-This project demonstrates:
+### What Worked Well
+- **pgvector over Pinecone**: One service to manage, SQL familiarity, RLS built-in
+- **Gemini over OpenAI**: Better cost/performance for technical documents
+- **Next.js App Router**: API routes eliminate backend complexity
+- **Supabase**: Auth, storage, database, vectors in one platform
 
-| Skill | Evidence |
-|-------|----------|
-| **Full-Stack Development** | Next.js 16, React 19, TypeScript, API routes |
-| **AI/ML Integration** | RAG pipeline, embeddings, LLM prompt engineering |
-| **Domain Expertise** | O&G materials, NACE/ASTM/API standards |
-| **Production Mindset** | Security hardening, input validation, error handling |
-| **DevOps** | CI/CD with GitHub Actions, Vercel deployment |
-| **Documentation** | Comprehensive README, CLAUDE.md, CONTRIBUTING.md |
+### What I'd Improve
+1. **Chunking Strategy**: Current naive chunking breaks tables. Would implement document-structure-aware chunking
+2. **Evaluation Framework**: No automated RAG evaluation yet. Would add ragas metrics
+3. **Caching**: No query caching. Would add Redis for repeated queries
+4. **Multi-tenancy**: Current design is single-tenant. Would add workspace isolation
 
-### Code Quality Highlights
-- **Security**: Input validation, file size limits, no error leakage
-- **Architecture**: Clean separation, serverless-ready
-- **Testing**: Vitest for frontend, type-safe throughout
-- **Open Source**: MIT license, contribution guidelines
+### Hard Problems Solved
+1. **Citation Accuracy**: Mapping LLM references back to exact source pages
+2. **Table Extraction**: PDFs have complex table structures, unpdf handles most cases
+3. **Embedding Dimension Mismatch**: Migrated from 768 to 3072 dims mid-project
 
 ---
 
-## Contact
+## Built By
 
-**David Fernandez** - [davidfernandez.dev](https://www.davidfernandez.dev)
+**David Fernandez** | Senior Full-Stack Engineer
 
-Building AI tools for the energy industry. Open to opportunities in:
-- Materials/Corrosion Engineering + AI
-- O&G Digital Transformation
-- Technical Product Management
+[Portfolio](https://davidfernandez.dev) | [GitHub](https://github.com/davidfertube)
+
+### What This Project Demonstrates
+
+| Competency | Evidence |
+|------------|----------|
+| **System Design** | End-to-end RAG architecture with clear trade-offs |
+| **Full-Stack** | Next.js 16, React 19, TypeScript, API design |
+| **AI/ML Engineering** | Vector embeddings, LLM prompt engineering, citation system |
+| **Production Mindset** | Security hardening, error handling, input validation |
+| **Domain Knowledge** | O&G materials, NACE/ASTM/API compliance requirements |
+| **DevOps** | CI/CD pipelines, one-click deployments |
+
+### Project Stats
+
+| Metric | Value |
+|--------|-------|
+| Development Time | ~3 weeks (solo) |
+| Lines of Code | ~5,000 TypeScript |
+| Test Coverage | Core API routes covered |
+| Dependencies | Minimal, production-ready |
+
+### Technologies I'd Use at Enterprise Scale
+
+- **Better PDF Parsing**: Azure Document Intelligence, Unstructured.io
+- **Hybrid Search**: Azure AI Search, Elasticsearch
+- **Observability**: Datadog, Sentry, structured logging
+- **Auth**: Clerk, Auth0, or Azure AD B2C
 
 ---
 
