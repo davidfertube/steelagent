@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { CheckCircle, AlertCircle, Sparkles, Copy, Check, FileText, ChevronDown, ChevronUp } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Source } from "@/lib/api";
+import { ComparisonCard } from "@/components/comparison-card";
 
 interface ResponseDisplayProps {
   response: string | null;
@@ -136,6 +137,30 @@ function SourceCitation({ source, index }: { source: Source; index: number }) {
 export function ResponseDisplay({ response, sources, error, isLoading }: ResponseDisplayProps) {
   const { displayedText, isComplete } = useTypewriter(response || "", 15);
   const [copied, setCopied] = useState(false);
+  const [showComparison, setShowComparison] = useState(false);
+
+  // Reset comparison visibility when response changes (new query started)
+  useEffect(() => {
+    setShowComparison(false);
+  }, [response]);
+
+  // Show comparison card 800ms after typewriter completes
+  useEffect(() => {
+    // Only show comparison when typewriter is complete AND we have a response
+    if (!isComplete || !response) {
+      return;
+    }
+
+    const timer = setTimeout(() => {
+      setShowComparison(true);
+    }, 800);
+
+    // Cleanup only clears the timer - doesn't reset state
+    // State reset happens in the separate effect above when response changes
+    return () => {
+      clearTimeout(timer);
+    };
+  }, [isComplete, response]);
 
   const handleCopy = async () => {
     if (response) {
@@ -283,6 +308,12 @@ export function ResponseDisplay({ response, sources, error, isLoading }: Respons
               </p>
             </motion.div>
           )}
+
+          {/* Comparison Card - shows value vs generic LLMs */}
+          <ComparisonCard
+            sourcesCount={sources?.length || 0}
+            isVisible={showComparison}
+          />
         </motion.div>
       )}
     </AnimatePresence>

@@ -1,37 +1,77 @@
 import { NextRequest, NextResponse } from "next/server";
-import { GoogleGenerativeAI } from "@google/generative-ai";
 import { searchSimilarChunks, getDocumentById } from "@/lib/vectorstore";
+import { validateQuery } from "@/lib/validation";
+import { withTimeout, TIMEOUTS } from "@/lib/timeout";
+import { handleApiError, createValidationError, getErrorStatusCode } from "@/lib/errors";
+import { getModelFallbackClient } from "@/lib/model-fallback";
 
-const genAI = new GoogleGenerativeAI(process.env.GOOGLE_API_KEY || "");
+/**
+ * Chat API Route - RAG-powered Q&A
+ *
+ * This endpoint:
+ * 1. Validates the user query
+ * 2. Searches for relevant document chunks
+ * 3. Builds context from retrieved documents
+ * 4. Generates a response with citations using Gemini
+ *
+ * Rate Limit Handling:
+ * - Uses ModelFallbackClient for automatic model fallback
+ * - If primary model (gemini-2.5-flash) is rate limited, falls back to alternatives
+ * - Prevents API failures and avoids overage charges
+ *
+ * Security features:
+ * - Input validation and sanitization
+ * - Timeout protection on LLM calls
+ * - Safe error handling (no internal details leaked)
+ */
 
 export async function POST(request: NextRequest) {
   try {
-    const { query } = await request.json();
+    // ========================================
+    // Step 1: Parse and Validate Input
+    // ========================================
+    const body = await request.json();
+    const { query } = body;
 
-    if (!query) {
-      return NextResponse.json(
-        { error: "Query is required" },
-        { status: 400 }
-      );
+    // Validate query using our validation utility
+    const validation = validateQuery(query);
+    if (!validation.isValid) {
+      const error = createValidationError(validation.error || "Invalid query");
+      return NextResponse.json(error, { status: getErrorStatusCode("VALIDATION_ERROR") });
     }
 
-    // Search for relevant chunks
+    // Use the cleaned, sanitized query
+    const cleanedQuery = validation.cleanedQuery!;
+
+    // ========================================
+    // Step 2: Search for Relevant Documents
+    // ========================================
     let chunks: Awaited<ReturnType<typeof searchSimilarChunks>> = [];
     try {
-      chunks = await searchSimilarChunks(query, 5, 0.5);
-    } catch {
-      // If vector search fails (no documents indexed), continue with empty context
-      console.log("No documents indexed yet or search failed");
+      // Wrap vector search with timeout for reliability
+      chunks = await withTimeout(
+        searchSimilarChunks(cleanedQuery, 5, 0.5),
+        TIMEOUTS.VECTOR_SEARCH,
+        "Vector search"
+      );
+    } catch (searchError) {
+      // Log but continue - we can still provide a response without documents
+      console.warn("[Chat API] Vector search failed, continuing without context:", searchError);
+      // Don't throw - we'll continue with empty chunks
     }
 
-    // Get document names for citations
+    // ========================================
+    // Step 3: Build Document Context
+    // ========================================
     const documentIds = [...new Set(chunks.map((c) => c.document_id))];
     const documents = await Promise.all(
       documentIds.map((id) => getDocumentById(id))
     );
-    const docMap = new Map(documents.filter(Boolean).map((d) => [d!.id, d]));
+    const docMap = new Map(
+      documents.filter((d): d is NonNullable<typeof d> => d !== null).map((d) => [d.id, d])
+    );
 
-    // Build context from chunks
+    // Build context string from retrieved chunks
     const context = chunks.length > 0
       ? chunks
           .map((chunk, index) => {
@@ -41,8 +81,11 @@ export async function POST(request: NextRequest) {
           .join("\n\n---\n\n")
       : "No documents have been uploaded yet.";
 
-    // Initialize Gemini model
-    const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
+    // ========================================
+    // Step 4: Generate LLM Response
+    // ========================================
+    // Use ModelFallbackClient for automatic fallback on rate limits
+    const fallbackClient = getModelFallbackClient();
 
     const systemPrompt = `You are a senior materials engineer specializing in steel specifications, NACE/ASTM/API standards, and O&G compliance.
 
@@ -71,10 +114,10 @@ A: **Answer:** The minimum yield strength of 316L is 170 MPa (25 ksi) [1].
 ${context}
 
 ---
-USER QUESTION: ${query}
+USER QUESTION: ${cleanedQuery}
 
 Instructions: Answer ONLY using the context above. Cite every fact with [1], [2], etc. If the answer isn't in the context, say so.`
-      : `USER QUESTION: ${query}
+      : `USER QUESTION: ${cleanedQuery}
 
 NOTE: No documents have been uploaded to the knowledge base yet.
 
@@ -83,19 +126,24 @@ Please provide general guidance based on industry standards (ASTM, NACE, API), b
 2. User should upload relevant specification PDFs for verified, citable answers
 3. Do not provide specific numerical values without document sources`;
 
-    // Generate response
-    const result = await model.generateContent({
-      contents: [
-        {
-          role: "user",
-          parts: [{ text: systemPrompt + "\n\n" + userPrompt }],
-        },
-      ],
-    });
+    // Generate response with timeout protection and automatic model fallback
+    // If gemini-2.5-flash is rate limited, automatically tries fallback models
+    const fullPrompt = systemPrompt + "\n\n" + userPrompt;
 
-    const responseText = result.response.text();
+    const { text: responseText, modelUsed } = await withTimeout(
+      fallbackClient.generateContent(fullPrompt, "gemini-2.5-flash"),
+      TIMEOUTS.LLM_GENERATION,
+      "LLM response generation"
+    );
 
-    // Build sources array
+    // Log which model was used (helpful for monitoring rate limits)
+    if (modelUsed !== "gemini-2.5-flash") {
+      console.log(`[Chat API] Used fallback model: ${modelUsed}`);
+    }
+
+    // ========================================
+    // Step 5: Build Sources Array
+    // ========================================
     const sources = chunks.map((chunk, index) => {
       const doc = docMap.get(chunk.document_id);
       return {
@@ -106,27 +154,17 @@ Please provide general guidance based on industry standards (ASTM, NACE, API), b
       };
     });
 
+    // ========================================
+    // Step 6: Return Response
+    // ========================================
     return NextResponse.json({
       response: responseText,
       sources,
     });
+
   } catch (error) {
-    console.error("Chat error:", error);
-
-    const errorMessage = error instanceof Error ? error.message : "Unknown error";
-
-    // Check if it's an API key error
-    if (errorMessage.includes("API key") || errorMessage.includes("API_KEY")) {
-      return NextResponse.json({
-        response: "Google Gemini API is not configured. Please add GOOGLE_API_KEY to your environment variables.",
-        sources: [],
-      });
-    }
-
-    // Security: Don't leak error details to client
-    return NextResponse.json(
-      { error: "Failed to process query" },
-      { status: 500 }
-    );
+    // Use our safe error handler - never leaks internal details
+    const { response, status } = handleApiError(error, "Chat API");
+    return NextResponse.json(response, { status });
   }
 }

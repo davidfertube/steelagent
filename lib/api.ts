@@ -146,6 +146,17 @@ export interface ChatResponse {
   sources: Source[];
 }
 
+export interface GenericLLMResponse {
+  response: string;
+  sources: [];
+  isGenericLLM: true;
+}
+
+export interface ComparisonResult {
+  steelAgent: ChatResponse;
+  genericLLM: GenericLLMResponse;
+}
+
 export interface HealthResponse {
   status: string;
   version?: string;
@@ -211,6 +222,64 @@ export async function queryKnowledgeBase(query: string): Promise<ChatResponse> {
 
     return getDemoResponse(query);
   }
+}
+
+/**
+ * Query a generic LLM (without RAG) for comparison purposes
+ * @param query - The user's question
+ * @returns The generic LLM response (no sources)
+ */
+export async function queryGenericLLM(query: string): Promise<GenericLLMResponse> {
+  try {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 10000);
+
+    const response = await fetch(`${API_URL}/api/chat/compare`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ query }),
+      signal: controller.signal,
+    });
+
+    clearTimeout(timeoutId);
+
+    if (!response.ok) {
+      throw new Error('Failed to query generic LLM');
+    }
+
+    return response.json();
+  } catch {
+    // Return a simulated generic response for demo mode
+    await new Promise(resolve => setTimeout(resolve, 600 + Math.random() * 400));
+
+    return {
+      response: `Based on my general knowledge about steel materials:
+
+The specifications you're asking about typically involve various ASTM and industry standards. Common values and requirements include tensile strength, yield strength, and hardness limits that vary by grade and application.
+
+For specific values, I recommend consulting the relevant specification documents directly, as exact requirements can vary significantly between standards and grades.
+
+*Note: This response is based on general knowledge and may not reflect your specific documentation.*`,
+      sources: [],
+      isGenericLLM: true,
+    };
+  }
+}
+
+/**
+ * Query both Steel Agent and generic LLM in parallel for comparison
+ * @param query - The user's question
+ * @returns Both responses for side-by-side comparison
+ */
+export async function queryWithComparison(query: string): Promise<ComparisonResult> {
+  const [steelAgent, genericLLM] = await Promise.all([
+    queryKnowledgeBase(query),
+    queryGenericLLM(query),
+  ]);
+
+  return { steelAgent, genericLLM };
 }
 
 /**

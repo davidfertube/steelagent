@@ -5,6 +5,9 @@ import { Upload, FileText, X, CheckCircle, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 
+// Maximum file size (50MB) - must match server-side limit
+const MAX_FILE_SIZE = 50 * 1024 * 1024;
+
 interface UploadedFile {
   name: string;
   size: number;
@@ -45,6 +48,17 @@ export function DocumentUpload({ onUploadComplete }: DocumentUploadProps) {
   };
 
   const handleFile = async (newFile: File) => {
+    // Client-side file size validation for instant feedback
+    if (newFile.size > MAX_FILE_SIZE) {
+      setFile({
+        name: newFile.name,
+        size: newFile.size,
+        status: "error",
+        error: "File too large. Maximum size is 50MB.",
+      });
+      return;
+    }
+
     const uploadFile: UploadedFile = {
       name: newFile.name,
       size: newFile.size,
@@ -110,6 +124,21 @@ export function DocumentUpload({ onUploadComplete }: DocumentUploadProps) {
     return (bytes / (1024 * 1024)).toFixed(1) + " MB";
   };
 
+  // Estimate processing time based on file size
+  // ~2 seconds per MB for upload + extraction + embedding
+  const estimateProcessingTime = (bytes: number) => {
+    const mb = bytes / (1024 * 1024);
+    const seconds = Math.max(5, Math.ceil(mb * 2)); // Minimum 5 seconds
+    if (seconds < 60) return `~${seconds} seconds`;
+    const minutes = Math.ceil(seconds / 60);
+    return `~${minutes} minute${minutes > 1 ? "s" : ""}`;
+  };
+
+  // Estimate page count from file size (rough: ~50KB per page average)
+  const estimatePageCount = (bytes: number) => {
+    return Math.max(1, Math.round(bytes / (50 * 1024)));
+  };
+
   return (
     <Card className="border border-black/10">
       <CardContent className="p-6">
@@ -131,8 +160,11 @@ export function DocumentUpload({ onUploadComplete }: DocumentUploadProps) {
             <p className="text-lg font-medium text-black mb-2">
               Drop your PDF here
             </p>
-            <p className="text-sm text-black/60 mb-4">
+            <p className="text-sm text-black/60 mb-2">
               or click to browse your files
+            </p>
+            <p className="text-xs text-black/40 mb-4">
+              Up to 50MB • 500+ pages supported
             </p>
             <input
               type="file"
@@ -180,9 +212,14 @@ export function DocumentUpload({ onUploadComplete }: DocumentUploadProps) {
                   </div>
                 )}
                 {file.status === "processing" && (
-                  <div className="flex items-center gap-2">
-                    <Loader2 className="w-5 h-5 animate-spin text-amber-600" />
-                    <span className="text-sm font-medium text-amber-600">Processing...</span>
+                  <div className="flex flex-col items-end gap-0.5">
+                    <div className="flex items-center gap-2">
+                      <Loader2 className="w-5 h-5 animate-spin text-amber-600" />
+                      <span className="text-sm font-medium text-amber-600">Processing...</span>
+                    </div>
+                    <span className="text-xs text-amber-600/70">
+                      ~{estimatePageCount(file.size)} pages • {estimateProcessingTime(file.size)}
+                    </span>
                   </div>
                 )}
                 {file.status === "complete" && (

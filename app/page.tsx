@@ -9,220 +9,54 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { SearchForm } from "@/components/search-form";
 import { ResponseDisplay } from "@/components/response-display";
+import { RealtimeComparison } from "@/components/realtime-comparison";
 import { HealthIndicator } from "@/components/health-indicator";
 import { DocumentUpload } from "@/components/document-upload";
-import { Source } from "@/lib/api";
+import { Source, GenericLLMResponse } from "@/lib/api";
 
-// Industry Visualization - Steel Specifications and AI
+// Industry Visualization - Many Documents → One AI Agent
+// Shows multiple documents flowing into a central brain/neural network
 function IndustryVisualization() {
+  // Document positions arranged around the central agent
+  // Each document has: x, y (top-left corner), and connection point to center
+  const documents = [
+    { id: 1, x: 40, y: 50, connectX: 70, connectY: 95, delay: 0 },      // Top-left
+    { id: 2, x: 290, y: 50, connectX: 320, connectY: 95, delay: 0.2 },  // Top-right
+    { id: 3, x: 10, y: 175, connectX: 55, connectY: 200, delay: 0.4 },  // Left
+    { id: 4, x: 320, y: 175, connectX: 345, connectY: 200, delay: 0.6 },// Right
+    { id: 5, x: 40, y: 300, connectX: 70, connectY: 305, delay: 0.8 },  // Bottom-left
+    { id: 6, x: 290, y: 300, connectX: 320, connectY: 305, delay: 1.0 },// Bottom-right
+  ];
+
+  // Center point where the brain/agent is located
+  const centerX = 200;
+  const centerY = 200;
+
   return (
     <div className="relative w-full max-w-xl mx-auto h-[450px] lg:h-[520px] flex items-center justify-center">
       <svg viewBox="0 0 400 400" className="w-full h-full">
-        {/* Steel pipe cross-sections */}
-        <motion.circle
-          cx="150"
-          cy="150"
-          r="60"
-          fill="none"
-          stroke="black"
-          strokeWidth="3"
-          initial={{ pathLength: 0 }}
-          animate={{ pathLength: 1 }}
-          transition={{ duration: 1.5, delay: 0.2 }}
-        />
-        <motion.circle
-          cx="150"
-          cy="150"
-          r="45"
-          fill="none"
-          stroke="black"
-          strokeWidth="2"
-          strokeDasharray="4 2"
-          initial={{ pathLength: 0 }}
-          animate={{ pathLength: 1 }}
-          transition={{ duration: 1.5, delay: 0.4 }}
-        />
+        {/* Definitions for gradients and filters */}
+        <defs>
+          {/* Green glow gradient for the brain */}
+          <radialGradient id="brainGlow" cx="50%" cy="50%" r="50%">
+            <stop offset="0%" stopColor="#22c55e" stopOpacity="0.4" />
+            <stop offset="70%" stopColor="#22c55e" stopOpacity="0.1" />
+            <stop offset="100%" stopColor="#22c55e" stopOpacity="0" />
+          </radialGradient>
+          {/* Pulse animation filter */}
+          <filter id="glow">
+            <feGaussianBlur stdDeviation="3" result="coloredBlur" />
+            <feMerge>
+              <feMergeNode in="coloredBlur" />
+              <feMergeNode in="SourceGraphic" />
+            </feMerge>
+          </filter>
+        </defs>
 
-        <motion.circle
-          cx="280"
-          cy="200"
-          r="50"
-          fill="none"
-          stroke="black"
-          strokeWidth="3"
-          initial={{ pathLength: 0 }}
-          animate={{ pathLength: 1 }}
-          transition={{ duration: 1.5, delay: 0.6 }}
-        />
-        <motion.circle
-          cx="280"
-          cy="200"
-          r="38"
-          fill="none"
-          stroke="black"
-          strokeWidth="2"
-          strokeDasharray="4 2"
-          initial={{ pathLength: 0 }}
-          animate={{ pathLength: 1 }}
-          transition={{ duration: 1.5, delay: 0.8 }}
-        />
-
-        {/* Document/spec icons */}
-        <motion.rect
-          x="100"
-          y="280"
-          width="60"
-          height="80"
-          fill="none"
-          stroke="black"
-          strokeWidth="2"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ duration: 0.5, delay: 1 }}
-        />
-        <motion.line
-          x1="110"
-          y1="295"
-          x2="150"
-          y2="295"
-          stroke="black"
-          strokeWidth="1"
-          initial={{ pathLength: 0 }}
-          animate={{ pathLength: 1 }}
-          transition={{ duration: 0.5, delay: 1.2 }}
-        />
-        <motion.line
-          x1="110"
-          y1="310"
-          x2="150"
-          y2="310"
-          stroke="black"
-          strokeWidth="1"
-          initial={{ pathLength: 0 }}
-          animate={{ pathLength: 1 }}
-          transition={{ duration: 0.5, delay: 1.3 }}
-        />
-        <motion.line
-          x1="110"
-          y1="325"
-          x2="145"
-          y2="325"
-          stroke="black"
-          strokeWidth="1"
-          initial={{ pathLength: 0 }}
-          animate={{ pathLength: 1 }}
-          transition={{ duration: 0.5, delay: 1.4 }}
-        />
-
-        <motion.rect
-          x="240"
-          y="300"
-          width="60"
-          height="80"
-          fill="none"
-          stroke="black"
-          strokeWidth="2"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ duration: 0.5, delay: 1.1 }}
-        />
-        <motion.line
-          x1="250"
-          y1="315"
-          x2="290"
-          y2="315"
-          stroke="black"
-          strokeWidth="1"
-          initial={{ pathLength: 0 }}
-          animate={{ pathLength: 1 }}
-          transition={{ duration: 0.5, delay: 1.3 }}
-        />
-        <motion.line
-          x1="250"
-          y1="330"
-          x2="290"
-          y2="330"
-          stroke="black"
-          strokeWidth="1"
-          initial={{ pathLength: 0 }}
-          animate={{ pathLength: 1 }}
-          transition={{ duration: 0.5, delay: 1.4 }}
-        />
-        <motion.line
-          x1="250"
-          y1="345"
-          x2="285"
-          y2="345"
-          stroke="black"
-          strokeWidth="1"
-          initial={{ pathLength: 0 }}
-          animate={{ pathLength: 1 }}
-          transition={{ duration: 0.5, delay: 1.5 }}
-        />
-
-        {/* AI connection lines (subtle red) */}
-        <motion.line
-          x1="150"
-          y1="210"
-          x2="130"
-          y2="280"
-          stroke="#ef4444"
-          strokeWidth="1.5"
-          strokeDasharray="4 4"
-          animate={{ strokeDashoffset: [0, 8] }}
-          transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
-        />
-
-        <motion.line
-          x1="280"
-          y1="250"
-          x2="270"
-          y2="300"
-          stroke="#ef4444"
-          strokeWidth="1.5"
-          strokeDasharray="4 4"
-          animate={{ strokeDashoffset: [0, 8] }}
-          transition={{ duration: 2, repeat: Infinity, ease: "linear", delay: 0.5 }}
-        />
-
-        {/* Connection nodes */}
-        <motion.circle
-          cx="150"
-          cy="210"
-          r="4"
-          fill="#ef4444"
-          animate={{ scale: [1, 1.3, 1] }}
-          transition={{ duration: 2, repeat: Infinity }}
-        />
-        <motion.circle
-          cx="130"
-          cy="280"
-          r="4"
-          fill="#ef4444"
-          animate={{ scale: [1, 1.3, 1] }}
-          transition={{ duration: 2, repeat: Infinity, delay: 0.3 }}
-        />
-        <motion.circle
-          cx="280"
-          cy="250"
-          r="4"
-          fill="#ef4444"
-          animate={{ scale: [1, 1.3, 1] }}
-          transition={{ duration: 2, repeat: Infinity, delay: 0.6 }}
-        />
-        <motion.circle
-          cx="270"
-          cy="300"
-          r="4"
-          fill="#ef4444"
-          animate={{ scale: [1, 1.3, 1] }}
-          transition={{ duration: 2, repeat: Infinity, delay: 0.9 }}
-        />
-
-        {/* Labels */}
+        {/* Top label */}
         <motion.text
           x="200"
-          y="30"
+          y="25"
           fontSize="10"
           fill="black"
           opacity="0.5"
@@ -230,13 +64,269 @@ function IndustryVisualization() {
           textAnchor="middle"
           initial={{ opacity: 0 }}
           animate={{ opacity: 0.5 }}
-          transition={{ duration: 1, delay: 1.5 }}
+          transition={{ duration: 1, delay: 2.5 }}
         >
-          STEEL SPECIFICATIONS
+          YOUR DOCUMENTS
+        </motion.text>
+
+        {/* Connection lines from documents to brain (behind everything) */}
+        {documents.map((doc) => (
+          <motion.line
+            key={`line-${doc.id}`}
+            x1={doc.connectX}
+            y1={doc.connectY}
+            x2={centerX}
+            y2={centerY}
+            stroke="#22c55e"
+            strokeWidth="2"
+            strokeDasharray="8 4"
+            initial={{ pathLength: 0, opacity: 0 }}
+            animate={{
+              pathLength: 1,
+              opacity: 1,
+              strokeDashoffset: [0, -12]
+            }}
+            transition={{
+              pathLength: { duration: 0.8, delay: doc.delay + 0.5 },
+              opacity: { duration: 0.3, delay: doc.delay + 0.5 },
+              strokeDashoffset: {
+                duration: 1.5,
+                repeat: Infinity,
+                ease: "linear",
+                delay: doc.delay + 1.3
+              }
+            }}
+          />
+        ))}
+
+        {/* Animated particles traveling along lines */}
+        {documents.map((doc) => (
+          <motion.circle
+            key={`particle-${doc.id}`}
+            r="4"
+            fill="#22c55e"
+            filter="url(#glow)"
+            initial={{ opacity: 0 }}
+            animate={{
+              opacity: [0, 1, 1, 0],
+              cx: [doc.connectX, centerX],
+              cy: [doc.connectY, centerY],
+            }}
+            transition={{
+              duration: 2,
+              repeat: Infinity,
+              delay: doc.delay + 1.5,
+              ease: "easeInOut",
+              times: [0, 0.1, 0.9, 1]
+            }}
+          />
+        ))}
+
+        {/* Document icons */}
+        {documents.map((doc) => (
+          <g key={`doc-${doc.id}`}>
+            {/* Document rectangle */}
+            <motion.rect
+              x={doc.x}
+              y={doc.y}
+              width="45"
+              height="55"
+              fill="white"
+              stroke="black"
+              strokeWidth="2"
+              rx="2"
+              initial={{ opacity: 0, scale: 0.8 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ duration: 0.4, delay: doc.delay }}
+            />
+            {/* Document lines (text representation) */}
+            <motion.line
+              x1={doc.x + 8}
+              y1={doc.y + 12}
+              x2={doc.x + 37}
+              y2={doc.y + 12}
+              stroke="black"
+              strokeWidth="1"
+              strokeOpacity="0.4"
+              initial={{ pathLength: 0 }}
+              animate={{ pathLength: 1 }}
+              transition={{ duration: 0.3, delay: doc.delay + 0.2 }}
+            />
+            <motion.line
+              x1={doc.x + 8}
+              y1={doc.y + 22}
+              x2={doc.x + 37}
+              y2={doc.y + 22}
+              stroke="black"
+              strokeWidth="1"
+              strokeOpacity="0.4"
+              initial={{ pathLength: 0 }}
+              animate={{ pathLength: 1 }}
+              transition={{ duration: 0.3, delay: doc.delay + 0.25 }}
+            />
+            <motion.line
+              x1={doc.x + 8}
+              y1={doc.y + 32}
+              x2={doc.x + 30}
+              y2={doc.y + 32}
+              stroke="black"
+              strokeWidth="1"
+              strokeOpacity="0.4"
+              initial={{ pathLength: 0 }}
+              animate={{ pathLength: 1 }}
+              transition={{ duration: 0.3, delay: doc.delay + 0.3 }}
+            />
+            <motion.line
+              x1={doc.x + 8}
+              y1={doc.y + 42}
+              x2={doc.x + 34}
+              y2={doc.y + 42}
+              stroke="black"
+              strokeWidth="1"
+              strokeOpacity="0.4"
+              initial={{ pathLength: 0 }}
+              animate={{ pathLength: 1 }}
+              transition={{ duration: 0.3, delay: doc.delay + 0.35 }}
+            />
+            {/* Connection point indicator */}
+            <motion.circle
+              cx={doc.connectX}
+              cy={doc.connectY}
+              r="3"
+              fill="#22c55e"
+              initial={{ scale: 0 }}
+              animate={{ scale: [1, 1.3, 1] }}
+              transition={{
+                scale: { duration: 2, repeat: Infinity, delay: doc.delay + 1.5 }
+              }}
+            />
+          </g>
+        ))}
+
+        {/* Central AI Brain/Agent */}
+        {/* Outer glow */}
+        <motion.circle
+          cx={centerX}
+          cy={centerY}
+          r="55"
+          fill="url(#brainGlow)"
+          initial={{ scale: 0, opacity: 0 }}
+          animate={{
+            scale: [1, 1.1, 1],
+            opacity: 1
+          }}
+          transition={{
+            scale: { duration: 3, repeat: Infinity, ease: "easeInOut" },
+            opacity: { duration: 0.5, delay: 1.2 }
+          }}
+        />
+
+        {/* Main brain circle */}
+        <motion.circle
+          cx={centerX}
+          cy={centerY}
+          r="40"
+          fill="white"
+          stroke="#22c55e"
+          strokeWidth="3"
+          filter="url(#glow)"
+          initial={{ scale: 0 }}
+          animate={{ scale: 1 }}
+          transition={{ duration: 0.6, delay: 1.2, type: "spring" }}
+        />
+
+        {/* Inner brain pattern - neural network style */}
+        <motion.circle
+          cx={centerX}
+          cy={centerY}
+          r="30"
+          fill="none"
+          stroke="#22c55e"
+          strokeWidth="1.5"
+          strokeDasharray="6 3"
+          initial={{ pathLength: 0 }}
+          animate={{ pathLength: 1 }}
+          transition={{ duration: 1, delay: 1.5 }}
+        />
+
+        {/* Brain neural nodes */}
+        {[
+          { x: centerX - 15, y: centerY - 12 },
+          { x: centerX + 15, y: centerY - 12 },
+          { x: centerX, y: centerY + 5 },
+          { x: centerX - 10, y: centerY + 18 },
+          { x: centerX + 10, y: centerY + 18 },
+        ].map((node, i) => (
+          <motion.circle
+            key={`node-${i}`}
+            cx={node.x}
+            cy={node.y}
+            r="4"
+            fill="#22c55e"
+            initial={{ scale: 0 }}
+            animate={{ scale: [1, 1.4, 1] }}
+            transition={{
+              scale: { duration: 1.5, repeat: Infinity, delay: 1.8 + i * 0.2 }
+            }}
+          />
+        ))}
+
+        {/* Neural connections inside brain */}
+        <motion.path
+          d={`M ${centerX - 15} ${centerY - 12} L ${centerX} ${centerY + 5} L ${centerX + 15} ${centerY - 12}`}
+          fill="none"
+          stroke="#22c55e"
+          strokeWidth="1.5"
+          strokeOpacity="0.6"
+          initial={{ pathLength: 0 }}
+          animate={{ pathLength: 1 }}
+          transition={{ duration: 0.8, delay: 1.8 }}
+        />
+        <motion.path
+          d={`M ${centerX - 10} ${centerY + 18} L ${centerX} ${centerY + 5} L ${centerX + 10} ${centerY + 18}`}
+          fill="none"
+          stroke="#22c55e"
+          strokeWidth="1.5"
+          strokeOpacity="0.6"
+          initial={{ pathLength: 0 }}
+          animate={{ pathLength: 1 }}
+          transition={{ duration: 0.8, delay: 2 }}
+        />
+
+        {/* "AI" text in center */}
+        <motion.text
+          x={centerX}
+          y={centerY - 22}
+          fontSize="12"
+          fill="#22c55e"
+          fontWeight="bold"
+          fontFamily="monospace"
+          textAnchor="middle"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.5, delay: 2.2 }}
+        >
+          STEEL
         </motion.text>
         <motion.text
+          x={centerX}
+          y={centerY - 10}
+          fontSize="12"
+          fill="#22c55e"
+          fontWeight="bold"
+          fontFamily="monospace"
+          textAnchor="middle"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.5, delay: 2.3 }}
+        >
+          AGENT
+        </motion.text>
+
+        {/* Bottom label */}
+        <motion.text
           x="200"
-          y="460"
+          y="385"
           fontSize="10"
           fill="black"
           opacity="0.5"
@@ -244,9 +334,9 @@ function IndustryVisualization() {
           textAnchor="middle"
           initial={{ opacity: 0 }}
           animate={{ opacity: 0.5 }}
-          transition={{ duration: 1, delay: 1.6 }}
+          transition={{ duration: 1, delay: 2.5 }}
         >
-          AI-POWERED RETRIEVAL
+          ONE AGENT • ALL YOUR SPECS
         </motion.text>
       </svg>
     </div>
@@ -419,6 +509,10 @@ export default function Home() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [hasDocumentUploaded, setHasDocumentUploaded] = useState(false);
 
+  // Comparison mode state
+  const [compareMode, setCompareMode] = useState(false);
+  const [genericLLMResponse, setGenericLLMResponse] = useState<string | null>(null);
+
   // Refs for auto-scrolling
   const step2Ref = useRef<HTMLDivElement>(null);
   const step3Ref = useRef<HTMLDivElement>(null);
@@ -462,8 +556,19 @@ export default function Home() {
       setResponse(null);
       setSources([]);
       setError(null);
+      setGenericLLMResponse(null);
     }
   }, []);
+
+  const handleComparisonResult = useCallback(
+    (steelAgent: { response: string; sources: Source[] }, genericLLM: GenericLLMResponse) => {
+      setError(null);
+      setResponse(steelAgent.response);
+      setSources(steelAgent.sources);
+      setGenericLLMResponse(genericLLM.response);
+    },
+    []
+  );
 
   return (
     <div className="flex min-h-screen flex-col bg-white text-black overflow-x-hidden">
@@ -774,6 +879,9 @@ export default function Home() {
                       onResult={handleResult}
                       onError={handleError}
                       onLoadingChange={handleLoadingChange}
+                      onComparisonResult={handleComparisonResult}
+                      compareMode={compareMode}
+                      onCompareModeChange={setCompareMode}
                     />
                   </motion.div>
 
@@ -811,12 +919,22 @@ export default function Home() {
                             </motion.span>
                           )}
                         </div>
-                        <ResponseDisplay
-                          response={response}
-                          sources={sources}
-                          error={error}
-                          isLoading={isLoading}
-                        />
+                        {compareMode ? (
+                          <RealtimeComparison
+                            steelAgentResponse={response}
+                            steelAgentSources={sources}
+                            genericLLMResponse={genericLLMResponse}
+                            isLoading={isLoading}
+                            error={error}
+                          />
+                        ) : (
+                          <ResponseDisplay
+                            response={response}
+                            sources={sources}
+                            error={error}
+                            isLoading={isLoading}
+                          />
+                        )}
                       </motion.div>
                     </>
                   )}

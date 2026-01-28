@@ -2,14 +2,21 @@
 
 import { useState, useCallback, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { ArrowRight, Loader2, X } from "lucide-react";
+import { ArrowRight, Loader2, X, GitCompare } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { queryKnowledgeBase, ApiRequestError, Source } from "@/lib/api";
+import { queryKnowledgeBase, queryWithComparison, ApiRequestError, Source, GenericLLMResponse } from "@/lib/api";
+import { useSafeTimeout } from "@/hooks/use-safe-state";
 
 interface SearchFormProps {
   onResult: (response: string, sources: Source[]) => void;
   onError: (error: string) => void;
   onLoadingChange?: (loading: boolean) => void;
+  onComparisonResult?: (
+    steelAgent: { response: string; sources: Source[] },
+    genericLLM: GenericLLMResponse
+  ) => void;
+  compareMode?: boolean;
+  onCompareModeChange?: (enabled: boolean) => void;
 }
 
 // Example queries - generic enough to work with any steel spec document
@@ -21,11 +28,21 @@ const EXAMPLE_QUERIES = [
   "What are the corrosion resistance properties?",
 ];
 
-export function SearchForm({ onResult, onError, onLoadingChange }: SearchFormProps) {
+export function SearchForm({
+  onResult,
+  onError,
+  onLoadingChange,
+  onComparisonResult,
+  compareMode = false,
+  onCompareModeChange,
+}: SearchFormProps) {
   const [query, setQuery] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [isAnimating, setIsAnimating] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
+
+  // Use safe timeout to prevent memory leaks on unmount
+  const { setSafeTimeout } = useSafeTimeout();
 
   const handleSubmit = useCallback(
     async (e: React.FormEvent) => {
@@ -36,8 +53,18 @@ export function SearchForm({ onResult, onError, onLoadingChange }: SearchFormPro
       onLoadingChange?.(true);
 
       try {
-        const result = await queryKnowledgeBase(query);
-        onResult(result.response, result.sources || []);
+        if (compareMode && onComparisonResult) {
+          // Run both queries in parallel for comparison
+          const result = await queryWithComparison(query);
+          onComparisonResult(
+            { response: result.steelAgent.response, sources: result.steelAgent.sources || [] },
+            result.genericLLM
+          );
+        } else {
+          // Normal single query
+          const result = await queryKnowledgeBase(query);
+          onResult(result.response, result.sources || []);
+        }
       } catch (error) {
         if (error instanceof ApiRequestError) {
           onError(error.message);
@@ -49,15 +76,18 @@ export function SearchForm({ onResult, onError, onLoadingChange }: SearchFormPro
         onLoadingChange?.(false);
       }
     },
-    [query, isLoading, onResult, onError, onLoadingChange]
+    [query, isLoading, onResult, onError, onLoadingChange, compareMode, onComparisonResult]
   );
 
+  // Handle example query click with animation
+  // Uses safe timeout to prevent memory leaks if component unmounts
   const handleExampleClick = useCallback((exampleQuery: string) => {
     setIsAnimating(true);
     setQuery(exampleQuery);
     inputRef.current?.focus();
-    setTimeout(() => setIsAnimating(false), 600);
-  }, []);
+    // Safe timeout auto-clears on unmount
+    setSafeTimeout(() => setIsAnimating(false), 600);
+  }, [setSafeTimeout]);
 
   return (
     <div className="w-full space-y-6">
@@ -100,8 +130,30 @@ export function SearchForm({ onResult, onError, onLoadingChange }: SearchFormPro
           </AnimatePresence>
         </motion.div>
 
-        {/* Submit Button */}
-        <div className="flex justify-end">
+        {/* Submit Button and Compare Toggle */}
+        <div className="flex items-center justify-between gap-3">
+          {/* Compare Mode Toggle */}
+          {onCompareModeChange && (
+            <motion.button
+              type="button"
+              onClick={() => onCompareModeChange(!compareMode)}
+              className={`flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition-all ${
+                compareMode
+                  ? "bg-gradient-to-r from-green-500/10 to-blue-500/10 border-2 border-green-500 text-green-700"
+                  : "bg-muted/50 border-2 border-transparent text-muted-foreground hover:border-muted-foreground/30"
+              }`}
+              whileTap={{ scale: 0.98 }}
+            >
+              <GitCompare className={`h-4 w-4 ${compareMode ? "text-green-600" : ""}`} />
+              <span className="hidden sm:inline">
+                {compareMode ? "Compare Mode ON" : "Compare with LLM"}
+              </span>
+              <span className="sm:hidden">
+                {compareMode ? "ON" : "Compare"}
+              </span>
+            </motion.button>
+          )}
+
           <Button
             type="submit"
             disabled={isLoading || !query.trim()}
@@ -110,11 +162,11 @@ export function SearchForm({ onResult, onError, onLoadingChange }: SearchFormPro
             {isLoading ? (
               <>
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                Analyzing...
+                {compareMode ? "Comparing..." : "Analyzing..."}
               </>
             ) : (
               <>
-                Run Analysis
+                {compareMode ? "Run Comparison" : "Run Analysis"}
                 <ArrowRight className="ml-2 h-4 w-4" />
               </>
             )}
