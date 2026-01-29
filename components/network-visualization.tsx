@@ -186,12 +186,13 @@ export function NetworkVisualization() {
                 </div>
 
                 {/* Center: The AI Agent with Label */}
-                <div className="relative flex flex-col items-center gap-4 z-20">
+                <div className="relative flex flex-col items-center justify-center z-20">
                     <Circle ref={agentRef} className="h-28 w-28 md:h-32 md:w-32 bg-black border-none shadow-2xl shadow-green-500/30 ring-4 ring-green-500/10 z-20">
                         <div className="absolute inset-0 rounded-full border-2 border-green-500/30 animate-ping opacity-20" />
                         <BrainCircuit className="h-12 w-12 md:h-14 md:w-14 text-green-400" />
                     </Circle>
-                    <div className="text-center">
+                    {/* Absolute positioning to keep text from affecting vertical alignment */}
+                    <div className="absolute top-full mt-4 left-1/2 -translate-x-1/2 whitespace-nowrap">
                         <span className="block text-xl md:text-2xl font-bold text-slate-800 tracking-tight">Spec Agents</span>
                     </div>
                 </div>
