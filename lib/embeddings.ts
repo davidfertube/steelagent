@@ -25,15 +25,20 @@ let voyageClient: VoyageAIClient | null = null;
  */
 function getVoyageClient(): VoyageAIClient {
   if (!voyageClient) {
-    if (!process.env.VOYAGE_API_KEY) {
+    const apiKey = process.env.VOYAGE_API_KEY;
+    console.log(`[Embeddings] Initializing VoyageAI client, key present: ${!!apiKey}, prefix: ${apiKey?.substring(0, 4) || 'none'}`);
+
+    if (!apiKey) {
+      console.error("[Embeddings] VOYAGE_API_KEY is not set in environment");
       throw new Error(
         "VOYAGE_API_KEY environment variable is not set. " +
         "Get a free API key at https://www.voyageai.com (200M tokens FREE/month)"
       );
     }
     voyageClient = new VoyageAIClient({
-      apiKey: process.env.VOYAGE_API_KEY,
+      apiKey: apiKey,
     });
+    console.log("[Embeddings] VoyageAI client initialized successfully");
   }
   return voyageClient;
 }
