@@ -1,4 +1,4 @@
-# Steel Agents - Launch Checklist
+# Spec Agents - Launch Checklist
 
 ## ✅ COMPLETED
 - [x] Frontend UI (Next.js 16)

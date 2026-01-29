@@ -209,7 +209,7 @@ export function RealtimeComparison({
 
       {/* Side-by-side Comparison */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-        {/* Steel Agents Column */}
+        {/* Spec Agents Column */}
         <motion.div
           initial={{ opacity: 0, x: -20 }}
           animate={{ opacity: 1, x: 0 }}
@@ -225,7 +225,7 @@ export function RealtimeComparison({
               >
                 <Sparkles className="h-4 w-4 text-green-600" />
               </motion.div>
-              <span className="text-sm font-semibold text-green-700">Steel Agents</span>
+              <span className="text-sm font-semibold text-green-700">Spec Agents</span>
               <motion.span
                 initial={{ opacity: 0, scale: 0 }}
                 animate={{ opacity: 1, scale: 1 }}
@@ -379,7 +379,7 @@ export function RealtimeComparison({
             </div>
             <div>
               <p className="text-sm font-medium text-foreground">
-                Steel Agents provides traceable, audit-ready answers
+                Spec Agents provides traceable, audit-ready answers
               </p>
               <p className="text-xs text-muted-foreground mt-1">
                 {steelAgentSources.length > 0 ? (

@@ -245,6 +245,11 @@
     @apply py-12 sm:py-16 md:py-20 lg:py-24;
   }
 
+  /* Touch-friendly target size (minimum 44x44px for mobile) */
+  .touch-target {
+    @apply min-h-[44px] min-w-[44px];
+  }
+
   /* Hero section padding */
   .section-hero {
     @apply py-16 sm:py-20 md:py-24 lg:py-32;
@@ -495,4 +500,35 @@
 @keyframes rotateY {
   from { transform: rotateY(0deg) rotateX(15deg); }
   to { transform: rotateY(360deg) rotateX(15deg); }
+}
+
+/* ===== REACT-PDF STYLES ===== */
+@layer utilities {
+  /* PDF viewer container */
+  .react-pdf__Document {
+    @apply flex flex-col items-center;
+  }
+
+  .react-pdf__Page {
+    @apply shadow-lg;
+  }
+
+  /* Text layer for selection */
+  .react-pdf__Page__textContent {
+    @apply select-text;
+  }
+
+  .react-pdf__Page__textContent span {
+    @apply select-text;
+  }
+
+  /* Annotation layer */
+  .react-pdf__Page__annotations {
+    pointer-events: auto;
+  }
+
+  /* Loading state */
+  .react-pdf__message {
+    @apply flex items-center justify-center p-8 text-muted-foreground;
+  }
 }

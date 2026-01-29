@@ -1,6 +1,6 @@
-# Steel Agents - Deployment Guide
+# Spec Agents - Deployment Guide
 
-This guide walks you through deploying Steel Agents to **Vercel** with **Supabase** as the backend.
+This guide walks you through deploying Spec Agents to **Vercel** with **Supabase** as the backend.
 
 ---
 

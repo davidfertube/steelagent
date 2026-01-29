@@ -1,8 +1,8 @@
-# Steel Agents - Next Steps
+# Spec Agents - Next Steps
 
 ## Current State (2026-01-28)
 
-Steel Agents is a working RAG-powered compliance verification tool for O&G materials engineers. The system uses **Voyage AI embeddings** (1024 dims, 200M tokens FREE/month) + **Groq LLM** (Llama 3.3 70B) + **Supabase pgvector** for document search with traceable citations.
+Spec Agents is a working RAG-powered compliance verification tool for O&G materials engineers. The system uses **Voyage AI embeddings** (1024 dims, 200M tokens FREE/month) + **Groq LLM** (Llama 3.3 70B) + **Supabase pgvector** for document search with traceable citations.
 
 **What's Working:**
 - PDF upload and processing (batch embeddings, ~1-2s/page)

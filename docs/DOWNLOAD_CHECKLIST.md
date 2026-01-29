@@ -1,6 +1,6 @@
 # Steel Specification Document Checklist
 
-Complete list of documents to download for training Steel Agents RAG system.
+Complete list of documents to download for training Spec Agents RAG system.
 
 ## Download Sources
 - **ASTM**: astm.org (subscription) or Scribd/archive.org

@@ -161,18 +161,18 @@ export function DocumentUpload({ onUploadComplete }: DocumentUploadProps) {
             onDragLeave={() => setIsDragging(false)}
             onDrop={handleDrop}
             className={`
-              border-2 border-dashed rounded-lg p-8 text-center transition-colors
+              border-2 border-dashed rounded-lg p-6 sm:p-8 text-center transition-colors
               ${isDragging ? "border-black bg-black/5" : "border-black/20 hover:border-black/40"}
             `}
           >
-            <Upload className="w-10 h-10 mx-auto mb-4 text-black/40" />
-            <p className="text-lg font-medium text-black mb-2">
+            <Upload className="w-12 h-12 sm:w-10 sm:h-10 mx-auto mb-4 text-black/40" />
+            <p className="text-base sm:text-lg font-medium text-black mb-2">
               Drop your PDF here
             </p>
-            <p className="text-sm text-black/60 mb-2">
+            <p className="text-sm sm:text-base text-black/60 mb-2">
               or click to browse your files
             </p>
-            <p className="text-xs text-black/40 mb-4">
+            <p className="text-xs sm:text-sm text-black/40 mb-4">
               Up to 50MB • 500+ pages supported
             </p>
             <input
@@ -182,7 +182,7 @@ export function DocumentUpload({ onUploadComplete }: DocumentUploadProps) {
               className="hidden"
               id="file-upload"
             />
-            <Button variant="outline" asChild>
+            <Button variant="outline" size="lg" className="touch-target" asChild>
               <label htmlFor="file-upload" className="cursor-pointer">
                 Select File
               </label>
@@ -194,7 +194,7 @@ export function DocumentUpload({ onUploadComplete }: DocumentUploadProps) {
         {file && (
           <div className={`space-y-3 ${file.status === "error" ? "mt-4" : ""}`}>
             <div
-              className={`flex items-center gap-3 p-4 rounded-lg transition-all ${
+              className={`flex flex-col sm:flex-row items-start sm:items-center gap-3 p-4 rounded-lg transition-all ${
                 file.status === "complete"
                   ? "bg-green-50 border-2 border-green-500"
                   : file.status === "error"
@@ -202,31 +202,40 @@ export function DocumentUpload({ onUploadComplete }: DocumentUploadProps) {
                   : "bg-black/5 border-2 border-black/10"
               }`}
             >
-              <FileText className={`w-6 h-6 flex-shrink-0 ${
-                file.status === "complete" ? "text-green-600" : "text-black/60"
-              }`} />
-              <div className="flex-1 min-w-0">
-                <p className="text-sm font-medium text-black truncate">
-                  {file.name}
-                </p>
-                <p className="text-xs text-black/60">
-                  {formatFileSize(file.size)}
-                </p>
+              <div className="flex items-center gap-3 flex-1 min-w-0 w-full sm:w-auto">
+                <FileText className={`w-6 h-6 flex-shrink-0 ${
+                  file.status === "complete" ? "text-green-600" : "text-black/60"
+                }`} />
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm sm:text-base font-medium text-black truncate">
+                    {file.name}
+                  </p>
+                  <p className="text-xs sm:text-sm text-black/60">
+                    {formatFileSize(file.size)}
+                  </p>
+                </div>
+                <button
+                  onClick={removeFile}
+                  className="p-2 touch-target hover:bg-black/10 rounded-full transition-colors sm:hidden"
+                  title="Remove file"
+                >
+                  <X className="w-5 h-5 text-black/60" />
+                </button>
               </div>
-              <div className="flex items-center gap-2">
+              <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2 w-full sm:w-auto">
                 {file.status === "uploading" && (
                   <div className="flex items-center gap-2">
                     <Loader2 className="w-5 h-5 animate-spin text-black/60" />
-                    <span className="text-sm text-black/60">Uploading...</span>
+                    <span className="text-sm sm:text-base text-black/60">Uploading...</span>
                   </div>
                 )}
                 {file.status === "processing" && (
-                  <div className="flex flex-col items-end gap-0.5">
+                  <div className="flex flex-col items-start sm:items-end gap-0.5">
                     <div className="flex items-center gap-2">
                       <Loader2 className="w-5 h-5 animate-spin text-amber-600" />
-                      <span className="text-sm font-medium text-amber-600">Processing...</span>
+                      <span className="text-sm sm:text-base font-medium text-amber-600">Processing...</span>
                     </div>
-                    <span className="text-xs text-amber-600/70">
+                    <span className="text-xs sm:text-sm text-amber-600/70">
                       ~{estimatePageCount(file.size)} pages • {estimateProcessingTime(file.size)}
                     </span>
                   </div>
@@ -234,15 +243,15 @@ export function DocumentUpload({ onUploadComplete }: DocumentUploadProps) {
                 {file.status === "complete" && (
                   <div className="flex items-center gap-2">
                     <CheckCircle className="w-5 h-5 text-green-600" />
-                    <span className="text-sm font-medium text-green-600">Ready!</span>
+                    <span className="text-sm sm:text-base font-medium text-green-600">Ready!</span>
                   </div>
                 )}
                 {file.status === "error" && (
-                  <span className="text-sm text-red-600">{file.error}</span>
+                  <span className="text-sm sm:text-base text-red-600 break-words">{file.error}</span>
                 )}
                 <button
                   onClick={removeFile}
-                  className="p-1.5 hover:bg-black/10 rounded-full transition-colors"
+                  className="hidden sm:block p-2 touch-target hover:bg-black/10 rounded-full transition-colors"
                   title="Remove file"
                 >
                   <X className="w-4 h-4 text-black/60" />

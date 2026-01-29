@@ -2,10 +2,11 @@
 
 import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { CheckCircle, AlertCircle, Sparkles, Copy, Check, FileText, ChevronDown, ChevronUp } from "lucide-react";
+import { CheckCircle, AlertCircle, Sparkles, Copy, Check, FileText, ChevronDown, ChevronUp, Eye } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Source } from "@/lib/api";
 import { ComparisonCard } from "@/components/comparison-card";
+import { PDFViewerModal } from "@/components/pdf-viewer-modal";
 
 interface ResponseDisplayProps {
   response: string | null;
@@ -77,7 +78,15 @@ function ResponseSkeleton() {
 }
 
 // Source citation component with clickable PDF links
-function SourceCitation({ source, index }: { source: Source; index: number }) {
+function SourceCitation({
+  source,
+  index,
+  onViewInPDF,
+}: {
+  source: Source;
+  index: number;
+  onViewInPDF: (source: Source) => void;
+}) {
   const [expanded, setExpanded] = useState(false);
 
   return (
@@ -94,24 +103,24 @@ function SourceCitation({ source, index }: { source: Source; index: number }) {
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2">
             <FileText className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
-            {source.document_url ? (
-              <a
-                href={source.document_url}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-sm font-medium text-green-600 hover:text-green-700 hover:underline truncate"
-                onClick={(e) => e.stopPropagation()}
-              >
-                {source.document}
-              </a>
-            ) : (
-              <span className="text-sm font-medium truncate">
-                {source.document}
-              </span>
-            )}
+            <button
+              onClick={() => onViewInPDF(source)}
+              className="text-sm font-medium text-green-600 hover:text-green-700 hover:underline truncate text-left"
+            >
+              {source.document}
+            </button>
             <span className="text-xs text-muted-foreground shrink-0">
               p. {source.page}
             </span>
+            {source.document_url && (
+              <button
+                onClick={() => onViewInPDF(source)}
+                className="p-1 -m-1 hover:bg-green-100 dark:hover:bg-green-900/30 rounded transition-colors"
+                title="View in PDF viewer"
+              >
+                <Eye className="h-3.5 w-3.5 text-green-600" />
+              </button>
+            )}
             <button
               onClick={() => setExpanded(!expanded)}
               className="ml-auto p-1 -m-1 hover:bg-muted rounded"
@@ -140,16 +149,28 @@ function SourceCitation({ source, index }: { source: Source; index: number }) {
               <p className="text-xs text-muted-foreground leading-relaxed">
                 {source.content_preview}
               </p>
-              {source.document_url && (
-                <a
-                  href={source.document_url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex items-center gap-1 mt-2 text-xs text-green-600 hover:text-green-700 hover:underline"
-                >
-                  Open PDF at page {source.page} →
-                </a>
-              )}
+              <div className="flex items-center gap-3 mt-2">
+                {source.document_url && (
+                  <button
+                    onClick={() => onViewInPDF(source)}
+                    className="inline-flex items-center gap-1 text-xs text-green-600 hover:text-green-700 hover:underline"
+                  >
+                    <Eye className="h-3 w-3" />
+                    View in PDF viewer
+                  </button>
+                )}
+                {source.document_url && (
+                  <a
+                    href={source.document_url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground hover:underline"
+                    onClick={(e) => e.stopPropagation()}
+                  >
+                    Open in new tab →
+                  </a>
+                )}
+              </div>
             </div>
           </motion.div>
         )}
@@ -165,6 +186,21 @@ export function ResponseDisplay({ response, sources, error, isLoading }: Respons
   // Track the response ID to reset showComparison when response changes
   const [currentResponseId, setCurrentResponseId] = useState(response);
   const [showComparison, setShowComparison] = useState(false);
+
+  // PDF viewer modal state
+  const [selectedSource, setSelectedSource] = useState<Source | null>(null);
+  const [isPDFModalOpen, setIsPDFModalOpen] = useState(false);
+
+  const handleViewInPDF = (source: Source) => {
+    setSelectedSource(source);
+    setIsPDFModalOpen(true);
+  };
+
+  const handleClosePDFModal = () => {
+    setIsPDFModalOpen(false);
+    // Delay clearing the source to allow for close animation
+    setTimeout(() => setSelectedSource(null), 200);
+  };
 
   // Detect when response changes and reset comparison state
   if (currentResponseId !== response) {
@@ -316,7 +352,12 @@ export function ResponseDisplay({ response, sources, error, isLoading }: Respons
               </div>
               <div className="space-y-1">
                 {sources.map((source, index) => (
-                  <SourceCitation key={source.ref} source={source} index={index} />
+                  <SourceCitation
+                    key={source.ref}
+                    source={source}
+                    index={index}
+                    onViewInPDF={handleViewInPDF}
+                  />
                 ))}
               </div>
             </motion.div>
@@ -344,6 +385,14 @@ export function ResponseDisplay({ response, sources, error, isLoading }: Respons
           />
         </motion.div>
       )}
+
+      {/* PDF Viewer Modal - key forces remount when source changes */}
+      <PDFViewerModal
+        key={selectedSource?.ref || "pdf-modal"}
+        source={selectedSource}
+        isOpen={isPDFModalOpen}
+        onClose={handleClosePDFModal}
+      />
     </AnimatePresence>
   );
 }

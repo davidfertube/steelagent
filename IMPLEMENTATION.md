@@ -2,7 +2,7 @@
 
 ## Overview
 
-This document provides technical details for implementing and extending Steel Agents, a Next.js-based RAG application with **no separate backend** - all API logic runs in Next.js API Routes.
+This document provides technical details for implementing and extending Spec Agents, a Next.js-based RAG application with **no separate backend** - all API logic runs in Next.js API Routes.
 
 ---
 

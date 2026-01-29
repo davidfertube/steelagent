@@ -1,8 +1,8 @@
-# Steel Agents - RAG Architecture & Dataflow
+# Spec Agents - RAG Architecture & Dataflow
 
 ## System Overview
 
-Steel Agents is an AI-powered RAG (Retrieval-Augmented Generation) system designed for steel specification compliance verification. It provides traceable, cited answers from uploaded ASTM/NACE/API specification documents.
+Spec Agents is an AI-powered RAG (Retrieval-Augmented Generation) system designed for steel specification compliance verification. It provides traceable, cited answers from uploaded ASTM/NACE/API specification documents.
 
 ---
 

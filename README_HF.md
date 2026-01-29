@@ -1,5 +1,5 @@
 ---
-title: Steel Venture
+title: Spec Agents
 emoji: 🔧
 colorFrom: yellow
 colorTo: gray
@@ -9,7 +9,7 @@ license: mit
 app_port: 3000
 ---
 
-# Steel Venture - AI-Powered Steel Specifications Search
+# Spec Agents - AI-Powered Steel Specifications Search
 
 An AI-powered RAG (Retrieval-Augmented Generation) application for querying steel specifications and O&G compliance documents.
 

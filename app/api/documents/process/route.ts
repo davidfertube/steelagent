@@ -184,17 +184,46 @@ export async function POST(request: NextRequest) {
     }
 
     // ========================================
-    // Step 5: Extract Text from PDF
+    // Step 5: Extract Text from PDF (Page by Page)
     // ========================================
     const arrayBuffer = await fileData.arrayBuffer();
-    let { text } = await extractText(arrayBuffer, { mergePages: true });
+
+    // Extract text per page for accurate page numbers
+    let pageTexts: string[] = [];
+    let usedOCR = false;
+
+    try {
+      // Use mergePages: false to get text per page
+      const result = await extractText(arrayBuffer, { mergePages: false });
+      // unpdf returns { text: string[] } when mergePages is false
+      const extractedPages = (result as unknown as { text: string[] }).text;
+
+      if (Array.isArray(extractedPages)) {
+        pageTexts = extractedPages;
+      } else {
+        // Fallback: if text is a string, treat as single page
+        pageTexts = [String(result.text || "")];
+      }
+    } catch (extractError) {
+      console.error("[Process API] PDF extraction failed:", extractError);
+      pageTexts = [];
+    }
+
+    // Check if we got meaningful text
+    const totalTextLength = pageTexts.reduce((sum, p) => sum + (p?.trim().length || 0), 0);
 
     // If unpdf couldn't extract text, try OCR with Gemini Vision
-    if (shouldAttemptOCR(text || "", fileData.size)) {
-      console.log("[Process API] No text from unpdf, attempting OCR...");
+    if (shouldAttemptOCR(pageTexts.join("") || "", fileData.size) || totalTextLength < 100) {
+      console.log("[Process API] Insufficient text from unpdf, attempting OCR...");
       try {
-        text = await extractTextWithOCR(arrayBuffer);
-        console.log(`[Process API] OCR extracted ${text.length} characters`);
+        const ocrText = await extractTextWithOCR(arrayBuffer);
+        console.log(`[Process API] OCR extracted ${ocrText.length} characters`);
+        // OCR returns text with page breaks marked as "---PAGE BREAK---"
+        pageTexts = ocrText.split(/---PAGE BREAK---/i).filter(p => p.trim().length > 0);
+        if (pageTexts.length === 0) {
+          pageTexts = [ocrText];
+        }
+        usedOCR = true;
       } catch (ocrError) {
         console.error("[Process API] OCR failed:", ocrError);
         await updateDocumentStatus(documentId, "error");
@@ -205,7 +234,7 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    if (!text || text.trim().length === 0) {
+    if (pageTexts.length === 0 || pageTexts.every(p => !p || p.trim().length === 0)) {
       console.error("[Process API] No text extracted from document:", documentId);
       await updateDocumentStatus(documentId, "error");
       const error = createValidationError(
@@ -214,13 +243,42 @@ export async function POST(request: NextRequest) {
       return NextResponse.json(error, { status: getErrorStatusCode("VALIDATION_ERROR") });
     }
 
-    // ========================================
-    // Step 6: Chunk the Text
-    // ========================================
-    // Use larger chunks (2000 chars) to reduce total chunks and speed up processing
-    const textChunks = chunkText(text, 2000, 300);
+    console.log(`[Process API] Extracted ${pageTexts.length} pages from document ${documentId}${usedOCR ? " (via OCR)" : ""}`);
 
-    if (textChunks.length === 0) {
+    // ========================================
+    // Step 6: Chunk the Text (Per Page for Accuracy)
+    // ========================================
+    interface PageChunk {
+      content: string;
+      page_number: number;
+      char_offset_start: number;
+      char_offset_end: number;
+    }
+
+    const allChunks: PageChunk[] = [];
+
+    for (let pageIndex = 0; pageIndex < pageTexts.length; pageIndex++) {
+      const pageText = pageTexts[pageIndex] || "";
+      if (pageText.trim().length < 50) continue; // Skip nearly empty pages
+
+      const pageNumber = pageIndex + 1; // 1-indexed page numbers
+      const pageChunks = chunkText(pageText, 2000, 300);
+
+      for (const chunkContent of pageChunks) {
+        // Find the offset of this chunk within the page
+        const charOffsetStart = pageText.indexOf(chunkContent);
+        const charOffsetEnd = charOffsetStart + chunkContent.length;
+
+        allChunks.push({
+          content: chunkContent,
+          page_number: pageNumber,
+          char_offset_start: charOffsetStart >= 0 ? charOffsetStart : 0,
+          char_offset_end: charOffsetEnd,
+        });
+      }
+    }
+
+    if (allChunks.length === 0) {
       console.error("[Process API] No valid chunks generated from document:", documentId);
       await updateDocumentStatus(documentId, "error");
       const error = createValidationError(
@@ -229,15 +287,16 @@ export async function POST(request: NextRequest) {
       return NextResponse.json(error, { status: getErrorStatusCode("VALIDATION_ERROR") });
     }
 
-    console.log(`[Process API] Generated ${textChunks.length} chunks for document ${documentId}`);
+    console.log(`[Process API] Generated ${allChunks.length} chunks across ${pageTexts.length} pages for document ${documentId}`);
 
     // ========================================
     // Step 7: Generate Embeddings
     // ========================================
+    const chunkContents = allChunks.map(c => c.content);
     let embeddings: number[][];
     try {
       // Use parallel embedding with batch size 10 for faster processing
-      embeddings = await generateEmbeddingsParallel(textChunks, 10);
+      embeddings = await generateEmbeddingsParallel(chunkContents, 10);
     } catch (embeddingError) {
       console.error("[Process API] Embedding generation failed:", embeddingError);
       await updateDocumentStatus(documentId, "error");
@@ -246,9 +305,9 @@ export async function POST(request: NextRequest) {
     }
 
     // Verify embeddings count matches chunks
-    if (embeddings.length !== textChunks.length) {
+    if (embeddings.length !== allChunks.length) {
       console.error(
-        `[Process API] Embedding count mismatch: ${embeddings.length} embeddings for ${textChunks.length} chunks`
+        `[Process API] Embedding count mismatch: ${embeddings.length} embeddings for ${allChunks.length} chunks`
       );
       await updateDocumentStatus(documentId, "error");
       const error = createValidationError("Failed to generate embeddings for all chunks.");
@@ -258,11 +317,12 @@ export async function POST(request: NextRequest) {
     // ========================================
     // Step 8: Store Chunks with Embeddings
     // ========================================
-    const chunks = textChunks.map((content, index) => ({
+    const chunks = allChunks.map((chunk, index) => ({
       document_id: documentId!,
-      content,
-      // Rough page estimate: assume ~3 chunks per page
-      page_number: Math.floor(index / 3) + 1,
+      content: chunk.content,
+      page_number: chunk.page_number, // ACTUAL page number from PDF
+      char_offset_start: chunk.char_offset_start,
+      char_offset_end: chunk.char_offset_end,
       embedding: embeddings[index],
     }));
 
@@ -288,7 +348,8 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({
       success: true,
       chunks: chunks.length,
-      message: `Successfully processed ${chunks.length} chunks from document`,
+      pages: pageTexts.length,
+      message: `Successfully processed ${chunks.length} chunks across ${pageTexts.length} pages`,
     });
 
   } catch (error) {

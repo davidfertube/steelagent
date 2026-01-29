@@ -14,7 +14,7 @@ import { DocumentUpload } from "@/components/document-upload";
 import { Source, GenericLLMResponse } from "@/lib/api";
 
 // Spline 3D Animation Component
-// Shows PDFs flowing into the Steel Agents brain
+// Shows PDFs flowing into the Spec Agents brain
 import Spline from '@splinetool/react-spline';
 
 function Hero3DAnimation() {
@@ -272,7 +272,7 @@ function LeadForm() {
             </svg>
           </div>
           <h3 className="text-xl font-semibold text-black mb-2">You&apos;re on the list!</h3>
-          <p className="text-black/70">We&apos;ll contact you when Steel Agents is ready.</p>
+          <p className="text-black/70">We&apos;ll contact you when Spec Agents is ready.</p>
         </CardContent>
       </Card>
     );
@@ -372,7 +372,7 @@ function LeadForm() {
         </form>
 
         <p className="text-xs text-black/50 text-center mt-4">
-          We&apos;ll contact you when Steel Agents is ready. No spam, ever.
+          We&apos;ll contact you when Spec Agents is ready. No spam, ever.
         </p>
       </CardContent>
     </Card>
@@ -456,7 +456,7 @@ export default function Home() {
           <div className="flex h-16 items-center justify-between">
             {/* Logo */}
             <Link href="/" className="text-lg font-semibold tracking-tight text-black">
-              Steel Agents
+              Spec Agents
             </Link>
 
             {/* Desktop Navigation */}
@@ -547,7 +547,7 @@ export default function Home() {
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.6, delay: 0.1 }}
-                    className="text-5xl sm:text-6xl md:text-7xl font-bold tracking-tight leading-[1.05] text-black"
+                    className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold tracking-tight leading-[1.05] text-black"
                   >
                     <motion.span
                       initial={{ opacity: 0 }}
@@ -561,7 +561,7 @@ export default function Home() {
                     initial={{ opacity: 0, y: 10 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.5, delay: 0.4 }}
-                    className="text-xl text-black/60 max-w-xl mx-auto leading-relaxed"
+                    className="text-lg sm:text-xl text-black/60 max-w-xl mx-auto leading-relaxed px-4"
                   >
                     Upload specs. Ask questions. Get{" "}
                     <span className="relative inline-block text-black font-semibold">
@@ -582,14 +582,14 @@ export default function Home() {
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.5, delay: 0.8 }}
-                  className="flex flex-wrap gap-4 justify-center"
+                  className="flex flex-wrap gap-3 sm:gap-4 justify-center px-4"
                 >
-                  <Button size="lg" className="bg-black text-white hover:bg-black/90 h-12 px-8" asChild>
+                  <Button size="lg" className="bg-black text-white hover:bg-black/90 h-12 sm:h-14 px-6 sm:px-8 text-base sm:text-lg touch-target" asChild>
                     <a href="#demo">
                       Try Demo
                     </a>
                   </Button>
-                  <Button size="lg" variant="outline" className="border-black/20 bg-white text-black hover:bg-black/5 h-12 px-6" asChild>
+                  <Button size="lg" variant="outline" className="border-black/20 bg-white text-black hover:bg-black/5 h-12 sm:h-14 px-5 sm:px-6 text-base sm:text-lg touch-target" asChild>
                     <a href="#contact">
                       Get Access
                     </a>
@@ -601,15 +601,15 @@ export default function Home() {
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.5, delay: 1.0 }}
-                  className="grid grid-cols-2 gap-6 pt-4 max-w-md mx-auto"
+                  className="grid grid-cols-2 gap-4 sm:gap-6 pt-4 max-w-md mx-auto px-4"
                 >
-                  <div>
-                    <p className="text-2xl sm:text-3xl font-semibold text-black">4+ hrs</p>
-                    <p className="text-sm text-black/60">Saved per day</p>
+                  <div className="text-center sm:text-left">
+                    <p className="text-xl sm:text-2xl md:text-3xl font-semibold text-black">4+ hrs</p>
+                    <p className="text-xs sm:text-sm text-black/60">Saved per day</p>
                   </div>
-                  <div>
-                    <p className="text-2xl sm:text-3xl font-semibold text-black">100%</p>
-                    <p className="text-sm text-black/60">Cited sources</p>
+                  <div className="text-center sm:text-left">
+                    <p className="text-xl sm:text-2xl md:text-3xl font-semibold text-black">100%</p>
+                    <p className="text-xs sm:text-sm text-black/60">Cited sources</p>
                   </div>
                 </motion.div>
               </div>
@@ -627,7 +627,7 @@ export default function Home() {
           </div>
         </section>
 
-        {/* Why Steel Agents vs Generic LLMs Section */}
+        {/* Why Spec Agents vs Generic LLMs Section */}
         <section className="relative py-12 sm:py-16 md:py-20 border-t border-black/5 bg-black/[0.02]">
           <div className="container-center">
             <motion.div
@@ -646,7 +646,7 @@ export default function Home() {
                   transition={{ duration: 0.5, delay: 0.1 }}
                   className="text-3xl sm:text-4xl md:text-5xl font-semibold tracking-tight text-black"
                 >
-                  Why Steel Agents?
+                  Why Spec Agents?
                 </motion.h2>
                 <motion.p
                   initial={{ opacity: 0, y: 10 }}
@@ -655,19 +655,19 @@ export default function Home() {
                   transition={{ duration: 0.5, delay: 0.2 }}
                   className="text-lg text-black/70 max-w-2xl mx-auto"
                 >
-                  Generic LLMs (ChatGPT, Claude, Gemini) hallucinate specs. Steel Agents only answers from your documents.
+                  Generic LLMs (ChatGPT, Claude, Gemini) hallucinate specs. Spec Agents only answers from your documents.
                 </motion.p>
               </div>
 
               {/* Comparison Grid */}
-              <div className="grid lg:grid-cols-2 gap-6 max-w-4xl mx-auto">
-                {/* Steel Agents Card */}
+              <div className="grid md:grid-cols-2 gap-4 sm:gap-6 max-w-4xl mx-auto">
+                {/* Spec Agents Card */}
                 <motion.div
                   initial={{ opacity: 0, x: -20 }}
                   whileInView={{ opacity: 1, x: 0 }}
                   viewport={{ once: true }}
                   transition={{ duration: 0.5, delay: 0.3 }}
-                  className="rounded-xl border-2 border-green-500 bg-green-50/50 p-6 space-y-4"
+                  className="rounded-xl border-2 border-green-500 bg-green-50/50 p-4 sm:p-6 space-y-3 sm:space-y-4"
                 >
                   <div className="flex items-center gap-3">
                     <div className="w-10 h-10 rounded-full bg-green-500 flex items-center justify-center">
@@ -675,7 +675,7 @@ export default function Home() {
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                       </svg>
                     </div>
-                    <h3 className="text-xl font-semibold text-green-700">Steel Agents</h3>
+                    <h3 className="text-xl font-semibold text-green-700">Spec Agents</h3>
                   </div>
                   <ul className="space-y-3">
                     {[
@@ -709,7 +709,7 @@ export default function Home() {
                   whileInView={{ opacity: 1, x: 0 }}
                   viewport={{ once: true }}
                   transition={{ duration: 0.5, delay: 0.4 }}
-                  className="rounded-xl border-2 border-red-300 bg-red-50/30 p-6 space-y-4"
+                  className="rounded-xl border-2 border-red-300 bg-red-50/30 p-4 sm:p-6 space-y-3 sm:space-y-4"
                 >
                   <div className="flex items-center gap-3">
                     <div className="w-10 h-10 rounded-full bg-red-400 flex items-center justify-center">
@@ -760,7 +760,7 @@ export default function Home() {
                   &quot;What is the yield strength of 316L stainless steel?&quot;
                 </p>
                 <div className="grid md:grid-cols-2 gap-6">
-                  {/* Steel Agents Response */}
+                  {/* Spec Agents Response */}
                   <div className="space-y-3">
                     <div className="flex items-center gap-2">
                       <div className="w-6 h-6 rounded-full bg-green-500 flex items-center justify-center">
@@ -768,7 +768,7 @@ export default function Home() {
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                         </svg>
                       </div>
-                      <span className="text-sm font-semibold text-green-700">Steel Agents</span>
+                      <span className="text-sm font-semibold text-green-700">Spec Agents</span>
                     </div>
                     <div className="bg-green-50 rounded-lg p-4 text-sm">
                       <p className="text-black/80">&quot;The minimum yield strength of 316L is <strong>170 MPa (25 ksi)</strong> [1]&quot;</p>
@@ -1034,7 +1034,7 @@ export default function Home() {
           <div className="flex flex-col sm:flex-row items-center justify-between gap-6">
             <div className="flex items-center gap-3">
               <div>
-                <span className="font-semibold text-black">Steel Agents</span>
+                <span className="font-semibold text-black">Spec Agents</span>
                 <span className="text-black/60 text-sm ml-2">
                   by{" "}
                   <a
@@ -1061,7 +1061,7 @@ export default function Home() {
           </div>
           <Separator className="my-8 bg-black/5" />
           <p className="text-center text-xs text-black/40 max-w-2xl mx-auto">
-            <strong>Disclaimer:</strong> Steel Agents provides AI-generated responses for reference only.
+            <strong>Disclaimer:</strong> Spec Agents provides AI-generated responses for reference only.
             Always verify specifications against original source documents. Not intended for safety-critical
             decisions without professional engineering review. Users are responsible for their own document licenses.
           </p>

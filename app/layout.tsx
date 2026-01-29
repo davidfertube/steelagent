@@ -7,8 +7,15 @@ import { cn } from "@/lib/utils";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "Steel Agents - Compliance Verification for Material Engineers",
+  title: "Spec Agents - Compliance Verification for Material Engineers",
   description: "AI-powered steel specification search with traceable citations for O&G compliance",
+};
+
+export const viewport = {
+  width: 'device-width',
+  initialScale: 1,
+  maximumScale: 5,
+  userScalable: true,
 };
 
 export default function RootLayout({
