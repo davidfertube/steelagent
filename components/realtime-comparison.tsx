@@ -23,6 +23,7 @@ interface RealtimeComparisonProps {
   genericLLMResponse: string | null;
   isLoading: boolean;
   error: string | null;
+  onOpenPdf?: (source: Source) => void;
 }
 
 // Typewriter effect hook
@@ -58,8 +59,24 @@ function useTypewriter(text: string, speed: number = 15) {
 }
 
 // Source citation component with clickable PDF links
-function SourceCitation({ source, index }: { source: Source; index: number }) {
+function SourceCitation({
+  source,
+  index,
+  onOpenPdf
+}: {
+  source: Source;
+  index: number;
+  onOpenPdf?: (source: Source) => void;
+}) {
   const [expanded, setExpanded] = useState(false);
+
+  const handleOpenPdf = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (onOpenPdf) {
+      onOpenPdf(source);
+    }
+  };
 
   return (
     <motion.div
@@ -76,15 +93,12 @@ function SourceCitation({ source, index }: { source: Source; index: number }) {
           <div className="flex items-center gap-1.5">
             <FileText className="h-3 w-3 text-green-600 shrink-0" />
             {source.document_url ? (
-              <a
-                href={source.document_url}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-xs font-medium truncate text-green-600 hover:text-green-700 hover:underline"
-                onClick={(e) => e.stopPropagation()}
+              <button
+                onClick={handleOpenPdf}
+                className="text-xs font-medium truncate text-green-600 hover:text-green-700 hover:underline text-left"
               >
                 {source.document}
-              </a>
+              </button>
             ) : (
               <span className="text-xs font-medium truncate text-foreground">
                 {source.document}
@@ -118,14 +132,12 @@ function SourceCitation({ source, index }: { source: Source; index: number }) {
             <div className="ml-6 mt-1 p-2 bg-green-50 rounded text-[10px] text-muted-foreground leading-relaxed">
               {source.content_preview}
               {source.document_url && (
-                <a
-                  href={source.document_url}
-                  target="_blank"
-                  rel="noopener noreferrer"
+                <button
+                  onClick={handleOpenPdf}
                   className="block mt-1 text-green-600 hover:text-green-700 hover:underline"
                 >
-                  Open PDF at page {source.page} →
-                </a>
+                  View in PDF viewer (page {source.page}) →
+                </button>
               )}
             </div>
           </motion.div>
@@ -152,6 +164,7 @@ export function RealtimeComparison({
   genericLLMResponse,
   isLoading,
   error,
+  onOpenPdf,
 }: RealtimeComparisonProps) {
   const steelAgent = useTypewriter(steelAgentResponse || "", 12);
   const genericLLM = useTypewriter(genericLLMResponse || "", 12);
@@ -284,7 +297,7 @@ export function RealtimeComparison({
                     </div>
                     <div className="space-y-1">
                       {steelAgentSources.map((source, index) => (
-                        <SourceCitation key={source.ref} source={source} index={index} />
+                        <SourceCitation key={source.ref} source={source} index={index} onOpenPdf={onOpenPdf} />
                       ))}
                     </div>
                   </motion.div>

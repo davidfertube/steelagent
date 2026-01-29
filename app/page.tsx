@@ -8,9 +8,15 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { SearchForm } from "@/components/search-form";
-import { ResponseDisplay } from "@/components/response-display";
 import { RealtimeComparison } from "@/components/realtime-comparison";
 import { DocumentUpload } from "@/components/document-upload";
+import dynamic from "next/dynamic";
+
+// Dynamic import to avoid SSR issues with pdfjs-dist
+const PDFViewerPanel = dynamic(
+  () => import("@/components/pdf-viewer-panel").then((mod) => mod.PDFViewerPanel),
+  { ssr: false }
+);
 import { Source, GenericLLMResponse } from "@/lib/api";
 import { NetworkVisualization } from "@/components/network-visualization";
 
@@ -562,9 +568,30 @@ export default function Home() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [hasDocumentUploaded, setHasDocumentUploaded] = useState(false);
 
-  // Comparison mode state
-  const [compareMode, setCompareMode] = useState(false);
+  // Generic LLM response for comparison display
   const [genericLLMResponse, setGenericLLMResponse] = useState<string | null>(null);
+
+  // PDF Viewer state
+  const [pdfViewerOpen, setPdfViewerOpen] = useState(false);
+  const [pdfViewerData, setPdfViewerData] = useState<{
+    url: string;
+    page: number;
+    highlightText: string;
+    documentName: string;
+  } | null>(null);
+
+  // Handler to open PDF viewer from citations
+  const handleOpenPdf = useCallback((source: Source) => {
+    if (source.document_url) {
+      setPdfViewerData({
+        url: source.document_url,
+        page: parseInt(source.page) || 1,
+        highlightText: source.content_preview || "",
+        documentName: source.document,
+      });
+      setPdfViewerOpen(true);
+    }
+  }, []);
 
   // Refs for auto-scrolling
   const step2Ref = useRef<HTMLDivElement>(null);
@@ -1091,8 +1118,6 @@ export default function Home() {
                       onError={handleError}
                       onLoadingChange={handleLoadingChange}
                       onComparisonResult={handleComparisonResult}
-                      compareMode={compareMode}
-                      onCompareModeChange={setCompareMode}
                     />
                   </motion.div>
 
@@ -1130,22 +1155,14 @@ export default function Home() {
                             </motion.span>
                           )}
                         </div>
-                        {compareMode ? (
-                          <RealtimeComparison
-                            steelAgentResponse={response}
-                            steelAgentSources={sources}
-                            genericLLMResponse={genericLLMResponse}
-                            isLoading={isLoading}
-                            error={error}
-                          />
-                        ) : (
-                          <ResponseDisplay
-                            response={response}
-                            sources={sources}
-                            error={error}
-                            isLoading={isLoading}
-                          />
-                        )}
+                        <RealtimeComparison
+                          steelAgentResponse={response}
+                          steelAgentSources={sources}
+                          genericLLMResponse={genericLLMResponse}
+                          isLoading={isLoading}
+                          error={error}
+                          onOpenPdf={handleOpenPdf}
+                        />
                       </motion.div>
                     </>
                   )}
@@ -1242,6 +1259,16 @@ export default function Home() {
           </div>
         </div>
       </footer>
+
+      {/* PDF Viewer Side Panel */}
+      <PDFViewerPanel
+        isOpen={pdfViewerOpen}
+        onClose={() => setPdfViewerOpen(false)}
+        pdfUrl={pdfViewerData?.url || null}
+        pageNumber={pdfViewerData?.page || 1}
+        highlightText={pdfViewerData?.highlightText}
+        documentName={pdfViewerData?.documentName}
+      />
     </div>
   );
 }
