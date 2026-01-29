@@ -331,7 +331,9 @@ export async function POST(request: NextRequest) {
     } catch (storageError) {
       console.error("[Process API] Chunk storage failed:", storageError);
       await updateDocumentStatus(documentId, "error");
-      const error = createValidationError("Failed to save document data. Please try uploading again.");
+      // Show actual database error for debugging
+      const errorMessage = storageError instanceof Error ? storageError.message : "Unknown database error";
+      const error = createValidationError(`Storage error: ${errorMessage}`);
       return NextResponse.json(error, { status: getErrorStatusCode("INTERNAL_ERROR") });
     }
 

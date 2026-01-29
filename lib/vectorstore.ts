@@ -46,7 +46,7 @@ export async function storeChunks(chunks: Chunk[]): Promise<void> {
 
   if (error) {
     console.error("Error storing chunks:", error);
-    throw new Error("Failed to store chunks");
+    throw new Error(`Database error: ${error.message} (code: ${error.code})`);
   }
 }
 
