@@ -2,7 +2,7 @@
 
 import { useState, useCallback, FormEvent, useRef, useEffect } from "react";
 import { motion } from "framer-motion";
-import { ArrowRight, Github, Menu, X } from "lucide-react";
+import { ArrowRight, Menu, X } from "lucide-react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -473,14 +473,6 @@ export default function Home() {
               >
                 Contact
               </a>
-              <a
-                href="https://github.com/davidfertube/spec-agents"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-sm text-black/60 hover:text-black transition-colors"
-              >
-                GitHub
-              </a>
             </nav>
 
             {/* Mobile menu button */}
@@ -520,15 +512,6 @@ export default function Home() {
                 onClick={() => setMobileMenuOpen(false)}
               >
                 Contact
-              </a>
-              <a
-                href="https://github.com/davidfertube/spec-agents"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="block py-3 px-3 text-sm text-black/60 hover:text-black hover:bg-black/5 rounded transition-colors"
-                onClick={() => setMobileMenuOpen(false)}
-              >
-                GitHub
               </a>
             </nav>
           </motion.div>
@@ -1036,27 +1019,9 @@ export default function Home() {
               <div>
                 <span className="font-semibold text-black">Spec Agents</span>
                 <span className="text-black/60 text-sm ml-2">
-                  by{" "}
-                  <a
-                    href="https://github.com/davidfertube"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="hover:text-black transition-colors"
-                  >
-                    Antigravity
-                  </a>
+                  by Antigravity
                 </span>
               </div>
-            </div>
-            <div className="flex items-center gap-6">
-              <a
-                href="https://github.com/davidfertube/spec-agents"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-black/60 hover:text-black transition-colors"
-              >
-                <Github className="h-5 w-5" />
-              </a>
             </div>
           </div>
           <Separator className="my-8 bg-black/5" />
