@@ -582,6 +582,13 @@ export default function Home() {
 
   // Handler to open PDF viewer from citations
   const handleOpenPdf = useCallback((source: Source) => {
+    console.log("[PDF Viewer] Opening PDF for source:", {
+      document: source.document,
+      page: source.page,
+      document_url: source.document_url,
+      hasUrl: !!source.document_url,
+    });
+
     if (source.document_url) {
       setPdfViewerData({
         url: source.document_url,
@@ -590,6 +597,8 @@ export default function Home() {
         documentName: source.document,
       });
       setPdfViewerOpen(true);
+    } else {
+      console.warn("[PDF Viewer] No document_url available for source:", source.document);
     }
   }, []);
 
@@ -642,6 +651,14 @@ export default function Home() {
 
   const handleComparisonResult = useCallback(
     (steelAgent: { response: string; sources: Source[] }, genericLLM: GenericLLMResponse) => {
+      // Debug: Log sources to see if document_url is present
+      console.log("[Comparison Result] Sources received:", steelAgent.sources.map(s => ({
+        ref: s.ref,
+        document: s.document,
+        hasUrl: !!s.document_url,
+        url: s.document_url?.slice(0, 50) + "...",
+      })));
+
       setError(null);
       setResponse(steelAgent.response);
       setSources(steelAgent.sources);
@@ -746,11 +763,13 @@ export default function Home() {
                     initial={{ opacity: 0, y: 10 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.5, delay: 0.4 }}
-                    className="text-lg sm:text-xl text-black/60 max-w-xl mx-auto leading-relaxed px-4"
+                    className="text-lg sm:text-xl text-black/60 max-w-2xl mx-auto leading-relaxed px-4"
                   >
-                    Upload specs. Ask questions. Get{" "}
+                    ASTM, NACE, and API specs—instantly searchable.
+                    <br />
+                    Built for materials engineers who need{" "}
                     <span className="relative inline-block text-black font-semibold">
-                      cited answers
+                      audit-ready answers
                       <motion.span
                         className="absolute -bottom-1 left-0 right-0 h-[3px] bg-green-500"
                         initial={{ scaleX: 0 }}

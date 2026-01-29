@@ -13,6 +13,8 @@ import {
   Check,
   ChevronDown,
   ChevronUp,
+  ExternalLink,
+  Eye,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Source } from "@/lib/api";
@@ -69,11 +71,12 @@ function SourceCitation({
   onOpenPdf?: (source: Source) => void;
 }) {
   const [expanded, setExpanded] = useState(false);
+  const hasUrl = !!source.document_url;
 
   const handleOpenPdf = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    if (onOpenPdf) {
+    if (onOpenPdf && hasUrl) {
       onOpenPdf(source);
     }
   };
@@ -85,41 +88,70 @@ function SourceCitation({
       transition={{ delay: index * 0.05 }}
       className="group"
     >
-      <div className="flex items-start gap-2 hover:bg-green-50 rounded-md p-1.5 -m-1.5 transition-colors">
-        <span className="font-mono text-xs font-semibold text-green-600 shrink-0">
+      {/* Main citation row - clickable if URL exists */}
+      <motion.div
+        className={`flex items-start gap-2 rounded-lg p-2 -m-1 transition-all duration-200 ${
+          hasUrl
+            ? "cursor-pointer hover:bg-green-100 hover:shadow-sm border border-transparent hover:border-green-200"
+            : "hover:bg-green-50"
+        }`}
+        onClick={hasUrl ? handleOpenPdf : undefined}
+        whileHover={hasUrl ? { scale: 1.01 } : {}}
+        whileTap={hasUrl ? { scale: 0.99 } : {}}
+      >
+        {/* Citation number badge */}
+        <motion.span
+          className={`font-mono text-xs font-bold px-1.5 py-0.5 rounded shrink-0 ${
+            hasUrl
+              ? "bg-green-500 text-white"
+              : "bg-green-100 text-green-700"
+          }`}
+          whileHover={hasUrl ? { scale: 1.1 } : {}}
+        >
           {source.ref}
-        </span>
+        </motion.span>
+
         <div className="flex-1 min-w-0">
-          <div className="flex items-center gap-1.5">
-            <FileText className="h-3 w-3 text-green-600 shrink-0" />
-            {source.document_url ? (
-              <button
-                onClick={handleOpenPdf}
-                className="text-xs font-medium truncate text-green-600 hover:text-green-700 hover:underline text-left"
-              >
-                {source.document}
-              </button>
-            ) : (
-              <span className="text-xs font-medium truncate text-foreground">
-                {source.document}
-              </span>
-            )}
-            <span className="text-[10px] text-muted-foreground shrink-0">
-              p. {source.page}
+          <div className="flex items-center gap-1.5 flex-wrap">
+            <FileText className={`h-3.5 w-3.5 shrink-0 ${hasUrl ? "text-green-600" : "text-muted-foreground"}`} />
+            <span className={`text-xs font-medium truncate ${hasUrl ? "text-green-700" : "text-foreground"}`}>
+              {source.document}
             </span>
+            <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-green-100 text-green-700 shrink-0">
+              Page {source.page}
+            </span>
+
+            {/* View PDF button - only show if URL exists */}
+            {hasUrl && (
+              <motion.span
+                initial={{ opacity: 0, scale: 0.8 }}
+                animate={{ opacity: 1, scale: 1 }}
+                className="ml-auto flex items-center gap-1 text-[10px] font-semibold text-green-600 bg-green-50 px-2 py-1 rounded-full border border-green-200 group-hover:bg-green-500 group-hover:text-white group-hover:border-green-500 transition-all duration-200"
+              >
+                <Eye className="h-3 w-3" />
+                <span className="hidden sm:inline">View PDF</span>
+              </motion.span>
+            )}
+
+            {/* Expand button */}
             <button
-              onClick={() => setExpanded(!expanded)}
-              className="ml-auto p-0.5 -m-0.5 hover:bg-green-100 rounded"
+              onClick={(e) => {
+                e.stopPropagation();
+                setExpanded(!expanded);
+              }}
+              className={`p-1 hover:bg-green-200 rounded transition-colors ${hasUrl ? "" : "ml-auto"}`}
             >
               {expanded ? (
-                <ChevronUp className="h-3 w-3 text-muted-foreground" />
+                <ChevronUp className="h-3 w-3 text-green-600" />
               ) : (
-                <ChevronDown className="h-3 w-3 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" />
+                <ChevronDown className="h-3 w-3 text-muted-foreground group-hover:text-green-600 transition-colors" />
               )}
             </button>
           </div>
         </div>
-      </div>
+      </motion.div>
+
+      {/* Expanded content preview */}
       <AnimatePresence>
         {expanded && (
           <motion.div
@@ -129,15 +161,17 @@ function SourceCitation({
             transition={{ duration: 0.2 }}
             className="overflow-hidden"
           >
-            <div className="ml-6 mt-1 p-2 bg-green-50 rounded text-[10px] text-muted-foreground leading-relaxed">
-              {source.content_preview}
-              {source.document_url && (
-                <button
+            <div className="ml-8 mt-2 p-3 bg-green-50 rounded-lg text-xs text-muted-foreground leading-relaxed border border-green-100">
+              <p className="italic">&quot;{source.content_preview}&quot;</p>
+              {hasUrl && (
+                <motion.button
                   onClick={handleOpenPdf}
-                  className="block mt-1 text-green-600 hover:text-green-700 hover:underline"
+                  className="mt-2 flex items-center gap-1.5 text-green-600 hover:text-green-700 font-medium"
+                  whileHover={{ x: 2 }}
                 >
-                  View in PDF viewer (page {source.page}) →
-                </button>
+                  <ExternalLink className="h-3 w-3" />
+                  Open in PDF viewer (page {source.page})
+                </motion.button>
               )}
             </div>
           </motion.div>
@@ -281,21 +315,51 @@ export function RealtimeComparison({
                   )}
                 </div>
 
-                {/* Sources */}
+                {/* Sources - with attention-grabbing animation */}
                 {steelAgent.isComplete && steelAgentSources.length > 0 && (
                   <motion.div
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 0.3 }}
-                    className="mt-4 pt-3 border-t border-green-200"
+                    initial={{ opacity: 0, y: 10, scale: 0.98 }}
+                    animate={{ opacity: 1, y: 0, scale: 1 }}
+                    transition={{ delay: 0.3, type: "spring", stiffness: 200 }}
+                    className="mt-4 pt-4 border-t-2 border-green-300 bg-gradient-to-b from-green-50/50 to-transparent rounded-lg p-3 -mx-1"
                   >
-                    <div className="flex items-center gap-1.5 mb-2">
-                      <CheckCircle className="h-3.5 w-3.5 text-green-600" />
-                      <span className="text-xs font-medium text-green-700">
-                        {steelAgentSources.length} Verified Source{steelAgentSources.length !== 1 ? "s" : ""}
-                      </span>
-                    </div>
-                    <div className="space-y-1">
+                    {/* Header with pulse animation */}
+                    <motion.div
+                      className="flex items-center justify-between mb-3"
+                      initial={{ x: -10 }}
+                      animate={{ x: 0 }}
+                      transition={{ delay: 0.4 }}
+                    >
+                      <div className="flex items-center gap-2">
+                        <motion.div
+                          animate={{ scale: [1, 1.2, 1] }}
+                          transition={{ duration: 0.5, delay: 0.5 }}
+                        >
+                          <CheckCircle className="h-4 w-4 text-green-600" />
+                        </motion.div>
+                        <span className="text-sm font-semibold text-green-700">
+                          {steelAgentSources.length} Verified Source{steelAgentSources.length !== 1 ? "s" : ""}
+                        </span>
+                      </div>
+                      {/* Show clickable hint if any source has a URL */}
+                      {steelAgentSources.some(s => s.document_url) && (
+                        <motion.div
+                          initial={{ opacity: 0, x: 10 }}
+                          animate={{ opacity: 1, x: 0 }}
+                          transition={{ delay: 0.6 }}
+                          className="flex items-center gap-1.5 text-xs text-green-600 bg-green-100 px-2 py-1 rounded-full"
+                        >
+                          <motion.div
+                            animate={{ scale: [1, 1.2, 1] }}
+                            transition={{ duration: 1.5, repeat: 3 }}
+                          >
+                            <Eye className="h-3.5 w-3.5" />
+                          </motion.div>
+                          <span className="font-medium">Click to view PDF</span>
+                        </motion.div>
+                      )}
+                    </motion.div>
+                    <div className="space-y-2">
                       {steelAgentSources.map((source, index) => (
                         <SourceCitation key={source.ref} source={source} index={index} onOpenPdf={onOpenPdf} />
                       ))}
