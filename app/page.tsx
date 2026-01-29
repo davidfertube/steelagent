@@ -981,53 +981,61 @@ export default function Home() {
         </section>
 
         {/* Lead Collection Section */}
-        <section id="contact" className="relative py-12 sm:py-16 md:py-20 border-t border-black/5">
-          <div className="container-center">
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.6 }}
-              className="max-w-2xl mx-auto"
-            >
-              <div className="text-center space-y-4 mb-8">
-                <motion.div
-                  initial={{ opacity: 0, scale: 0.9 }}
-                  whileInView={{ opacity: 1, scale: 1 }}
-                  viewport={{ once: true }}
-                  transition={{ duration: 0.4 }}
-                  className="inline-flex items-center gap-2 px-3 py-1 border border-black/10 rounded-full text-xs font-medium text-black/70"
-                >
-                  <motion.span
-                    className="w-2 h-2 bg-amber-500 rounded-full"
-                    animate={{ scale: [1, 1.2, 1], opacity: [1, 0.7, 1] }}
-                    transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
-                  />
-                  EARLY ACCESS
-                </motion.div>
-                <motion.h2
-                  initial={{ opacity: 0, y: 10 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ duration: 0.5, delay: 0.1 }}
-                  className="text-3xl sm:text-4xl md:text-5xl font-semibold tracking-tight text-black"
-                >
-                  Get Priority Access
-                </motion.h2>
-                <motion.p
-                  initial={{ opacity: 0, y: 10 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ duration: 0.5, delay: 0.2 }}
-                  className="text-lg text-black/70"
-                >
-                  Join 500+ material engineers already on the waitlist. Be first to access premium features.
-                </motion.p>
-              </div>
+        <section id="contact" className="relative py-12 sm:py-16 md:py-20 border-t border-black/5 overflow-hidden">
+          <div className="container-wide">
+            <div className="flex flex-col lg:flex-row gap-12 lg:gap-16 items-center">
+              {/* Left Column: Form & Content */}
+              <motion.div
+                initial={{ opacity: 0, x: -20 }}
+                whileInView={{ opacity: 1, x: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.6 }}
+                className="flex-1 w-full max-w-2xl mx-auto lg:mx-0"
+              >
+                <div className="text-left space-y-6 mb-8">
+                  <motion.div
+                    initial={{ opacity: 0, scale: 0.9 }}
+                    whileInView={{ opacity: 1, scale: 1 }}
+                    viewport={{ once: true }}
+                    transition={{ duration: 0.4 }}
+                    className="inline-flex items-center gap-2 px-3 py-1 border border-black/10 rounded-full text-xs font-medium text-black/70"
+                  >
+                    <motion.span
+                      className="w-2 h-2 bg-amber-500 rounded-full"
+                      animate={{ scale: [1, 1.2, 1], opacity: [1, 0.7, 1] }}
+                      transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+                    />
+                    EARLY ACCESS
+                  </motion.div>
+                  <h2 className="text-4xl sm:text-5xl font-bold tracking-tight text-black">
+                    Get Priority Access
+                  </h2>
+                  <p className="text-lg text-black/70 leading-relaxed">
+                    Join 500+ material engineers already on the waitlist. Be the first to automate your compliance reviews with AI that cites its sources.
+                  </p>
+                </div>
 
-              {/* Lead Form */}
-              <LeadForm />
-            </motion.div>
+                {/* Lead Form */}
+                <div className="bg-white rounded-2xl border border-black/5 shadow-xl shadow-black/5 p-6 sm:p-8">
+                  <LeadForm />
+                </div>
+              </motion.div>
+
+              {/* Right Column: 3D Animation */}
+              <motion.div
+                initial={{ opacity: 0, x: 20 }}
+                whileInView={{ opacity: 1, x: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.8, delay: 0.2 }}
+                className="flex-1 w-full hidden lg:block"
+              >
+                <div className="relative">
+                  {/* Decorative background element */}
+                  <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[120%] h-[120%] bg-blue-50/50 rounded-full blur-3xl -z-10" />
+                  <Result3DAnimation />
+                </div>
+              </motion.div>
+            </div>
           </div>
         </section>
       </main>

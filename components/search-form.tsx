@@ -23,9 +23,6 @@ interface SearchFormProps {
 const EXAMPLE_QUERIES = [
   "What is the minimum tensile strength?",
   "List the chemical composition requirements",
-  "What are the hardness limits?",
-  "Summarize the mechanical properties",
-  "What are the corrosion resistance properties?",
 ];
 
 export function SearchForm({
@@ -137,11 +134,10 @@ export function SearchForm({
             <motion.button
               type="button"
               onClick={() => onCompareModeChange(!compareMode)}
-              className={`flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition-all ${
-                compareMode
+              className={`flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition-all ${compareMode
                   ? "bg-gradient-to-r from-green-500/10 to-blue-500/10 border-2 border-green-500 text-green-700"
                   : "bg-muted/50 border-2 border-transparent text-muted-foreground hover:border-muted-foreground/30"
-              }`}
+                }`}
               whileTap={{ scale: 0.98 }}
             >
               <GitCompare className={`h-4 w-4 ${compareMode ? "text-green-600" : ""}`} />
