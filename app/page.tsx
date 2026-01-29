@@ -12,7 +12,6 @@ import { ResponseDisplay } from "@/components/response-display";
 import { RealtimeComparison } from "@/components/realtime-comparison";
 import { DocumentUpload } from "@/components/document-upload";
 import { Source, GenericLLMResponse } from "@/lib/api";
-import { Result3DAnimation } from "@/components/result-3d-animation";
 
 // Spline 3D Animation Component
 // Shows PDFs flowing into the Spec Agents brain
@@ -1033,7 +1032,13 @@ export default function Home() {
                 <div className="relative">
                   {/* Decorative background element */}
                   <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[120%] h-[120%] bg-blue-50/50 rounded-full blur-3xl -z-10" />
-                  <Result3DAnimation />
+                  {/* 3D Animation placeholder - requires @react-three packages */}
+                  <div className="w-full h-[400px] flex items-center justify-center text-gray-400">
+                    <div className="text-center">
+                      <div className="text-6xl mb-4">📊</div>
+                      <p className="text-sm">AI-Powered Analysis</p>
+                    </div>
+                  </div>
                 </div>
               </motion.div>
             </div>
