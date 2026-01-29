@@ -274,16 +274,25 @@ export function createEmbeddingError(error: unknown): SafeErrorResponse {
   if (error instanceof Error) {
     const msg = error.message.toLowerCase();
 
-    // API key configuration issues
-    if (msg.includes('voyage_api_key') || msg.includes('voyageai.com')) {
+    // Only show "not configured" if key is ACTUALLY missing (from our own check)
+    if (msg.includes('voyage_api_key') && msg.includes('not set')) {
       return {
         error: 'Embedding service not configured. Please add VOYAGE_API_KEY to environment variables.',
         code: 'SERVICE_UNAVAILABLE',
       };
     }
+
+    // Show actual Voyage API errors (auth failures, etc.) for debugging
+    if (msg.includes('voyageai') || msg.includes('voyage')) {
+      return {
+        error: `Voyage AI error: ${error.message}`,
+        code: 'SERVICE_UNAVAILABLE',
+      };
+    }
+
     if (msg.includes('api key') || msg.includes('api_key') || msg.includes('invalid key')) {
       return {
-        error: 'Document processing is temporarily unavailable. Please check API key configuration.',
+        error: `API key error: ${error.message}`,
         code: 'SERVICE_UNAVAILABLE',
       };
     }
