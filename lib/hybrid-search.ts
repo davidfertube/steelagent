@@ -58,6 +58,78 @@ export interface SearchMetadata {
 }
 
 // ============================================================================
+// Table Content Boost
+// ============================================================================
+
+/**
+ * Table boost constant - adds 0.15 to combined score for table content
+ * This improves retrieval of specification tables which contain key data
+ */
+const TABLE_BOOST = 0.15;
+
+/**
+ * Patterns that indicate table content in technical specifications
+ */
+const TABLE_PATTERNS = [
+  /TABLE\s+\d+/i,                           // "TABLE 1", "Table 2"
+  /\bTABLE\s+[A-Z]\d*/i,                    // "TABLE A1", "TABLE X2"
+  /(?:Mechanical|Chemical|Physical)\s+(?:Requirements|Properties)/i,
+  /(?:Grade|Type|Class)\s+(?:Designation|UNS)/i,
+  /\b(?:min|max|Min|Max|MIN|MAX)\b.*\b(?:ksi|MPa|%|psi)\b/,  // "min 65 ksi"
+  /\b\d+(?:\.\d+)?\s*(?:ksi|MPa)\b.*\b\d+(?:\.\d+)?\s*(?:ksi|MPa)\b/,  // Multiple values
+  /\|\s*\w+\s*\|/,                          // Pipe-delimited table cells
+  /\t\s*\d+(?:\.\d+)?\s*\t/,               // Tab-separated numeric data
+];
+
+/**
+ * Detect if chunk content is likely a table
+ */
+function isTableContent(content: string): boolean {
+  // Check for table patterns
+  const hasTablePattern = TABLE_PATTERNS.some(pattern => pattern.test(content));
+
+  // Check for high density of numeric values (tables have many numbers)
+  const numbers = content.match(/\d+(?:\.\d+)?/g) || [];
+  const words = content.split(/\s+/).length;
+  const numericDensity = numbers.length / words;
+
+  // Tables typically have >20% numeric content
+  const hasHighNumericDensity = numericDensity > 0.2;
+
+  return hasTablePattern || hasHighNumericDensity;
+}
+
+/**
+ * Apply boost to table content chunks
+ *
+ * Tables in ASTM/API specs contain critical data (mechanical properties,
+ * chemical composition, dimensions) that should rank higher in results.
+ */
+function applyTableBoost(results: HybridSearchResult[]): HybridSearchResult[] {
+  let boostCount = 0;
+
+  const boosted = results.map(result => {
+    if (isTableContent(result.content)) {
+      boostCount++;
+      return {
+        ...result,
+        combined_score: Math.min(1.0, result.combined_score + TABLE_BOOST),
+      };
+    }
+    return result;
+  });
+
+  // Re-sort by combined score after boosting
+  boosted.sort((a, b) => b.combined_score - a.combined_score);
+
+  if (boostCount > 0) {
+    console.log(`[Hybrid Search] Applied +${TABLE_BOOST} table boost to ${boostCount}/${results.length} chunks`);
+  }
+
+  return boosted;
+}
+
+// ============================================================================
 // Main Functions
 // ============================================================================
 
@@ -135,21 +207,24 @@ export async function hybridSearchChunks(
 
   const results = (data || []) as HybridSearchResult[];
 
+  // Apply table content boost (+0.15) to improve table retrieval accuracy
+  const boostedResults = applyTableBoost(results);
+
   // Log results summary
   const searchTimeMs = Date.now() - startTime;
   console.log(
-    `[Hybrid Search] Found ${results.length} results in ${searchTimeMs}ms`
+    `[Hybrid Search] Found ${boostedResults.length} results in ${searchTimeMs}ms`
   );
 
-  if (results.length > 0 && processed.boostExactMatch) {
+  if (boostedResults.length > 0 && processed.boostExactMatch) {
     // Log BM25 vs vector score breakdown for debugging
-    const topResult = results[0];
+    const topResult = boostedResults[0];
     console.log(
       `[Hybrid Search] Top result scores: BM25=${topResult.bm25_score.toFixed(3)}, Vector=${topResult.vector_score.toFixed(3)}, Combined=${topResult.combined_score.toFixed(3)}`
     );
   }
 
-  return results;
+  return boostedResults;
 }
 
 /**

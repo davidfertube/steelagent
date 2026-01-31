@@ -29,7 +29,7 @@ const CSRF_PROTECTED_ROUTES = [
   '/api/leads',
 ];
 
-export function middleware(request: NextRequest) {
+export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
   const method = request.method;
 
@@ -100,7 +100,7 @@ export function middleware(request: NextRequest) {
   const shouldRateLimit = RATE_LIMITED_ROUTES.some(route => pathname.startsWith(route));
 
   if (shouldRateLimit) {
-    const rateLimitResult = checkRateLimit(clientIp, pathname);
+    const rateLimitResult = await checkRateLimit(clientIp, pathname);
 
     if (!rateLimitResult.success) {
       console.warn(`[Middleware] Rate limited - IP: ${clientIp}, Path: ${pathname}`);

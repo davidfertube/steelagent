@@ -1,27 +1,66 @@
 /**
  * Rate Limiting Module
  *
- * IP-based rate limiting with in-memory storage.
- * For production scale, upgrade to Upstash Redis.
+ * Distributed rate limiting using Upstash Redis.
+ * Falls back to in-memory if Upstash is not configured.
  */
 
+import { Redis } from '@upstash/redis';
+import { Ratelimit } from '@upstash/ratelimit';
+
+// Check if Upstash is configured
+const UPSTASH_CONFIGURED = !!(
+  process.env.UPSTASH_REDIS_REST_URL &&
+  process.env.UPSTASH_REDIS_REST_TOKEN
+);
+
+// Initialize Upstash Redis if configured
+let redis: Redis | null = null;
+if (UPSTASH_CONFIGURED) {
+  redis = new Redis({
+    url: process.env.UPSTASH_REDIS_REST_URL!,
+    token: process.env.UPSTASH_REDIS_REST_TOKEN!,
+  });
+}
+
+// Create rate limiters for different endpoints
+const rateLimiters: Record<string, Ratelimit> = {};
+
+function getRateLimiter(endpoint: string): Ratelimit | null {
+  if (!redis) return null;
+
+  if (!rateLimiters[endpoint]) {
+    const config = RATE_LIMITS[endpoint] || RATE_LIMITS['default'];
+    rateLimiters[endpoint] = new Ratelimit({
+      redis,
+      limiter: Ratelimit.slidingWindow(config.maxRequests, `${config.windowMs}ms`),
+      analytics: true,
+      prefix: `ratelimit:${endpoint}`,
+    });
+  }
+
+  return rateLimiters[endpoint];
+}
+
+// Fallback in-memory store (for local dev without Upstash)
 interface RateLimitEntry {
   count: number;
   resetTime: number;
 }
 
-// In-memory store for rate limiting (per-instance, not distributed)
 const rateLimitStore = new Map<string, RateLimitEntry>();
 
-// Clean up expired entries every 5 minutes
-setInterval(() => {
-  const now = Date.now();
-  for (const [key, entry] of rateLimitStore.entries()) {
-    if (entry.resetTime < now) {
-      rateLimitStore.delete(key);
+// Clean up expired entries every 5 minutes (only used if Upstash not configured)
+if (!UPSTASH_CONFIGURED) {
+  setInterval(() => {
+    const now = Date.now();
+    for (const [key, entry] of rateLimitStore.entries()) {
+      if (entry.resetTime < now) {
+        rateLimitStore.delete(key);
+      }
     }
-  }
-}, 5 * 60 * 1000);
+  }, 5 * 60 * 1000);
+}
 
 export interface RateLimitConfig {
   windowMs: number;      // Time window in milliseconds
@@ -48,13 +87,46 @@ export interface RateLimitResult {
 
 /**
  * Check if a request should be rate limited
+ * Uses Upstash Redis if configured, falls back to in-memory
  *
  * @param ip - Client IP address
  * @param endpoint - API endpoint path
  * @returns RateLimitResult with success status and headers
  */
-export function checkRateLimit(ip: string, endpoint: string): RateLimitResult {
+export async function checkRateLimit(ip: string, endpoint: string): Promise<RateLimitResult> {
   const config = RATE_LIMITS[endpoint] || RATE_LIMITS['default'];
+
+  // Try Upstash first
+  const limiter = getRateLimiter(endpoint);
+  if (limiter) {
+    try {
+      const { success, limit, remaining, reset } = await limiter.limit(ip);
+      const now = Date.now();
+      const resetTime = reset;
+
+      if (!success) {
+        return {
+          success: false,
+          limit,
+          remaining: 0,
+          resetTime,
+          retryAfter: Math.ceil((resetTime - now) / 1000),
+        };
+      }
+
+      return {
+        success: true,
+        limit,
+        remaining,
+        resetTime,
+      };
+    } catch (error) {
+      console.warn('[Rate Limit] Upstash error, falling back to in-memory:', error);
+      // Fall through to in-memory
+    }
+  }
+
+  // In-memory fallback
   const key = `${ip}:${endpoint}`;
   const now = Date.now();
 
@@ -133,4 +205,11 @@ export function getClientIp(request: Request): string {
 
   // Fallback - shouldn't happen in production
   return '127.0.0.1';
+}
+
+/**
+ * Check if Upstash is configured and working
+ */
+export function isUpstashConfigured(): boolean {
+  return UPSTASH_CONFIGURED;
 }
