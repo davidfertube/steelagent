@@ -25,11 +25,10 @@
 
 ## What's Missing for MVP Launch
 
-### Required (2 items)
+### Required (1 items)
 
 | Item | Status | How to Fix |
 |------|--------|------------|
-| **Steel PDFs** | Missing | Upload ASTM/NACE/API specification PDFs via the UI |
 | **Custom Domain** | Optional | Configure in Vercel Dashboard → Domains |
 
 ### Post-MVP (Add Later)
