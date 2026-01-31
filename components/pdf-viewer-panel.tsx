@@ -15,7 +15,6 @@ interface PDFViewerPanelProps {
   onClose: () => void;
   pdfUrl: string | null;
   pageNumber: number;
-  highlightText?: string;
   documentName?: string;
 }
 
@@ -24,11 +23,9 @@ export function PDFViewerPanel({
   onClose,
   pdfUrl,
   pageNumber,
-  highlightText,
   documentName,
 }: PDFViewerPanelProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const textLayerRef = useRef<HTMLDivElement>(null);
   const [pdfDoc, setPdfDoc] = useState<pdfjsLib.PDFDocumentProxy | null>(null);
   const [currentPage, setCurrentPage] = useState(pageNumber);
   const [totalPages, setTotalPages] = useState(0);
@@ -65,7 +62,7 @@ export function PDFViewerPanel({
     };
   }, [pdfUrl, isOpen, pageNumber]);
 
-  // Render current page
+  // Render current page (no highlighting - just clean PDF view)
   const renderPage = useCallback(async () => {
     if (!pdfDoc || !canvasRef.current) return;
 
@@ -85,54 +82,10 @@ export function PDFViewerPanel({
         canvasContext: context,
         viewport: viewport,
       }).promise;
-
-      // Render text layer for highlighting
-      if (textLayerRef.current) {
-        textLayerRef.current.innerHTML = "";
-        textLayerRef.current.style.width = `${viewport.width}px`;
-        textLayerRef.current.style.height = `${viewport.height}px`;
-
-        const textContent = await page.getTextContent();
-
-        textContent.items.forEach((item) => {
-          if ("str" in item && item.str) {
-            const div = document.createElement("div");
-            div.textContent = item.str;
-
-            // Position the text
-            const tx = pdfjsLib.Util.transform(viewport.transform, item.transform);
-            div.style.position = "absolute";
-            div.style.left = `${tx[4]}px`;
-            div.style.top = `${viewport.height - tx[5] - item.height * scale}px`;
-            div.style.fontSize = `${item.height * scale}px`;
-            div.style.fontFamily = "sans-serif";
-            div.style.color = "transparent";
-            div.style.whiteSpace = "nowrap";
-
-            // Content-based highlighting: match if PDF text appears in highlight text
-            // Use >= 4 to avoid matching short numbers like "75", "30" that appear everywhere
-            // This still catches steel grades (S31266, TP304), table headers, etc.
-            const itemText = item.str.toLowerCase().trim();
-            const normalizedHighlight = highlightText?.toLowerCase() || "";
-            const shouldHighlight = normalizedHighlight.length > 0 &&
-              itemText.length >= 4 &&
-              normalizedHighlight.includes(itemText);
-
-            if (shouldHighlight) {
-              div.style.backgroundColor = "rgba(255, 255, 0, 0.5)";
-              div.style.color = "transparent";
-              div.style.borderRadius = "2px";
-              div.style.padding = "0 2px";
-            }
-
-            textLayerRef.current?.appendChild(div);
-          }
-        });
-      }
     } catch (err) {
       console.error("Error rendering page:", err);
     }
-  }, [pdfDoc, currentPage, scale, highlightText]);
+  }, [pdfDoc, currentPage, scale]);
 
   useEffect(() => {
     renderPage();
@@ -243,22 +196,9 @@ export function PDFViewerPanel({
               ) : (
                 <div className="relative inline-block mx-auto shadow-lg">
                   <canvas ref={canvasRef} className="block" />
-                  <div
-                    ref={textLayerRef}
-                    className="absolute top-0 left-0 overflow-hidden pointer-events-none"
-                    style={{ mixBlendMode: "multiply" }}
-                  />
                 </div>
               )}
             </div>
-
-            {/* Highlight indicator */}
-            {highlightText && (
-              <div className="p-3 border-t bg-yellow-50 text-sm text-yellow-800">
-                <span className="font-medium">Highlighting:</span> &quot;{highlightText.slice(0, 50)}
-                {highlightText.length > 50 ? "..." : ""}&quot;
-              </div>
-            )}
           </motion.div>
         </>
       )}

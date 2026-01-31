@@ -21,7 +21,6 @@ interface PDFViewerModalProps {
 
 export function PDFViewerModal({ source, isOpen, onClose }: PDFViewerModalProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const textLayerRef = useRef<HTMLDivElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
 
   const [currentPage, setCurrentPage] = useState<number>(1);
@@ -87,9 +86,9 @@ export function PDFViewerModal({ source, isOpen, onClose }: PDFViewerModalProps)
     };
   }, [isOpen, pdfUrl, sourcePage]);
 
-  // Render page with text layer and yellow highlighting
+  // Render page (no highlighting - just clean PDF view)
   useEffect(() => {
-    if (!pdfDoc || !canvasRef.current || !textLayerRef.current || loading) return;
+    if (!pdfDoc || !canvasRef.current || loading) return;
 
     let cancelled = false;
 
@@ -111,81 +110,6 @@ export function PDFViewerModal({ source, isOpen, onClose }: PDFViewerModalProps)
           canvasContext: context,
           viewport,
         }).promise;
-
-        if (cancelled) return;
-
-        // Render text layer with yellow highlighting
-        const textContent = await page.getTextContent();
-        if (cancelled) return;
-
-        const textLayer = textLayerRef.current!;
-        textLayer.innerHTML = "";
-        textLayer.style.width = `${viewport.width}px`;
-        textLayer.style.height = `${viewport.height}px`;
-
-        // Content-based highlighting: use content_preview for more reliable matching
-        // char_offset approach fails because PDF.js text extraction order doesn't match document char order
-        const highlightText = source?.content_preview?.slice(0, 150).replace(/\.{3}$/, "").trim().toLowerCase() || "";
-        const targetPage = parseInt(source?.page || "0");
-        const isTargetPage = currentPage === targetPage;
-
-        let firstHighlightElement: HTMLDivElement | null = null;
-
-        textContent.items.forEach((item) => {
-          if (!("str" in item) || !item.str) return;
-
-          const div = document.createElement("div");
-          div.textContent = item.str;
-
-          // Position text using PDF.js transform
-          const tx = pdfjsLib.Util.transform(
-            viewport.transform,
-            item.transform
-          );
-
-          div.style.position = "absolute";
-          div.style.left = `${tx[4]}px`;
-          div.style.top = `${viewport.height - tx[5]}px`;
-          div.style.fontSize = `${Math.abs(tx[0])}px`;
-          div.style.fontFamily = "sans-serif";
-          div.style.color = "transparent";
-          div.style.whiteSpace = "pre";
-          div.style.transformOrigin = "0% 0%";
-
-          // Content-based highlighting: match if item.str appears in content_preview
-          // Use >= 4 to avoid matching short numbers like "75", "30" that appear everywhere in tables
-          // This still catches steel grades (S31266, TP304), table headers, etc.
-          const itemText = item.str.toLowerCase().trim();
-          const shouldHighlight = isTargetPage &&
-            highlightText.length > 0 &&
-            itemText.length >= 4 &&
-            highlightText.includes(itemText);
-
-          if (shouldHighlight) {
-            div.style.backgroundColor = "rgba(255, 255, 0, 0.5)";
-            div.style.borderRadius = "2px";
-            div.style.padding = "0 1px";
-            div.dataset.highlighted = "true";
-
-            if (!firstHighlightElement) {
-              firstHighlightElement = div;
-            }
-          }
-
-          textLayer.appendChild(div);
-        });
-
-        // Scroll to first highlighted element after a brief delay
-        if (firstHighlightElement && containerRef.current) {
-          setTimeout(() => {
-            if (firstHighlightElement && !cancelled) {
-              firstHighlightElement.scrollIntoView({
-                behavior: "smooth",
-                block: "center",
-              });
-            }
-          }, 100);
-        }
       } catch (err) {
         if (!cancelled) {
           console.error("Failed to render page:", err);
@@ -198,7 +122,7 @@ export function PDFViewerModal({ source, isOpen, onClose }: PDFViewerModalProps)
     return () => {
       cancelled = true;
     };
-  }, [pdfDoc, currentPage, scale, source, loading]);
+  }, [pdfDoc, currentPage, scale, loading]);
 
   // Handle keyboard navigation
   useEffect(() => {
@@ -378,11 +302,6 @@ export function PDFViewerModal({ source, isOpen, onClose }: PDFViewerModalProps)
               <div className="flex justify-center p-4">
                 <div className="relative shadow-lg bg-white">
                   <canvas ref={canvasRef} />
-                  <div
-                    ref={textLayerRef}
-                    className="absolute top-0 left-0 overflow-hidden"
-                    style={{ pointerEvents: "none" }}
-                  />
                 </div>
               </div>
             )}
@@ -396,21 +315,6 @@ export function PDFViewerModal({ source, isOpen, onClose }: PDFViewerModalProps)
                 </Button>
               </div>
             )}
-          </div>
-
-          {/* Footer with content preview */}
-          <div className="px-4 py-3 border-t border-border bg-muted/50">
-            <div className="flex items-start gap-3">
-              <div className="w-1 h-full min-h-[40px] bg-yellow-500 rounded-full shrink-0" />
-              <div className="flex-1 min-w-0">
-                <p className="text-xs font-medium text-muted-foreground mb-1">
-                  Highlighted text on page {parseInt(source.page) || 1}:
-                </p>
-                <p className="text-sm text-foreground leading-relaxed line-clamp-3 font-medium">
-                  &quot;{source.content_preview}&quot;
-                </p>
-              </div>
-            </div>
           </div>
         </Dialog.Content>
       </Dialog.Portal>

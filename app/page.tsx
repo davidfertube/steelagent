@@ -576,7 +576,6 @@ export default function Home() {
   const [pdfViewerData, setPdfViewerData] = useState<{
     url: string;
     page: number;
-    highlightText: string;
     documentName: string;
   } | null>(null);
 
@@ -593,7 +592,6 @@ export default function Home() {
       setPdfViewerData({
         url: source.document_url,
         page: parseInt(source.page) || 1,
-        highlightText: source.content_preview || "",
         documentName: source.document,
       });
       setPdfViewerOpen(true);
@@ -1298,7 +1296,6 @@ export default function Home() {
         onClose={() => setPdfViewerOpen(false)}
         pdfUrl={pdfViewerData?.url || null}
         pageNumber={pdfViewerData?.page || 1}
-        highlightText={pdfViewerData?.highlightText}
         documentName={pdfViewerData?.documentName}
       />
     </div>
