@@ -109,8 +109,15 @@ export function PDFViewerPanel({
             div.style.color = "transparent";
             div.style.whiteSpace = "nowrap";
 
-            // Highlight matching text
-            if (highlightText && item.str.toLowerCase().includes(highlightText.toLowerCase())) {
+            // Content-based highlighting: match if PDF text appears in highlight text
+            // (Fixed: was reversed - checking if short PDF item contains long highlight text)
+            const itemText = item.str.toLowerCase().trim();
+            const normalizedHighlight = highlightText?.toLowerCase() || "";
+            const shouldHighlight = normalizedHighlight.length > 0 &&
+              itemText.length >= 2 &&  // Catch table values like "4.3"
+              normalizedHighlight.includes(itemText);
+
+            if (shouldHighlight) {
               div.style.backgroundColor = "rgba(255, 255, 0, 0.5)";
               div.style.color = "transparent";
               div.style.borderRadius = "2px";

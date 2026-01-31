@@ -156,7 +156,7 @@ export function PDFViewerModal({ source, isOpen, onClose }: PDFViewerModalProps)
           const itemText = item.str.toLowerCase().trim();
           const shouldHighlight = isTargetPage &&
             highlightText.length > 0 &&
-            itemText.length > 3 &&  // Skip short items like single chars or spaces
+            itemText.length >= 2 &&  // Lowered from > 3 to catch table values like "4.3"
             highlightText.includes(itemText);
 
           if (shouldHighlight) {
