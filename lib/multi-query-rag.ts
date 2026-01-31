@@ -21,7 +21,6 @@ import { decomposeQuerySmart, type DecomposedQuery } from "./query-decomposition
 import { preprocessQuery } from "./query-preprocessing";
 import { resolveSpecsToDocuments } from "./document-mapper";
 import {
-  cacheRAGResponse,
   analyzeQueryComplexity,
   timedOperation,
 } from "./latency-optimizer";
@@ -195,8 +194,9 @@ export async function multiQueryRAG(
     console.log(`[Multi-Query RAG] Returning all ${finalChunks.length} candidates`);
   }
 
-  // OPTIMIZATION: Cache the response for repeat queries
-  cacheRAGResponse(query, finalChunks);
+  // CACHE FULLY DISABLED: Previously cached responses here, but cache was causing
+  // identical results for different queries. Removed both cache read and write.
+  // Embedding cache (for Voyage AI) still provides optimization.
 
   const totalTime = Date.now() - startTime;
   console.log(`[Multi-Query RAG] Total pipeline time: ${totalTime}ms`);

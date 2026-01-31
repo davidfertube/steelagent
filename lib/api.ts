@@ -220,13 +220,16 @@ export async function queryKnowledgeBase(query: string): Promise<ChatResponse> {
 
     return response.json();
   } catch (error) {
-    // If backend is unavailable, use demo mode
-    console.log('Backend unavailable, using demo mode');
+    // DEMO MODE DISABLED: Previously fell back to hardcoded responses, causing
+    // different queries to return identical results. Now we surface real errors.
+    console.error('[API] Query failed:', error);
 
-    // Simulate network delay for realistic feel
-    await new Promise(resolve => setTimeout(resolve, 800 + Math.random() * 400));
-
-    return getDemoResponse(query);
+    // Re-throw the error so the UI can show a proper error message
+    throw new ApiRequestError(
+      'Failed to query knowledge base. Please try again.',
+      error instanceof ApiRequestError ? error.statusCode : 500,
+      error instanceof Error ? error.message : 'Unknown error'
+    );
   }
 }
 
@@ -256,21 +259,10 @@ export async function queryGenericLLM(query: string): Promise<GenericLLMResponse
     }
 
     return response.json();
-  } catch {
-    // Return a simulated generic response for demo mode
-    await new Promise(resolve => setTimeout(resolve, 600 + Math.random() * 400));
-
-    return {
-      response: `Based on my general knowledge about steel materials:
-
-The specifications you're asking about typically involve various ASTM and industry standards. Common values and requirements include tensile strength, yield strength, and hardness limits that vary by grade and application.
-
-For specific values, I recommend consulting the relevant specification documents directly, as exact requirements can vary significantly between standards and grades.
-
-*Note: This response is based on general knowledge and may not reflect your specific documentation.*`,
-      sources: [],
-      isGenericLLM: true,
-    };
+  } catch (error) {
+    // DEMO MODE DISABLED: Throw real errors instead of fake responses
+    console.error('[API] Generic LLM query failed:', error);
+    throw new Error('Failed to query generic LLM');
   }
 }
 

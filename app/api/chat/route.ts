@@ -50,6 +50,9 @@ export async function POST(request: NextRequest) {
     // Use the cleaned, sanitized query
     const cleanedQuery = validation.cleanedQuery!;
 
+    // DEBUG: Log incoming query to trace request flow
+    console.log(`[Chat API] Incoming query: "${cleanedQuery}"`);
+
     // ========================================
     // Optional: Use Verified Generation Pipeline
     // ========================================
@@ -407,6 +410,9 @@ RESPONSE GUIDELINES:
     // ========================================
     // Step 6: Return Response
     // ========================================
+    // DEBUG: Log response summary for tracing
+    console.log(`[Chat API] Returning response with ${sources.length} sources (${responseText.length} chars)`);
+
     return NextResponse.json({
       response: responseText,
       sources,
