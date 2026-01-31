@@ -11,6 +11,7 @@
 
 import dotenv from "dotenv";
 import { createClient } from "@supabase/supabase-js";
+import type { Source } from "../lib/api";
 
 dotenv.config({ path: ".env.local" });
 
@@ -36,7 +37,7 @@ interface TestCase {
 interface TestResult {
   testCase: TestCase;
   response: string;
-  sources: any[];
+  sources: Source[];
   passed: boolean;
   matchedPatterns: string[];
   missedPatterns: string[];
@@ -180,7 +181,7 @@ async function getChunkStats(): Promise<{ totalChunks: number; byDocument: Recor
 
   const byDocument: Record<string, number> = {};
   for (const chunk of data || []) {
-    const filename = (chunk.documents as any)?.filename || "unknown";
+    const filename = (chunk.documents as { filename?: string })?.filename || "unknown";
     byDocument[filename] = (byDocument[filename] || 0) + 1;
   }
 
@@ -190,7 +191,7 @@ async function getChunkStats(): Promise<{ totalChunks: number; byDocument: Recor
   };
 }
 
-async function runQuery(query: string): Promise<{ response: string; sources: any[]; latencyMs: number }> {
+async function runQuery(query: string): Promise<{ response: string; sources: Source[]; latencyMs: number }> {
   const startTime = Date.now();
 
   try {

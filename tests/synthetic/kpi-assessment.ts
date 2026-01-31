@@ -8,6 +8,7 @@
 import { describe, it, expect, beforeAll } from 'vitest';
 import fs from 'fs';
 import path from 'path';
+import type { Source } from '../../lib/api';
 
 // Load synthetic prompts
 const promptsPath = path.join(__dirname, 'material-engineer-prompts.json');
@@ -28,7 +29,7 @@ interface TestResult {
   category: string;
   difficulty: string;
   response: string;
-  sources: any[];
+  sources: Source[];
   metrics: {
     hasAnswer: boolean;
     hasCitation: boolean;
@@ -168,7 +169,7 @@ export const CATEGORY_TARGETS = {
  */
 async function executeQuery(query: string): Promise<{
   response: string;
-  sources: any[];
+  sources: Source[];
   responseTime: number;
 }> {
   const start = Date.now();

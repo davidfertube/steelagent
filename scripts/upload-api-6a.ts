@@ -96,8 +96,8 @@ async function main() {
     console.log(`\n✅ COMPLETE!`);
     console.log(`   Chunks created: ${result.chunks || 0}`);
     console.log(`   Document is now ready for queries`);
-  } catch (error: any) {
-    console.log(`❌ Processing error:`, error.message);
+  } catch (error: unknown) {
+    console.log(`❌ Processing error:`, error instanceof Error ? error.message : String(error));
   }
 }
 

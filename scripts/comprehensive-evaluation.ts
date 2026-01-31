@@ -17,6 +17,7 @@ import dotenv from "dotenv";
 import Anthropic from "@anthropic-ai/sdk";
 import { createClient } from "@supabase/supabase-js";
 import { validateCitations, getCitationStats, type CitationCheck } from "../lib/citation-validator";
+import type { Source } from "../lib/api";
 
 dotenv.config({ path: ".env.local" });
 
@@ -46,7 +47,7 @@ interface TestResult {
   testCase: TestCase;
   ragResponse: string;
   baselineResponse: string;
-  ragSources: any[];
+  ragSources: Source[];
   ragPassed: boolean;
   baselinePassed: boolean;
   ragHallucinated: boolean;
@@ -200,7 +201,7 @@ const TEST_CASES: TestCase[] = [
 // API Functions
 // ============================================
 
-async function querySpecAgents(query: string): Promise<{ response: string; sources: any[]; latencyMs: number }> {
+async function querySpecAgents(query: string): Promise<{ response: string; sources: Source[]; latencyMs: number }> {
   const startTime = Date.now();
 
   try {

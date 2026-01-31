@@ -101,8 +101,8 @@ async function processDocument(documentId: number): Promise<boolean> {
     const result = await response.json();
     console.log(`✅ Processed: ${result.chunks || 0} chunks created`);
     return true;
-  } catch (error: any) {
-    console.log(`❌ Processing error:`, error.message);
+  } catch (error: unknown) {
+    console.log(`❌ Processing error:`, error instanceof Error ? error.message : String(error));
     return false;
   }
 }
