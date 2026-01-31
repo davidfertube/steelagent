@@ -399,13 +399,32 @@ RESPONSE GUIDELINES:
           page: String(chunk.page_number),
           content_preview: chunk.content.slice(0, 150) + "...",
           document_url: documentUrl,
+          // Include storage_path for PDF proxy fallback (avoids CORS/expiry issues)
+          storage_path: doc?.storage_path,
           // Include char offsets for precise citation highlighting in PDF viewer
           char_offset_start: chunk.char_offset_start,
           char_offset_end: chunk.char_offset_end,
         };
       })
     );
-    const sources = sourcesWithUrls;
+
+    // Deduplicate sources by (document, page) - keep first occurrence
+    // This fixes the issue of same page appearing as [1], [2], [3], [4], [5]
+    const sourceMap = new Map<string, typeof sourcesWithUrls[0]>();
+    sourcesWithUrls.forEach((source) => {
+      const key = `${source.document}:${source.page}`;
+      if (!sourceMap.has(key)) {
+        sourceMap.set(key, source);
+      }
+    });
+
+    // Re-number refs sequentially after deduplication
+    const sources = Array.from(sourceMap.values()).map((source, index) => ({
+      ...source,
+      ref: `[${index + 1}]`,
+    }));
+
+    console.log(`[Chat API] Deduplicated sources: ${sourcesWithUrls.length} → ${sources.length} unique (document, page) pairs`);
 
     // ========================================
     // Step 6: Return Response

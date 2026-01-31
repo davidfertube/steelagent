@@ -1,10 +1,16 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import * as Dialog from "@radix-ui/react-dialog";
-import { X, ChevronLeft, ChevronRight, Download, Loader2, ExternalLink } from "lucide-react";
+import { X, ChevronLeft, ChevronRight, Download, Loader2, ExternalLink, ZoomIn, ZoomOut } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Source } from "@/lib/api";
+import * as pdfjsLib from "pdfjs-dist";
+
+// Configure pdf.js worker
+if (typeof window !== "undefined") {
+  pdfjsLib.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjsLib.version}/pdf.worker.min.js`;
+}
 
 interface PDFViewerModalProps {
   source: Source | null;
@@ -13,40 +19,183 @@ interface PDFViewerModalProps {
 }
 
 export function PDFViewerModal({ source, isOpen, onClose }: PDFViewerModalProps) {
-  const [currentPage, setCurrentPage] = useState<number>(1);
-  const [loading, setLoading] = useState<boolean>(true);
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const textLayerRef = useRef<HTMLDivElement>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
 
-  // Build the PDF URL - prioritize signed URL for better browser compatibility
-  // Using useMemo instead of useCallback since we're computing a value
+  const [currentPage, setCurrentPage] = useState<number>(1);
+  const [totalPages, setTotalPages] = useState<number>(0);
+  const [scale, setScale] = useState<number>(1.2);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [error, setError] = useState<string | null>(null);
+  const [pdfDoc, setPdfDoc] = useState<pdfjsLib.PDFDocumentProxy | null>(null);
+
+  // Build the PDF URL - prefer proxy endpoint for better reliability (avoids CORS/expiry)
   const pdfUrl = (() => {
-    // Prefer the direct signed URL from Supabase (better browser PDF rendering)
-    if (source?.document_url) {
-      // Remove any existing page anchor
-      return source.document_url.split("#")[0];
-    }
-    // Fallback to proxy endpoint if no direct URL
+    // Prefer proxy endpoint (avoids CORS, has caching, no URL expiry)
     if (source?.storage_path) {
       return `/api/documents/pdf?path=${encodeURIComponent(source.storage_path)}`;
+    }
+    // Fallback to signed URL
+    if (source?.document_url) {
+      return source.document_url.split("#")[0];
     }
     return null;
   })();
 
-  // Track source ref to detect changes
-  const sourceRef = source?.ref;
+  // Track source page to detect changes
   const sourcePage = source?.page;
 
-  // Reset state when source changes - use separate state tracking
+  // Load PDF document when source changes
   useEffect(() => {
-    if (sourceRef && sourcePage) {
-      const pageNum = parseInt(sourcePage) || 1;
-      // Use timeout to avoid synchronous setState in effect
-      const timer = setTimeout(() => {
-        setCurrentPage(pageNum);
+    if (!isOpen || !pdfUrl) return;
+
+    let cancelled = false;
+
+    const loadPdf = async () => {
+      try {
         setLoading(true);
-      }, 0);
-      return () => clearTimeout(timer);
-    }
-  }, [sourceRef, sourcePage]);
+        setError(null);
+
+        const loadingTask = pdfjsLib.getDocument(pdfUrl);
+        const doc = await loadingTask.promise;
+
+        if (cancelled) return;
+
+        setPdfDoc(doc);
+        setTotalPages(doc.numPages);
+
+        // Navigate to cited page
+        const targetPage = parseInt(sourcePage || "1") || 1;
+        setCurrentPage(Math.min(Math.max(1, targetPage), doc.numPages));
+      } catch (err) {
+        if (cancelled) return;
+        console.error("Failed to load PDF:", err);
+        setError("Failed to load PDF document. Please try again.");
+      } finally {
+        if (!cancelled) {
+          setLoading(false);
+        }
+      }
+    };
+
+    loadPdf();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [isOpen, pdfUrl, sourcePage]);
+
+  // Render page with text layer and yellow highlighting
+  useEffect(() => {
+    if (!pdfDoc || !canvasRef.current || !textLayerRef.current || loading) return;
+
+    let cancelled = false;
+
+    const renderPage = async () => {
+      try {
+        const page = await pdfDoc.getPage(currentPage);
+        if (cancelled) return;
+
+        const viewport = page.getViewport({ scale });
+
+        // Render to canvas
+        const canvas = canvasRef.current!;
+        const context = canvas.getContext("2d")!;
+        canvas.height = viewport.height;
+        canvas.width = viewport.width;
+
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        await (page.render as any)({
+          canvasContext: context,
+          viewport,
+        }).promise;
+
+        if (cancelled) return;
+
+        // Render text layer with yellow highlighting
+        const textContent = await page.getTextContent();
+        if (cancelled) return;
+
+        const textLayer = textLayerRef.current!;
+        textLayer.innerHTML = "";
+        textLayer.style.width = `${viewport.width}px`;
+        textLayer.style.height = `${viewport.height}px`;
+
+        // Get char offset range for highlighting
+        const charStart = source?.char_offset_start ?? -1;
+        const charEnd = source?.char_offset_end ?? (charStart >= 0 ? charStart + 200 : -1);
+        const targetPage = parseInt(source?.page || "0");
+        const isTargetPage = currentPage === targetPage;
+
+        let charPosition = 0;
+        let firstHighlightElement: HTMLDivElement | null = null;
+
+        textContent.items.forEach((item) => {
+          if (!("str" in item) || !item.str) return;
+
+          const div = document.createElement("div");
+          div.textContent = item.str;
+
+          // Position text using PDF.js transform
+          const tx = pdfjsLib.Util.transform(
+            viewport.transform,
+            item.transform
+          );
+
+          div.style.position = "absolute";
+          div.style.left = `${tx[4]}px`;
+          div.style.top = `${viewport.height - tx[5]}px`;
+          div.style.fontSize = `${Math.abs(tx[0])}px`;
+          div.style.fontFamily = "sans-serif";
+          div.style.color = "transparent";
+          div.style.whiteSpace = "pre";
+          div.style.transformOrigin = "0% 0%";
+
+          // Track character position for highlighting
+          const itemStart = charPosition;
+          const itemEnd = charPosition + item.str.length;
+          charPosition = itemEnd;
+
+          // Apply yellow highlight if within char offset range on target page
+          if (isTargetPage && charStart >= 0 && itemEnd > charStart && itemStart < charEnd) {
+            div.style.backgroundColor = "rgba(255, 255, 0, 0.5)";
+            div.style.borderRadius = "2px";
+            div.style.padding = "0 1px";
+            div.dataset.highlighted = "true";
+
+            if (!firstHighlightElement) {
+              firstHighlightElement = div;
+            }
+          }
+
+          textLayer.appendChild(div);
+        });
+
+        // Scroll to first highlighted element after a brief delay
+        if (firstHighlightElement && containerRef.current) {
+          setTimeout(() => {
+            if (firstHighlightElement && !cancelled) {
+              firstHighlightElement.scrollIntoView({
+                behavior: "smooth",
+                block: "center",
+              });
+            }
+          }, 100);
+        }
+      } catch (err) {
+        if (!cancelled) {
+          console.error("Failed to render page:", err);
+        }
+      }
+    };
+
+    renderPage();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [pdfDoc, currentPage, scale, source, loading]);
 
   // Handle keyboard navigation
   useEffect(() => {
@@ -58,38 +207,38 @@ export function PDFViewerModal({ source, isOpen, onClose }: PDFViewerModalProps)
           setCurrentPage((prev) => Math.max(1, prev - 1));
           break;
         case "ArrowRight":
-          setCurrentPage((prev) => prev + 1);
+          setCurrentPage((prev) => Math.min(totalPages, prev + 1));
           break;
         case "Escape":
           onClose();
+          break;
+        case "+":
+        case "=":
+          setScale((s) => Math.min(3, s + 0.2));
+          break;
+        case "-":
+          setScale((s) => Math.max(0.5, s - 0.2));
           break;
       }
     };
 
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [isOpen, onClose]);
+  }, [isOpen, onClose, totalPages]);
 
-  const handleIframeLoad = useCallback(() => {
-    setLoading(false);
-  }, []);
-
-  const handleDownload = () => {
+  const handleDownload = useCallback(() => {
     if (pdfUrl) {
       window.open(pdfUrl, "_blank");
     }
-  };
+  }, [pdfUrl]);
 
-  const handleOpenExternal = () => {
+  const handleOpenExternal = useCallback(() => {
     if (pdfUrl) {
       window.open(pdfUrl, "_blank");
     }
-  };
+  }, [pdfUrl]);
 
   if (!source) return null;
-
-  // Build URL with page anchor
-  const pdfUrlWithPage = pdfUrl ? `${pdfUrl}#page=${currentPage}` : "";
 
   return (
     <Dialog.Root open={isOpen} onOpenChange={(open) => !open && onClose()}>
@@ -104,13 +253,38 @@ export function PDFViewerModal({ source, isOpen, onClose }: PDFViewerModalProps)
                   {source.document}
                 </Dialog.Title>
                 <Dialog.Description className="text-xs text-muted-foreground">
-                  Citation {source.ref} - Page {currentPage}
+                  Citation {source.ref} - Page {currentPage} of {totalPages || "?"}
                 </Dialog.Description>
               </div>
             </div>
 
             {/* Controls */}
             <div className="flex items-center gap-2">
+              {/* Zoom Controls */}
+              <div className="flex items-center gap-1 px-2 border-r border-border">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setScale((s) => Math.max(0.5, s - 0.2))}
+                  className="h-8 w-8 p-0"
+                  title="Zoom out (-)"
+                >
+                  <ZoomOut className="h-4 w-4" />
+                </Button>
+                <span className="text-xs text-muted-foreground w-12 text-center">
+                  {Math.round(scale * 100)}%
+                </span>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setScale((s) => Math.min(3, s + 0.2))}
+                  className="h-8 w-8 p-0"
+                  title="Zoom in (+)"
+                >
+                  <ZoomIn className="h-4 w-4" />
+                </Button>
+              </div>
+
               {/* Page Navigation */}
               <div className="flex items-center gap-1 px-2 border-r border-border">
                 <Button
@@ -124,12 +298,13 @@ export function PDFViewerModal({ source, isOpen, onClose }: PDFViewerModalProps)
                   <ChevronLeft className="h-4 w-4" />
                 </Button>
                 <span className="text-xs text-muted-foreground w-16 text-center">
-                  Page {currentPage}
+                  {currentPage} / {totalPages || "?"}
                 </span>
                 <Button
                   variant="ghost"
                   size="sm"
-                  onClick={() => setCurrentPage((prev) => prev + 1)}
+                  onClick={() => setCurrentPage((prev) => Math.min(totalPages, prev + 1))}
+                  disabled={currentPage >= totalPages}
                   className="h-8 w-8 p-0"
                   title="Next page (→)"
                 >
@@ -174,7 +349,7 @@ export function PDFViewerModal({ source, isOpen, onClose }: PDFViewerModalProps)
           </div>
 
           {/* PDF Viewer */}
-          <div className="flex-1 relative bg-muted/30">
+          <div ref={containerRef} className="flex-1 relative bg-muted/30 overflow-auto">
             {loading && (
               <div className="absolute inset-0 flex items-center justify-center bg-background/80 z-10">
                 <div className="flex flex-col items-center gap-3 text-muted-foreground">
@@ -184,15 +359,32 @@ export function PDFViewerModal({ source, isOpen, onClose }: PDFViewerModalProps)
               </div>
             )}
 
-            {pdfUrl ? (
-              <iframe
-                key={pdfUrlWithPage}
-                src={pdfUrlWithPage}
-                className="w-full h-full border-0"
-                onLoad={handleIframeLoad}
-                title={`PDF Viewer - ${source.document}`}
-              />
-            ) : (
+            {error && (
+              <div className="absolute inset-0 flex items-center justify-center bg-background/80 z-10">
+                <div className="flex flex-col items-center gap-3 text-center p-8">
+                  <p className="text-red-500">{error}</p>
+                  <Button onClick={handleOpenExternal} variant="outline">
+                    <ExternalLink className="h-4 w-4 mr-2" />
+                    Open in Browser
+                  </Button>
+                </div>
+              </div>
+            )}
+
+            {!loading && !error && pdfDoc && (
+              <div className="flex justify-center p-4">
+                <div className="relative shadow-lg bg-white">
+                  <canvas ref={canvasRef} />
+                  <div
+                    ref={textLayerRef}
+                    className="absolute top-0 left-0 overflow-hidden"
+                    style={{ pointerEvents: "none" }}
+                  />
+                </div>
+              </div>
+            )}
+
+            {!loading && !error && !pdfDoc && (
               <div className="flex flex-col items-center justify-center h-full gap-4 text-center p-8">
                 <p className="text-muted-foreground">PDF URL not available</p>
                 <Button onClick={handleOpenExternal} disabled={!source.document_url}>
@@ -201,23 +393,15 @@ export function PDFViewerModal({ source, isOpen, onClose }: PDFViewerModalProps)
                 </Button>
               </div>
             )}
-
-            {/* Citation Location Indicator */}
-            {currentPage === (parseInt(source.page) || 1) && source.char_offset_start !== undefined && !loading && (
-              <CitationIndicator
-                charOffsetStart={source.char_offset_start}
-                charOffsetEnd={source.char_offset_end}
-              />
-            )}
           </div>
 
           {/* Footer with content preview */}
           <div className="px-4 py-3 border-t border-border bg-muted/50">
             <div className="flex items-start gap-3">
-              <div className="w-1 h-full min-h-[40px] bg-red-500 rounded-full shrink-0" />
+              <div className="w-1 h-full min-h-[40px] bg-yellow-500 rounded-full shrink-0" />
               <div className="flex-1 min-w-0">
                 <p className="text-xs font-medium text-muted-foreground mb-1">
-                  Look for this text on page {(parseInt(source.page) || 1)}:
+                  Highlighted text on page {parseInt(source.page) || 1}:
                 </p>
                 <p className="text-sm text-foreground leading-relaxed line-clamp-3 font-medium">
                   &quot;{source.content_preview}&quot;
@@ -228,56 +412,5 @@ export function PDFViewerModal({ source, isOpen, onClose }: PDFViewerModalProps)
         </Dialog.Content>
       </Dialog.Portal>
     </Dialog.Root>
-  );
-}
-
-/**
- * Citation indicator - shows a pulsing red arrow on the left side
- */
-function CitationIndicator({
-  charOffsetStart,
-  charOffsetEnd,
-}: {
-  charOffsetStart: number;
-  charOffsetEnd?: number;
-}) {
-  // Estimate vertical position based on character offset
-  const avgCharsPerLine = 80;
-  const estimatedLine = Math.floor(charOffsetStart / avgCharsPerLine);
-
-  // Convert to percentage (assuming ~50 lines per page)
-  const topPercent = Math.min(85, Math.max(10, (estimatedLine / 50) * 100 + 15));
-
-  // Calculate height based on content length
-  const contentLength = (charOffsetEnd || charOffsetStart + 200) - charOffsetStart;
-  const estimatedLines = Math.ceil(contentLength / avgCharsPerLine);
-  const heightPercent = Math.min(25, Math.max(8, estimatedLines * 2));
-
-  return (
-    <div
-      className="absolute left-0 z-20 pointer-events-none"
-      style={{
-        top: `${topPercent}%`,
-        height: `${heightPercent}%`,
-      }}
-    >
-      {/* Pulsing red bar */}
-      <div
-        className="absolute left-0 w-2 h-full bg-red-500 rounded-r-sm animate-pulse"
-        style={{
-          boxShadow: "0 0 12px rgba(239, 68, 68, 0.8), 0 0 24px rgba(239, 68, 68, 0.4)",
-        }}
-      />
-      {/* Arrow pointing right */}
-      <div
-        className="absolute left-2 top-1/2 -translate-y-1/2 w-0 h-0 animate-pulse"
-        style={{
-          borderTop: "10px solid transparent",
-          borderBottom: "10px solid transparent",
-          borderLeft: "14px solid rgb(239, 68, 68)",
-          filter: "drop-shadow(0 0 6px rgba(239, 68, 68, 0.8))",
-        }}
-      />
-    </div>
   );
 }
