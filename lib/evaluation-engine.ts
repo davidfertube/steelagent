@@ -98,6 +98,9 @@ export interface EvaluationResult {
     bothCorrect: boolean;
     bothWrong: boolean;
   };
+
+  /** Optional RAGAS-style metrics (when includeRagMetrics is enabled) */
+  ragMetrics?: import("./rag-metrics").RAGMetrics;
 }
 
 export interface ComparisonMetrics {

@@ -59,6 +59,43 @@
       }
     },
     {
+      "id": "A872-006",
+      "question": "What is the chromium content range for UNS J93183 per A872?",
+      "expected_values": ["21.0-23.5%", "21.0-23.5", "21.0 to 23.5"],
+      "source_table": "Table 1",
+      "difficulty": "medium",
+      "tags": ["chemistry", "chromium", "J93183"]
+    },
+    {
+      "id": "A872-007",
+      "question": "What UNS grades are covered by ASTM A872?",
+      "expected_values": ["J93183", "J94300", "CD4MCuMN", "CD3MN"],
+      "source_table": "Table 1",
+      "difficulty": "medium",
+      "tags": ["grades", "UNS", "list"]
+    },
+    {
+      "id": "A872-008",
+      "question": "What marking or identification is required for A872 cast pipe?",
+      "expected_values": ["marking", "heat number", "grade", "size", "identification"],
+      "source_section": "Section 14 or 15",
+      "difficulty": "medium",
+      "tags": ["marking", "identification"]
+    },
+    {
+      "id": "A872-009",
+      "question": "What is the maximum carbon content for UNS J93183 per A872?",
+      "expected_values": ["0.03%", "0.03", "0.030"],
+      "source_table": "Table 1",
+      "difficulty": "easy",
+      "tags": ["chemistry", "carbon", "J93183"],
+      "verification": {
+        "numerical_value": 0.03,
+        "unit": "%",
+        "property": "carbon_max"
+      }
+    },
+    {
       "id": "A872-NEG-001",
       "question": "What is the weld procedure qualification for A872 pipe?",
       "expected_answer": "REFUSE - A872 is for centrifugally cast pipe, not welded pipe (weld repair is permitted but welded seam pipe is covered by A790)",
@@ -68,9 +105,9 @@
     }
   ],
   "metadata": {
-    "total_questions": 6,
-    "easy": 2,
-    "medium": 3,
+    "total_questions": 10,
+    "easy": 3,
+    "medium": 6,
     "hard": 0,
     "trap": 1,
     "requires_document": true

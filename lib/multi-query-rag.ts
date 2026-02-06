@@ -141,7 +141,7 @@ export async function multiQueryRAG(
   // Step 2: Execute sub-queries in parallel
   // Get more candidates per sub-query for better coverage
   // Increased from 20 to 30 for better recall on technical queries
-  const candidatesPerSubquery = Math.ceil(30 / decomposition.subqueries.length);
+  const candidatesPerSubquery = Math.ceil(40 / decomposition.subqueries.length);
 
   const allResults = await Promise.all(
     decomposition.subqueries.map(async (subquery) => {
@@ -170,7 +170,7 @@ export async function multiQueryRAG(
   if (shouldRerank && merged.length > topK) {
     try {
       console.log(`[Multi-Query RAG] Re-ranking ${merged.length} candidates for ${decomposition.intent} query`);
-      const rankedResults = await rerankChunks(query, merged, topK);
+      const rankedResults = await rerankChunks(query, merged, topK, decomposition.subqueries);
       finalChunks = rankedResults.map(r => r.chunk);
       reranked = true;
       console.log(`[Multi-Query RAG] Re-ranking complete, selected top ${topK}`);

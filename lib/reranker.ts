@@ -28,7 +28,8 @@ export interface RankedChunk {
 export async function rerankChunks(
   query: string,
   chunks: HybridSearchResult[],
-  topK: number = 5
+  topK: number = 5,
+  subQueries?: string[]
 ): Promise<RankedChunk[]> {
   // If we have fewer chunks than topK, just return them all
   if (chunks.length <= topK) {
@@ -44,13 +45,18 @@ export async function rerankChunks(
   // Truncate chunk content for faster processing
   const truncatedChunks = chunks.map((c, i) => ({
     id: i + 1,
-    content: c.content.slice(0, 400), // First 400 chars should be enough for relevance judgment
+    content: c.content.slice(0, 800), // 800 chars preserves most table rows for relevance judgment
   }));
+
+  // Include sub-queries in the prompt when the query was decomposed
+  const subQueryContext = subQueries && subQueries.length > 1
+    ? `\n\nSUB-QUERIES (the original query was decomposed into these — score chunks relevant to ANY of them):\n${subQueries.map((sq, i) => `${i + 1}. "${sq}"`).join('\n')}`
+    : '';
 
   // Batch scoring: Ask LLM to score all chunks at once
   const prompt = `You are a relevance judge for a technical document search system.
 
-USER QUERY: "${query}"
+USER QUERY: "${query}"${subQueryContext}
 
 CANDIDATE CHUNKS (${chunks.length} total):
 ${truncatedChunks.map(c => `[${c.id}] ${c.content}...`).join('\n\n---\n\n')}

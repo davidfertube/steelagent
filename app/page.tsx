@@ -10,13 +10,7 @@ import { Separator } from "@/components/ui/separator";
 import { SearchForm } from "@/components/search-form";
 import { RealtimeComparison } from "@/components/realtime-comparison";
 import { DocumentUpload } from "@/components/document-upload";
-import dynamic from "next/dynamic";
 
-// Dynamic import to avoid SSR issues with pdfjs-dist
-const PDFViewerPanel = dynamic(
-  () => import("@/components/pdf-viewer-panel").then((mod) => mod.PDFViewerPanel),
-  { ssr: false }
-);
 import { Source, GenericLLMResponse } from "@/lib/api";
 import { NetworkVisualization } from "@/components/network-visualization";
 
@@ -570,35 +564,6 @@ export default function Home() {
 
   // Generic LLM response for comparison display
   const [genericLLMResponse, setGenericLLMResponse] = useState<string | null>(null);
-
-  // PDF Viewer state
-  const [pdfViewerOpen, setPdfViewerOpen] = useState(false);
-  const [pdfViewerData, setPdfViewerData] = useState<{
-    url: string;
-    page: number;
-    documentName: string;
-  } | null>(null);
-
-  // Handler to open PDF viewer from citations
-  const handleOpenPdf = useCallback((source: Source) => {
-    console.log("[PDF Viewer] Opening PDF for source:", {
-      document: source.document,
-      page: source.page,
-      document_url: source.document_url,
-      hasUrl: !!source.document_url,
-    });
-
-    if (source.document_url) {
-      setPdfViewerData({
-        url: source.document_url,
-        page: parseInt(source.page) || 1,
-        documentName: source.document,
-      });
-      setPdfViewerOpen(true);
-    } else {
-      console.warn("[PDF Viewer] No document_url available for source:", source.document);
-    }
-  }, []);
 
   // Refs for auto-scrolling
   const step2Ref = useRef<HTMLDivElement>(null);
@@ -1191,7 +1156,6 @@ export default function Home() {
                           genericLLMResponse={genericLLMResponse}
                           isLoading={isLoading}
                           error={error}
-                          onOpenPdf={handleOpenPdf}
                         />
                       </motion.div>
                     </>
@@ -1266,14 +1230,12 @@ export default function Home() {
       {/* Footer */}
       <footer className="border-t border-black/5 py-8 sm:py-12 bg-white">
         <div className="container-center">
-          <div className="flex flex-col sm:flex-row items-center justify-between gap-6">
-            <div className="flex items-center gap-3">
-              <div>
-                <span className="font-semibold text-black">SpecVault</span>
-                <span className="text-black/60 text-sm ml-2">
-                  by Antigravity
-                </span>
-              </div>
+          <div className="flex justify-center">
+            <div>
+              <span className="font-semibold text-black">SpecVault</span>
+              <span className="text-black/60 text-sm ml-2">
+                by Antigravity
+              </span>
             </div>
           </div>
           <Separator className="my-8 bg-black/5" />
@@ -1290,14 +1252,6 @@ export default function Home() {
         </div>
       </footer>
 
-      {/* PDF Viewer Side Panel */}
-      <PDFViewerPanel
-        isOpen={pdfViewerOpen}
-        onClose={() => setPdfViewerOpen(false)}
-        pdfUrl={pdfViewerData?.url || null}
-        pageNumber={pdfViewerData?.page || 1}
-        documentName={pdfViewerData?.documentName}
-      />
     </div>
   );
 }

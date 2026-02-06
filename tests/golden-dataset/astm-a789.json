@@ -86,12 +86,46 @@
       "expect_refusal": true,
       "difficulty": "trap",
       "tags": ["negative-test", "sizing", "wrong-standard"]
+    },
+    {
+      "id": "A789-008",
+      "question": "What is the minimum yield strength for S32205 duplex tubing per ASTM A789?",
+      "expected_values": ["70 ksi", "485 MPa"],
+      "source_table": "Table 4",
+      "difficulty": "medium",
+      "tags": ["S32205", "yield", "tubing", "critical-confusion-test"],
+      "verification": {
+        "numerical_value": 70,
+        "unit": "ksi",
+        "property": "yield_strength"
+      }
+    },
+    {
+      "id": "A789-009",
+      "question": "What is the minimum tensile strength for S32750 super duplex tubing per A789?",
+      "expected_values": ["116 ksi", "800 MPa"],
+      "source_table": "Table 4",
+      "difficulty": "medium",
+      "tags": ["S32750", "tensile", "super-duplex"],
+      "verification": {
+        "numerical_value": 116,
+        "unit": "ksi",
+        "property": "tensile_strength"
+      }
+    },
+    {
+      "id": "A789-010",
+      "question": "What flattening test is required for A789 tubing?",
+      "expected_values": ["flattening", "flatten", "test"],
+      "source_section": "Section 8 or 9",
+      "difficulty": "medium",
+      "tags": ["flattening", "testing"]
     }
   ],
   "metadata": {
-    "total_questions": 8,
+    "total_questions": 11,
     "easy": 3,
-    "medium": 4,
+    "medium": 7,
     "hard": 0,
     "trap": 1,
     "requires_document": true

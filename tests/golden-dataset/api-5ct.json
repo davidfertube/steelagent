@@ -1,0 +1,99 @@
+{
+  "document": "API 5CT",
+  "description": "Specification for Casing and Tubing (Oil Country Tubular Goods)",
+  "revision": "9th Edition, 2012",
+  "qa_pairs": [
+    {
+      "id": "5CT-001",
+      "question": "What is the minimum yield strength for L80 casing per API 5CT?",
+      "expected_values": ["80 ksi", "552 MPa"],
+      "source_table": "Table C.6 or E.6",
+      "difficulty": "medium",
+      "tags": ["L80", "yield", "mechanical"],
+      "verification": {
+        "numerical_value": 80,
+        "unit": "ksi",
+        "property": "yield_strength"
+      }
+    },
+    {
+      "id": "5CT-002",
+      "question": "What is the maximum yield strength for P110 per API 5CT?",
+      "expected_values": ["140 ksi", "965 MPa"],
+      "source_table": "Table C.6 or E.6",
+      "difficulty": "medium",
+      "tags": ["P110", "yield", "mechanical"],
+      "verification": {
+        "numerical_value": 140,
+        "unit": "ksi",
+        "property": "yield_strength_max"
+      }
+    },
+    {
+      "id": "5CT-003",
+      "question": "What hardness limits apply to L80 grade per 5CT?",
+      "expected_values": ["23 HRC", "22 HRC", "HRC"],
+      "difficulty": "medium",
+      "tags": ["L80", "hardness", "mechanical"]
+    },
+    {
+      "id": "5CT-004",
+      "question": "What is the scope of API 5CT?",
+      "expected_values": ["casing", "tubing", "oil", "gas", "well"],
+      "source_section": "Section 1",
+      "difficulty": "medium",
+      "tags": ["scope", "product-form"]
+    },
+    {
+      "id": "5CT-005",
+      "question": "What impact test requirements apply to J55 per 5CT?",
+      "expected_values": ["impact", "Charpy", "CVN", "joule", "ft-lb"],
+      "difficulty": "medium",
+      "tags": ["J55", "impact", "testing"]
+    },
+    {
+      "id": "5CT-006",
+      "question": "What thread types are specified in API 5CT?",
+      "expected_values": ["buttress", "round", "STC", "LTC"],
+      "difficulty": "medium",
+      "tags": ["threading", "connections"]
+    },
+    {
+      "id": "5CT-007",
+      "question": "Compare mechanical properties of J55 vs N80 per API 5CT",
+      "expected_values": ["J55", "N80", "55 ksi", "80 ksi"],
+      "difficulty": "complex",
+      "tags": ["J55", "N80", "comparison", "yield"]
+    },
+    {
+      "id": "5CT-008",
+      "question": "What are all the grades covered by API 5CT?",
+      "expected_values": ["H40", "J55", "K55", "N80", "L80", "C90", "T95", "P110", "Q125"],
+      "difficulty": "complex",
+      "tags": ["grades", "list"]
+    },
+    {
+      "id": "5CT-009",
+      "question": "What dimensional tolerances apply to 9-5/8 inch casing per 5CT?",
+      "expected_values": ["9-5/8", "tolerance", "OD", "wall", "drift"],
+      "difficulty": "complex",
+      "tags": ["dimensions", "tolerances", "9-5/8"]
+    },
+    {
+      "id": "5CT-010",
+      "question": "What are the heat treatment requirements for C90 per API 5CT?",
+      "expected_values": ["C90", "heat", "treatment", "quench", "temper"],
+      "difficulty": "complex",
+      "tags": ["C90", "heat-treatment"]
+    }
+  ],
+  "metadata": {
+    "total_questions": 10,
+    "easy": 0,
+    "medium": 6,
+    "hard": 0,
+    "complex": 4,
+    "trap": 0,
+    "requires_document": true
+  }
+}

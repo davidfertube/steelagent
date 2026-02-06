@@ -1,0 +1,87 @@
+{
+  "document": "API 16C",
+  "description": "Specification for Choke and Kill Systems",
+  "revision": "1993",
+  "qa_pairs": [
+    {
+      "id": "16C-001",
+      "question": "What is the scope of API 16C?",
+      "expected_values": ["choke", "kill", "equipment", "BOP", "well control"],
+      "source_section": "Section 1",
+      "difficulty": "medium",
+      "tags": ["scope", "choke", "kill"]
+    },
+    {
+      "id": "16C-002",
+      "question": "What pressure ratings are covered in API 16C?",
+      "expected_values": ["5000", "10000", "15000", "psi"],
+      "difficulty": "medium",
+      "tags": ["pressure", "ratings"]
+    },
+    {
+      "id": "16C-003",
+      "question": "What materials are acceptable per API 16C?",
+      "expected_values": ["material", "steel", "alloy", "class"],
+      "difficulty": "medium",
+      "tags": ["material", "requirements"]
+    },
+    {
+      "id": "16C-004",
+      "question": "What testing is required for chokes per 16C?",
+      "expected_values": ["test", "pressure", "function", "qualification"],
+      "difficulty": "medium",
+      "tags": ["testing", "choke"]
+    },
+    {
+      "id": "16C-005",
+      "question": "What are the valve requirements in API 16C?",
+      "expected_values": ["valve", "gate", "ball", "check"],
+      "difficulty": "medium",
+      "tags": ["valve", "requirements"]
+    },
+    {
+      "id": "16C-006",
+      "question": "What flange connections are specified in 16C?",
+      "expected_values": ["flange", "connection", "API 6A", "6BX"],
+      "difficulty": "medium",
+      "tags": ["flange", "connections"]
+    },
+    {
+      "id": "16C-007",
+      "question": "Compare requirements for 10K vs 15K choke manifolds",
+      "expected_values": ["10000", "15000", "10K", "15K", "manifold"],
+      "difficulty": "complex",
+      "tags": ["comparison", "pressure-class"]
+    },
+    {
+      "id": "16C-008",
+      "question": "What are the design requirements for choke manifolds per 16C?",
+      "expected_values": ["design", "manifold", "calculation", "factor"],
+      "difficulty": "complex",
+      "tags": ["design", "manifold"]
+    },
+    {
+      "id": "16C-009",
+      "question": "What quality documentation is required for API 16C?",
+      "expected_values": ["quality", "documentation", "record", "certificate"],
+      "difficulty": "complex",
+      "tags": ["quality", "documentation"]
+    },
+    {
+      "id": "16C-010",
+      "question": "What are the erosion considerations in API 16C?",
+      "expected_values": ["erosion", "wear", "flow", "velocity"],
+      "difficulty": "complex",
+      "tags": ["erosion", "wear"]
+    }
+  ],
+  "metadata": {
+    "total_questions": 10,
+    "easy": 0,
+    "medium": 6,
+    "hard": 0,
+    "complex": 4,
+    "trap": 0,
+    "requires_document": true
+  }
+}

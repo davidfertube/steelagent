@@ -1,6 +1,5 @@
 "use client";
 
-import { Boxes } from "lucide-react";
 import Link from "next/link";
 
 export default function PrivacyPage() {
@@ -10,11 +9,8 @@ export default function PrivacyPage() {
       <header className="fixed top-0 left-0 right-0 z-50 bg-white/90 backdrop-blur-md border-b border-black/5">
         <div className="container-center">
           <div className="flex h-16 items-center justify-between">
-            <Link href="/" className="flex items-center gap-2">
-              <div className="w-8 h-8 bg-black flex items-center justify-center">
-                <Boxes className="w-4 h-4 text-white" />
-              </div>
-              <span className="text-lg font-semibold tracking-tight text-black">SpecVault</span>
+            <Link href="/" className="text-lg font-semibold tracking-tight text-black hover:text-black/80 transition-colors">
+              SpecVault
             </Link>
           </div>
         </div>
@@ -23,7 +19,7 @@ export default function PrivacyPage() {
       <main className="flex-1 pt-24 pb-16">
         <div className="container-narrow">
           <h1 className="text-4xl font-semibold tracking-tight mb-8">Privacy Policy</h1>
-          <p className="text-sm text-black/60 mb-8">Last updated: January 2025</p>
+          <p className="text-sm text-black/60 mb-8">Last updated: February 2026</p>
 
           <div className="prose prose-sm max-w-none space-y-8">
             <section>
@@ -127,7 +123,7 @@ export default function PrivacyPage() {
             <section>
               <h2 className="text-xl font-semibold mb-4">11. Contact Us</h2>
               <p className="text-black/70 leading-relaxed">
-                For privacy-related questions, please contact us at privacy@steelagent.io
+                For privacy-related questions, please contact us at privacy@specvault.io
               </p>
             </section>
           </div>
@@ -141,8 +137,6 @@ export default function PrivacyPage() {
             <Link href="/" className="hover:text-black/60 transition-colors">Home</Link>
             <span>·</span>
             <Link href="/terms" className="hover:text-black/60 transition-colors">Terms of Service</Link>
-            <span>·</span>
-            <Link href="/pricing" className="hover:text-black/60 transition-colors">Pricing</Link>
           </div>
         </div>
       </footer>

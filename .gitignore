@@ -67,3 +67,4 @@ data/*.pdf
 
 # clerk configuration (can include secrets)
 /.clerk/
+.env*.local

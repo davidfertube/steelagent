@@ -153,6 +153,29 @@ const PROPERTY_KEYWORDS = [
   "thickness",
   "tolerance",
   "permissible",
+  // Plural forms (tables often use plural headings)
+  "strengths",
+  "temperatures",
+  "tolerances",
+  "properties",
+  // Short forms common in tables
+  "min",
+  "max",
+  "psi",
+  // Test methods
+  "flattening",
+  "hydrostatic",
+  "transverse",
+  "longitudinal",
+  // Spec section terms
+  "scope",
+  "marking",
+  "supplementary",
+  "inspection",
+  "certification",
+  "certificate",
+  "dimensional",
+  "dimensions",
 ];
 
 /**

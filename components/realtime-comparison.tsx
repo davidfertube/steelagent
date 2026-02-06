@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion } from "framer-motion";
 import {
   CheckCircle,
   XCircle,
@@ -11,10 +11,6 @@ import {
   Bot,
   Copy,
   Check,
-  ChevronDown,
-  ChevronUp,
-  ExternalLink,
-  Eye,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Source } from "@/lib/api";
@@ -25,7 +21,6 @@ interface RealtimeComparisonProps {
   genericLLMResponse: string | null;
   isLoading: boolean;
   error: string | null;
-  onOpenPdf?: (source: Source) => void;
 }
 
 // Typewriter effect hook
@@ -60,123 +55,39 @@ function useTypewriter(text: string, speed: number = 15) {
   return { displayedText, isComplete };
 }
 
-// Source citation component with clickable PDF links
+// Source citation component — inline summary, no PDF viewer
 function SourceCitation({
   source,
   index,
-  onOpenPdf
 }: {
   source: Source;
   index: number;
-  onOpenPdf?: (source: Source) => void;
 }) {
-  const [expanded, setExpanded] = useState(false);
-  const hasUrl = !!source.document_url;
-
-  const handleOpenPdf = (e: React.MouseEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    if (onOpenPdf && hasUrl) {
-      onOpenPdf(source);
-    }
-  };
-
   return (
     <motion.div
       initial={{ opacity: 0, x: -10 }}
       animate={{ opacity: 1, x: 0 }}
       transition={{ delay: index * 0.05 }}
-      className="group"
     >
-      {/* Main citation row - clickable if URL exists */}
-      <motion.div
-        className={`flex items-start gap-2 rounded-lg p-2 -m-1 transition-all duration-200 ${
-          hasUrl
-            ? "cursor-pointer hover:bg-green-100 hover:shadow-sm border border-transparent hover:border-green-200"
-            : "hover:bg-green-50"
-        }`}
-        onClick={hasUrl ? handleOpenPdf : undefined}
-        whileHover={hasUrl ? { scale: 1.01 } : {}}
-        whileTap={hasUrl ? { scale: 0.99 } : {}}
-      >
-        {/* Citation number badge */}
-        <motion.span
-          className={`font-mono text-xs font-bold px-1.5 py-0.5 rounded shrink-0 ${
-            hasUrl
-              ? "bg-green-500 text-white"
-              : "bg-green-100 text-green-700"
-          }`}
-          whileHover={hasUrl ? { scale: 1.1 } : {}}
-        >
+      <div className="flex items-start gap-2 rounded-lg p-2 -m-1">
+        <span className="font-mono text-xs font-bold px-1.5 py-0.5 rounded shrink-0 bg-green-100 text-green-700">
           {source.ref}
-        </motion.span>
-
+        </span>
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-1.5 flex-wrap">
-            <FileText className={`h-3.5 w-3.5 shrink-0 ${hasUrl ? "text-green-600" : "text-muted-foreground"}`} />
-            <span className={`text-xs font-medium truncate ${hasUrl ? "text-green-700" : "text-foreground"}`}>
+            <FileText className="h-3.5 w-3.5 shrink-0 text-green-600" />
+            <span className="text-xs font-medium truncate text-green-700">
               {source.document}
             </span>
             <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-green-100 text-green-700 shrink-0">
               Page {source.page}
             </span>
-
-            {/* View PDF button - only show if URL exists */}
-            {hasUrl && (
-              <motion.span
-                initial={{ opacity: 0, scale: 0.8 }}
-                animate={{ opacity: 1, scale: 1 }}
-                className="ml-auto flex items-center gap-1 text-[10px] font-semibold text-green-600 bg-green-50 px-2 py-1 rounded-full border border-green-200 group-hover:bg-green-500 group-hover:text-white group-hover:border-green-500 transition-all duration-200"
-              >
-                <Eye className="h-3 w-3" />
-                <span className="hidden sm:inline">View PDF</span>
-              </motion.span>
-            )}
-
-            {/* Expand button */}
-            <button
-              onClick={(e) => {
-                e.stopPropagation();
-                setExpanded(!expanded);
-              }}
-              className={`p-1 hover:bg-green-200 rounded transition-colors ${hasUrl ? "" : "ml-auto"}`}
-            >
-              {expanded ? (
-                <ChevronUp className="h-3 w-3 text-green-600" />
-              ) : (
-                <ChevronDown className="h-3 w-3 text-muted-foreground group-hover:text-green-600 transition-colors" />
-              )}
-            </button>
           </div>
+          <p className="text-xs text-muted-foreground leading-relaxed mt-1 ml-5">
+            {source.content_preview}
+          </p>
         </div>
-      </motion.div>
-
-      {/* Expanded content preview */}
-      <AnimatePresence>
-        {expanded && (
-          <motion.div
-            initial={{ height: 0, opacity: 0 }}
-            animate={{ height: "auto", opacity: 1 }}
-            exit={{ height: 0, opacity: 0 }}
-            transition={{ duration: 0.2 }}
-            className="overflow-hidden"
-          >
-            <div className="ml-8 mt-2 p-3 bg-green-50 rounded-lg text-xs text-muted-foreground leading-relaxed border border-green-100">
-              <p className="italic">&quot;{source.content_preview}&quot;</p>
-              {hasUrl && (
-                <motion.button
-                  onClick={handleOpenPdf}
-                  className="mt-2 flex items-center gap-1.5 text-green-600 hover:text-green-700 font-medium"
-                  whileHover={{ x: 2 }}
-                >
-                  <ExternalLink className="h-3 w-3" />
-                  Open in PDF viewer (page {source.page})
-                </motion.button>
-              )}
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+      </div>
     </motion.div>
   );
 }
@@ -198,7 +109,6 @@ export function RealtimeComparison({
   genericLLMResponse,
   isLoading,
   error,
-  onOpenPdf,
 }: RealtimeComparisonProps) {
   const steelAgent = useTypewriter(steelAgentResponse || "", 12);
   const genericLLM = useTypewriter(genericLLMResponse || "", 12);
@@ -341,27 +251,10 @@ export function RealtimeComparison({
                           {steelAgentSources.length} Verified Source{steelAgentSources.length !== 1 ? "s" : ""}
                         </span>
                       </div>
-                      {/* Show clickable hint if any source has a URL */}
-                      {steelAgentSources.some(s => s.document_url) && (
-                        <motion.div
-                          initial={{ opacity: 0, x: 10 }}
-                          animate={{ opacity: 1, x: 0 }}
-                          transition={{ delay: 0.6 }}
-                          className="flex items-center gap-1.5 text-xs text-green-600 bg-green-100 px-2 py-1 rounded-full"
-                        >
-                          <motion.div
-                            animate={{ scale: [1, 1.2, 1] }}
-                            transition={{ duration: 1.5, repeat: 3 }}
-                          >
-                            <Eye className="h-3.5 w-3.5" />
-                          </motion.div>
-                          <span className="font-medium">Click to view PDF</span>
-                        </motion.div>
-                      )}
                     </motion.div>
                     <div className="space-y-2">
                       {steelAgentSources.map((source, index) => (
-                        <SourceCitation key={source.ref} source={source} index={index} onOpenPdf={onOpenPdf} />
+                        <SourceCitation key={source.ref} source={source} index={index} />
                       ))}
                     </div>
 

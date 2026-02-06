@@ -36,6 +36,7 @@ const CACHE_TTL = 60000; // 1 minute - short TTL to pick up new uploads quickly
 function extractCodesFromFilename(filename: string): {
   astm: string[];
   uns: string[];
+  api: string[];
 } {
   const upper = filename.toUpperCase();
 
@@ -48,7 +49,21 @@ function extractCodesFromFilename(filename: string): {
   const unsMatches = upper.match(/[SNCGHJKWRT]\d{5}/g) || [];
   const uniqueUns = [...new Set(unsMatches)];
 
-  return { astm: uniqueAstm, uns: uniqueUns };
+  // Extract API spec codes (5CT, 6A, 16C, 5CRA) from filenames like
+  // "API Spec 5CT Purchasing Guidelines.pdf" or "API Spec 6A Wellhead.pdf"
+  const apiMatches: string[] = [];
+  const apiContextMatch = upper.match(/(?:API|SPEC)\s+(\d{1,2}[A-Z]{1,4})\b/g);
+  if (apiContextMatch) {
+    for (const m of apiContextMatch) {
+      const code = m.replace(/^(?:API|SPEC)\s+/i, '');
+      if (/^\d{1,2}[A-Z]{1,3}$/.test(code)) {
+        apiMatches.push(code);
+      }
+    }
+  }
+  const uniqueApi = [...new Set(apiMatches)];
+
+  return { astm: uniqueAstm, uns: uniqueUns, api: uniqueApi };
 }
 
 /**
@@ -79,7 +94,7 @@ async function refreshDocumentCache(): Promise<void> {
   documentCache = new Map();
 
   for (const doc of documents) {
-    const { astm, uns } = extractCodesFromFilename(doc.filename);
+    const { astm, uns, api } = extractCodesFromFilename(doc.filename);
 
     // Map ASTM codes to document IDs
     for (const code of astm) {
@@ -99,8 +114,17 @@ async function refreshDocumentCache(): Promise<void> {
       }
     }
 
+    // Map API spec codes to document IDs
+    for (const code of api) {
+      const existing = documentCache.get(code) || [];
+      if (!existing.includes(doc.id)) {
+        existing.push(doc.id);
+        documentCache.set(code, existing);
+      }
+    }
+
     console.log(
-      `[Document Mapper] Document ${doc.id} (${doc.filename}): ASTM=[${astm.join(", ")}], UNS=[${uns.join(", ")}]`
+      `[Document Mapper] Document ${doc.id} (${doc.filename}): ASTM=[${astm.join(", ")}], UNS=[${uns.join(", ")}], API=[${api.join(", ")}]`
     );
   }
 
@@ -188,14 +212,39 @@ export async function resolveSpecsToDocuments(
   let rawAstmCodes = codes.astm || [];
 
   if (fullQuery && rawAstmCodes.length === 0) {
-    // Look for patterns like "per A790", "according to A790", "in A790", "from A790"
-    const perPattern = /\b(?:per|according to|in|from|spec|specification)\s+(A\d{3,4})\b/i;
+    // Look for patterns like "per A790", "according to A790", "in A790", "ASTM A790"
+    const perPattern = /\b(?:per|according\s+to|in|from|spec|specification|under|about|of|ASTM)\s+(A\d{3,4})\b/i;
     const match = fullQuery.match(perPattern);
 
     if (match) {
       const extractedCode = match[1].toUpperCase();
       console.log(`[Document Mapper] Found "${match[0]}" pattern in query, extracting: ${extractedCode}`);
       rawAstmCodes = [extractedCode];
+    }
+
+    // Also catch "A789 tubing" or "A790 pipe" where spec code comes first
+    if (rawAstmCodes.length === 0) {
+      const codeFirstPattern = /\b(A\d{3,4})\s+(?:pipe|tubing|tube|plate|sheet|bar|cast|specification|spec|standard)\b/i;
+      const codeFirstMatch = fullQuery.match(codeFirstPattern);
+      if (codeFirstMatch) {
+        const extractedCode = codeFirstMatch[1].toUpperCase();
+        console.log(`[Document Mapper] Found code-first pattern "${codeFirstMatch[0]}" in query, extracting: ${extractedCode}`);
+        rawAstmCodes = [extractedCode];
+      }
+    }
+  }
+
+  // Also check for API specifications in the query (e.g., "API 5CT", "API 6A")
+  if (fullQuery && rawAstmCodes.length === 0) {
+    const apiPattern = /\bAPI\s+(\d{1,2}[A-Z]{0,3})\b/i;
+    const apiMatch = fullQuery.match(apiPattern);
+    if (apiMatch) {
+      const apiCode = apiMatch[1].toUpperCase();
+      const ids = documentCache.get(apiCode);
+      if (ids && ids.length > 0) {
+        console.log(`[Document Mapper] Found API code "${apiCode}" in query, filtering to docs: [${ids.join(", ")}]`);
+        return ids;
+      }
     }
   }
 

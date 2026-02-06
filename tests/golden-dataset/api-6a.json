@@ -1,0 +1,87 @@
+{
+  "document": "API 6A",
+  "description": "Specification for Wellhead and Christmas Tree Equipment",
+  "revision": "20th Edition",
+  "qa_pairs": [
+    {
+      "id": "6A-001",
+      "question": "What is the scope of API 6A?",
+      "expected_values": ["wellhead", "christmas tree", "equipment"],
+      "source_section": "Section 1",
+      "difficulty": "medium",
+      "tags": ["scope", "wellhead"]
+    },
+    {
+      "id": "6A-002",
+      "question": "What pressure ratings are defined in API 6A?",
+      "expected_values": ["2000", "3000", "5000", "10000", "15000", "20000", "psi"],
+      "difficulty": "medium",
+      "tags": ["pressure", "ratings"]
+    },
+    {
+      "id": "6A-003",
+      "question": "What material classes are in API 6A?",
+      "expected_values": ["AA", "BB", "CC", "DD", "EE", "FF", "HH"],
+      "difficulty": "medium",
+      "tags": ["material", "classes"]
+    },
+    {
+      "id": "6A-004",
+      "question": "What temperature ratings are specified in API 6A?",
+      "expected_values": ["K", "L", "P", "R", "S", "T", "U", "V"],
+      "difficulty": "medium",
+      "tags": ["temperature", "ratings"]
+    },
+    {
+      "id": "6A-005",
+      "question": "What are the PSL (Product Specification Levels) in API 6A?",
+      "expected_values": ["PSL", "1", "2", "3", "4"],
+      "difficulty": "medium",
+      "tags": ["PSL", "quality"]
+    },
+    {
+      "id": "6A-006",
+      "question": "What testing is required for API 6A equipment?",
+      "expected_values": ["test", "hydrostatic", "pressure", "function"],
+      "difficulty": "medium",
+      "tags": ["testing", "requirements"]
+    },
+    {
+      "id": "6A-007",
+      "question": "Compare PSL 1 vs PSL 3 requirements in API 6A",
+      "expected_values": ["PSL 1", "PSL 3", "traceability", "test"],
+      "difficulty": "complex",
+      "tags": ["PSL", "comparison"]
+    },
+    {
+      "id": "6A-008",
+      "question": "What are all the material requirements for Class DD per 6A?",
+      "expected_values": ["DD", "material", "carbon", "alloy", "steel"],
+      "difficulty": "complex",
+      "tags": ["DD", "material", "requirements"]
+    },
+    {
+      "id": "6A-009",
+      "question": "What are the design validation requirements for API 6A?",
+      "expected_values": ["design", "validation", "qualification", "test"],
+      "difficulty": "complex",
+      "tags": ["design", "validation"]
+    },
+    {
+      "id": "6A-010",
+      "question": "What marking and identification is required for 6A equipment?",
+      "expected_values": ["marking", "identification", "nameplate", "tag"],
+      "difficulty": "complex",
+      "tags": ["marking", "identification"]
+    }
+  ],
+  "metadata": {
+    "total_questions": 10,
+    "easy": 0,
+    "medium": 6,
+    "hard": 0,
+    "complex": 4,
+    "trap": 0,
+    "requires_document": true
+  }
+}

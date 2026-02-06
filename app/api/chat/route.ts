@@ -187,6 +187,38 @@ async function processRAGQuery(cleanedQuery: string, verified: boolean) {
 
       chunks = ragResult.chunks;
 
+      // Pre-LLM dedup: deduplicate chunks by (document_id, page_number)
+      // This ensures the LLM sees only unique source slots so its [1][2][3]
+      // refs map cleanly to the final source list
+      const chunkDedupMap = new Map<string, HybridSearchResult>();
+      for (const chunk of chunks) {
+        const key = `${chunk.document_id}:${chunk.page_number}`;
+        if (!chunkDedupMap.has(key)) {
+          chunkDedupMap.set(key, chunk);
+        } else {
+          const existing = chunkDedupMap.get(key)!;
+          if (chunk.combined_score > existing.combined_score) {
+            chunkDedupMap.set(key, chunk);
+          }
+        }
+      }
+      chunks = Array.from(chunkDedupMap.values());
+
+      // Content-level dedup: remove chunks with >80% word overlap
+      // Only dedup within the same document — cross-document chunks may have
+      // similar table structures but different values (e.g., A789 vs A790 yield tables)
+      const dedupedChunks: HybridSearchResult[] = [];
+      for (const chunk of chunks) {
+        const isDuplicate = dedupedChunks.some(existing =>
+          existing.document_id === chunk.document_id &&
+          computeContentOverlap(existing.content, chunk.content) > 0.8
+        );
+        if (!isDuplicate) {
+          dedupedChunks.push(chunk);
+        }
+      }
+      chunks = dedupedChunks;
+
       // Log query decomposition info
       if (ragResult.decomposition.subqueries.length > 1) {
         console.log(
@@ -254,7 +286,7 @@ async function processRAGQuery(cleanedQuery: string, verified: boolean) {
             const doc = docMap.get(chunk.document_id);
             // Add relevance note for exact keyword matches (BM25 > 0)
             const relevanceNote = chunk.bm25_score > 0
-              ? ` [HIGH RELEVANCE - exact keyword match]`
+              ? ` [HIGH RELEVANCE - exact keyword match, BM25=${chunk.bm25_score.toFixed(2)}]`
               : "";
             return `[${index + 1}] From "${doc?.filename || "Unknown"}" (Page ${chunk.page_number})${relevanceNote}:\n${chunk.content}`;
           })
@@ -325,11 +357,12 @@ Before answering, mentally work through these steps:
 - Mechanical properties: typically Table 3 or Table 4 (yield, tensile, elongation, hardness)
 - Chemical composition: typically Table 1 or Table 2
 - Heat treatment: Section 6 in most ASTM specs
-- **HARDNESS VALUES**: ASTM specs often list TWO hardness scales - always provide BOTH if available:
-  - Brinell (HB or HBW): e.g., "290 HBW max" or "290 max, HB"
-  - Rockwell (HRC): e.g., "30 HRC max" or "30 max, HRC"
-  - Format may be: "290 HBW (≈ 30 HRC)" or "290 max (HB), 30 max (HRC)"
-  - When asked for hardness, include BOTH scales in your answer
+- **HARDNESS VALUES**: ASTM specs may list hardness on one or two scales:
+  - Brinell (HB or HBW): e.g., "290 HBW max"
+  - Rockwell (HRC): e.g., "30 HRC max"
+  - ONLY report hardness scales that are EXPLICITLY stated in the context
+  - Do NOT convert between scales or infer a second scale if only one is given
+  - If only HBW is in the context, report only HBW; if both are listed, report both
 - **ELEMENT SYMBOLS**: Chemical composition tables use element symbols (C, Cr, Mo, Ni, N, etc.)
   - "Carbon" is shown as "C", "Chromium" as "Cr", "Molybdenum" as "Mo", etc.
   - Look for both the element name AND its symbol when extracting composition data
@@ -469,7 +502,7 @@ RESPONSE GUIDELINES:
           ref: `[${index + 1}]`,
           document: doc?.filename || "Unknown",
           page: String(chunk.page_number),
-          content_preview: chunk.content.slice(0, 150) + "...",
+          content_preview: generateCitationSummary(chunk.content),
           document_url: documentUrl,
           // Include storage_path for PDF proxy fallback (avoids CORS/expiry issues)
           storage_path: doc?.storage_path,
@@ -498,6 +531,33 @@ RESPONSE GUIDELINES:
 
     console.log(`[Chat API] Deduplicated sources: ${sourcesWithUrls.length} → ${sources.length} unique (document, page) pairs`);
 
+    // Remap citation numbers in the LLM response to match deduplicated source list
+    const refMap = new Map<string, string>();
+    sourcesWithUrls.forEach((original, oldIndex) => {
+      const oldRef = `[${oldIndex + 1}]`;
+      const newSource = sources.find(
+        (s) => s.document === original.document && s.page === original.page
+      );
+      if (newSource && oldRef !== newSource.ref) {
+        refMap.set(oldRef, newSource.ref);
+      }
+    });
+
+    let remappedResponse = responseText;
+    // Sort by descending ref number to avoid [1] replacing part of [10]
+    const sortedRefs = [...refMap.entries()].sort((a, b) => {
+      return parseInt(b[0].slice(1, -1)) - parseInt(a[0].slice(1, -1));
+    });
+    for (const [oldRef, newRef] of sortedRefs) {
+      remappedResponse = remappedResponse.replaceAll(oldRef, newRef);
+    }
+
+    // Remove references to citation numbers that no longer exist
+    const maxRef = sources.length;
+    remappedResponse = remappedResponse.replace(/\[(\d+)\]/g, (match, num) => {
+      return parseInt(num) > maxRef ? '' : match;
+    });
+
     // DEBUG: Log document mapping for investigating wrong PDF issues
     console.log("[Chat API] Source document mapping:", sources.map(s => ({
       ref: s.ref,
@@ -510,10 +570,45 @@ RESPONSE GUIDELINES:
   // Step 6: Return Response
   // ========================================
   // DEBUG: Log response summary for tracing
-  console.log(`[Chat API] Returning response with ${sources.length} sources (${responseText.length} chars)`);
+  console.log(`[Chat API] Returning response with ${sources.length} sources (${remappedResponse.length} chars)`);
 
   return {
-    response: responseText,
+    response: remappedResponse,
     sources,
   };
+}
+
+/**
+ * Compute word-level Jaccard similarity between two text strings.
+ * Returns 0-1 where 1 means identical word sets.
+ */
+function computeContentOverlap(a: string, b: string): number {
+  const wordsA = new Set(a.toLowerCase().split(/\s+/).filter(Boolean));
+  const wordsB = new Set(b.toLowerCase().split(/\s+/).filter(Boolean));
+  let intersectionSize = 0;
+  for (const w of wordsA) {
+    if (wordsB.has(w)) intersectionSize++;
+  }
+  const unionSize = new Set([...wordsA, ...wordsB]).size;
+  return unionSize > 0 ? intersectionSize / unionSize : 0;
+}
+
+/**
+ * Extract first meaningful sentence from chunk content for citation summary.
+ * Returns a concise 1-sentence preview capped at ~150 chars.
+ */
+function generateCitationSummary(content: string): string {
+  const cleaned = content
+    .replace(/\n+/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
+
+  // Split on sentence-ending punctuation followed by a space
+  const sentences = cleaned.split(/(?<=[.!?])\s+/);
+  const firstSentence = sentences[0]?.trim() || cleaned.slice(0, 120);
+
+  if (firstSentence.length > 150) {
+    return firstSentence.slice(0, 147) + '...';
+  }
+  return firstSentence;
 }

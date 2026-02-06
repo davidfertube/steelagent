@@ -1,111 +1,151 @@
 # CLAUDE.md - SpecVault
 
-## Current Status (2026-01-27)
+## Quick Reference
 
-| Component | Status | Notes |
-|-----------|--------|-------|
-| **Frontend** | READY | Deploy to Vercel |
-| **API Routes** | READY | Next.js API routes (no separate backend) |
-| **Database** | CONFIGURED | Supabase PostgreSQL + pgvector |
-| **LLM** | CONFIGURED | Groq (Llama 3.3 70B) with multi-provider fallback |
-| **Embeddings** | CONFIGURED | Voyage AI voyage-3-lite (200M tokens FREE/month) |
-
-### What's Working
-- [x] PDF upload to Supabase Storage
-- [x] Text extraction with `unpdf`
-- [x] Embeddings generation with Voyage AI (1024 dim, 1000+ RPM)
-- [x] Vector storage in Supabase pgvector
-- [x] Semantic search with cosine similarity
-- [x] LLM responses with Groq (Llama 3.3 70B) + multi-provider fallback
-- [x] Citations in responses ([1], [2], etc.)
-- [x] Lead capture form (with company field)
-- [x] Security hardening (input validation, file limits)
+- **Framework**: Next.js 16, React 19, Tailwind CSS
+- **LLM**: Gemini 2.5 Flash (primary) with multi-provider fallback (Groq, Cerebras, Together AI)
+- **Embeddings**: Voyage AI voyage-3-lite (1024 dim, 200M tokens FREE/month)
+- **Database**: Supabase PostgreSQL + pgvector
+- **Hosting**: Vercel (free tier)
+- **Total Cost**: $0/month (all free tiers)
 
 ---
 
-## What's Missing for MVP Launch
-
-### Required (1 items)
-
-| Item | Status | How to Fix |
-|------|--------|------------|
-| **Custom Domain** | Optional | Configure in Vercel Dashboard → Domains |
-
-### Post-MVP (Add Later)
-
-| Item | Notes |
-|------|-------|
-| **Rate Limiting** | Add Upstash Redis when you have traffic |
-| **User Auth** | Add Clerk when you need usage tracking |
-| **Payments** | Add Stripe when ready for paid tiers |
-| **Unstructured.io** | Better table extraction for spec sheets |
-
----
-
-## Quick Start
+## Development Workflow
 
 ```bash
-# 1. Install dependencies
+# First time setup
 npm install
+cp .env.example .env.local    # Edit with your API keys
 
-# 2. Configure environment
-cp .env.example .env.local
-# Edit .env.local with your API keys
+# Start development
+npm run dev                    # http://localhost:3000
+```
 
-# 3. Start development
-npm run dev
+### Running Tests
 
-# 4. Open http://localhost:3000
+```bash
+# Unit tests (fast, no server needed)
+npm test                                # All unit tests
+npm run test:evaluation:unit            # Evaluation pattern tests only
+
+# Accuracy tests (requires running dev server on localhost:3000)
+npm run test:accuracy                   # 80-query suite across all 8 documents
+npm run test:accuracy:verbose           # Same, with detailed per-query output
+
+# Integration tests (requires running server + env vars)
+npm run test:evaluation:quick           # 5-query smoke test
+npm run test:evaluation:full            # Full evaluation suite
+npm run test:confusion                  # A789/A790 cross-spec confusion matrix
+
+# RAGAS LLM-as-judge evaluation
+npm run evaluation:rag                  # Run RAGAS metrics (faithfulness, relevancy)
+npm run evaluation:rag:verbose          # Same, with detailed scoring
+
+# Performance
+npm run test:performance                # Performance analysis
+npm run test:bottleneck                 # Bottleneck profiling
+```
+
+### Build & Deploy
+
+```bash
+npm run build                  # Production build (catches type errors)
+npm run lint                   # ESLint
+git push origin main           # Auto-deploys to Vercel via GitHub Actions
 ```
 
 ---
 
 ## Architecture
 
-```
-┌─────────────────────────────────────────────────────────────────┐
-│                        Next.js 16 App                           │
-├─────────────────────────────────────────────────────────────────┤
-│  Frontend (React 19)     │     API Routes                       │
-│  - app/page.tsx          │     - /api/chat (RAG queries)        │
-│  - components/*          │     - /api/documents/upload          │
-│                          │     - /api/documents/process         │
-│                          │     - /api/leads                     │
-└──────────────────────────┴──────────────────────────────────────┘
-                                    │
-                    ┌───────────────┼───────────────┐
-                    ▼               ▼               ▼
-            ┌───────────┐   ┌───────────┐   ┌───────────┐
-            │  Supabase │   │   Groq    │   │ Voyage AI │
-            │  pgvector │   │ Llama 3.3 │   │ Embeddings│
-            │ (vectors) │   │  (LLM)    │   │ (1024 dim) │
-            └───────────┘   └───────────┘   └───────────┘
-```
+### Accuracy Results (Feb 2025)
+
+| Metric | Result | Target | Status |
+|--------|--------|--------|--------|
+| Overall accuracy | **91.3%** (73/80) | 90%+ | **Exceeded** |
+| Source citation | **96.3%** (77/80) | 90%+ | **Exceeded** |
+| Hallucination rate | ~0% | 0% | Maintained |
+| P50 latency | 13.0s | — | Good |
+| P95 latency | 24.2s | 30-60s | Within target |
+
+Golden datasets: `tests/golden-dataset/*.json` (8 files, 80+ queries total)
+
+### RAG Pipeline (5 stages)
+
+1. **Query Analysis**: `query-preprocessing.ts` extracts UNS/ASTM/API codes, `query-enhancement.ts` adds keywords
+2. **Hybrid Search**: `multi-query-rag.ts` decomposes complex queries, runs BM25 + vector search via `hybrid-search.ts`
+3. **Re-ranking**: `reranker.ts` scores candidates with LLM-based cross-encoder (800-char chunk window, sub-query aware)
+4. **Context Building**: Top 3 chunks assembled with `[1][2][3]` refs, deduped by (doc, page) — cross-document dedup prevented
+5. **Generation**: Gemini 2.5 Flash with CoT system prompt, SSE streaming
 
 ### Key Files
 
 | File | Purpose |
 |------|---------|
-| `app/page.tsx` | Main landing page with hero, upload, search |
-| `app/api/chat/route.ts` | RAG query endpoint |
-| `app/api/documents/upload/route.ts` | PDF upload to Supabase Storage |
-| `app/api/documents/process/route.ts` | Extract text, generate embeddings, store |
-| `app/api/leads/route.ts` | Lead capture form submission |
-| `lib/vectorstore.ts` | pgvector search functions |
-| `lib/embeddings.ts` | Voyage AI embedding generation |
-| `lib/embedding-cache.ts` | Query embedding cache (reduces API calls) |
-| `lib/supabase.ts` | Supabase client |
+| `app/api/chat/route.ts` | Main RAG endpoint (streaming SSE) |
+| `app/api/documents/process/route.ts` | PDF text extraction + embedding + storage |
+| `lib/multi-query-rag.ts` | Query decomposition + multi-hop retrieval |
+| `lib/hybrid-search.ts` | BM25 + vector fusion search |
+| `lib/reranker.ts` | LLM-based re-ranking |
+| `lib/query-preprocessing.ts` | UNS/ASTM code extraction + adaptive weights |
+| `lib/model-fallback.ts` | Multi-provider LLM fallback chain |
+| `lib/semantic-chunking.ts` | Table-preserving chunking (1500 chars, 200 overlap) |
+| `lib/document-mapper.ts` | Resolves ASTM codes to document IDs |
+| `lib/evaluation-engine.ts` | Pattern-based RAG evaluation |
+| `lib/rag-metrics.ts` | RAGAS-style LLM-as-judge evaluation |
+| `components/realtime-comparison.tsx` | Side-by-side RAG vs generic LLM display |
+
+---
+
+## Common Gotchas
+
+### A789/A790 Confusion
+A789 (tubing) and A790 (pipe) have DIFFERENT yield strengths for S32205:
+- A789: **70 ksi** / 485 MPa
+- A790: **65 ksi** / 450 MPa
+
+`lib/document-mapper.ts` resolves specs to document IDs to prevent cross-contamination.
+Content-level dedup in `chat/route.ts` is **document-scoped** — chunks from different documents are never merged even if they share 80%+ vocabulary overlap.
+Confusion tests: `tests/golden-dataset/astm-a789.json` / `astm-a790.json`.
+
+### Reranker Chunk Window
+Reranker truncates chunks to **800 chars** (was 400) for relevance scoring. This preserves ~6-8 table rows — enough to include header + data rows for most ASTM tables. Increasing further risks slower reranking without proportional accuracy gains.
+
+### Document Filter Patterns
+`lib/document-mapper.ts` detects document references via three pattern types:
+- **Per-pattern**: "per A790", "according to A312", "ASTM A789"
+- **Code-first**: "A789 tubing", "A790 pipe"
+- **API pattern**: "API 5CT", "API 6A", "API 16C"
+
+### Groq TPM Limits
+Free tier: 6000 TPM. Chunks limited to 3 (was 5) to stay under limit.
+If 429 errors occur, `model-fallback.ts` auto-switches providers.
+
+### Chunk Size
+Semantic chunking: 1500 chars target, 800 min, 2500 max, 200 overlap.
+Tables preserved intact. Increasing chunk size improves coverage but risks TPM limits.
+
+### Vercel Hobby Timeout
+10-second request limit. SSE streaming with 3s heartbeat keeps connection alive.
+See `app/api/chat/route.ts` lines 70-107.
 
 ---
 
 ## Environment Variables
 
 ```bash
-# Required (4 variables)
-VOYAGE_API_KEY=xxx                      # Voyage AI (voyageai.com)
-GROQ_API_KEY=xxx                        # Groq (console.groq.com)
-NEXT_PUBLIC_SUPABASE_URL=xxx            # Supabase project URL
-NEXT_PUBLIC_SUPABASE_ANON_KEY=xxx       # Supabase anon key
+# Required
+VOYAGE_API_KEY=xxx                # Voyage AI (voyageai.com)
+GROQ_API_KEY=xxx                  # Groq (console.groq.com)
+GOOGLE_API_KEY=xxx                # Gemini 2.5 Flash (ai.google.dev)
+NEXT_PUBLIC_SUPABASE_URL=xxx      # Supabase project URL
+NEXT_PUBLIC_SUPABASE_ANON_KEY=xxx # Supabase anon key
+
+# Optional (fallback LLMs)
+ANTHROPIC_API_KEY=xxx             # Claude (baseline comparisons)
+CEREBRAS_API_KEY=xxx              # Cerebras fallback
+TOGETHER_API_KEY=xxx              # Together AI fallback
 ```
 
 ---
@@ -114,86 +154,29 @@ NEXT_PUBLIC_SUPABASE_ANON_KEY=xxx       # Supabase anon key
 
 | Method | Endpoint | Request | Response |
 |--------|----------|---------|----------|
-| POST | `/api/chat` | `{ query: string }` | `{ response: string, sources: Source[] }` |
-| POST | `/api/documents/upload` | `FormData (file)` | `{ documentId, path, url }` |
+| POST | `/api/chat` | `{ query, stream? }` | SSE stream → `{ response, sources }` |
+| POST | `/api/documents/upload` | `FormData(file)` | `{ success, message }` |
 | POST | `/api/documents/process` | `{ documentId }` | `{ success, chunks }` |
 | POST | `/api/leads` | `{ firstName, lastName, email, company?, phone? }` | `{ success }` |
 
 ---
 
-## Demo Flow
+## Deployment Checklist
 
-1. **Land on homepage** → See animated hero with KPIs
-2. **Step 1: Upload PDF** → Select a steel specification (e.g., 316 Stainless datasheet)
-3. **Wait for processing** → Green checkmark appears when indexed
-4. **Step 2: Ask question** → Click example or type: "What is yield strength of 316L?"
-5. **See response** → Answer with [1] citation pointing to uploaded document
-6. **Key selling point**: "Every answer has traceable citations for compliance reports"
-
----
-
-## Commands Reference
-
-```bash
-# Development
-npm run dev                    # Start dev server on :3000
-
-# Build & Test
-npm run build                  # Build for production
-npm run lint                   # Run ESLint
-npm test                       # Run Vitest tests
-
-# Deployment
-git push origin main           # Auto-deploys via GitHub Actions to Vercel
-```
-
----
-
-## Security Checklist
-
-### Implemented
-- [x] **File Size Limits**: Upload API enforces 50MB maximum
-- [x] **Input Validation**: Leads API validates length and format
-- [x] **Error Handling**: Server errors don't leak internal details
-- [x] **PDF Only**: Document upload restricted to PDF MIME type
-- [x] **Filename Sanitization**: Prevents path traversal attacks
-
-### Post-MVP
-- [ ] **Rate Limiting**: Add Upstash for API rate limiting
-- [ ] **Row Level Security**: Enable RLS in Supabase
-- [ ] **Authentication**: Add Clerk when needed
-
----
-
-## Troubleshooting
-
-### "No documents indexed"
-Upload a PDF first, then wait for processing to complete (status changes to "indexed").
-
-### "Embedding API error"
-Verify `VOYAGE_API_KEY` is set. Get a free key at https://www.voyageai.com (200M tokens FREE/month).
-
-### Build fails
-Run `npm run lint -- --fix` to auto-fix linting issues.
-
----
-
-## Tech Stack Summary
-
-| Component | Technology | Cost |
-|-----------|------------|------|
-| Frontend | Next.js 16, React 19, Tailwind CSS | Free |
-| Backend | Next.js API Routes | Free |
-| Database | Supabase PostgreSQL + pgvector | Free tier |
-| LLM | Groq Llama 3.3 70B (14,400 req/day) | Free tier |
-| Embeddings | Voyage AI voyage-3-lite (200M tokens/mo) | Free tier |
-| Hosting | Vercel | Free |
-| **Total** | | **$0/month** |
+- [ ] All env vars set in Vercel Dashboard
+- [ ] `npm run build` passes locally
+- [ ] `npm run lint` passes
+- [ ] `npm test` passes (unit tests)
+- [ ] Upload test PDF and verify indexing works
+- [ ] Run a query and verify cited response
+- [ ] Check SSE streaming works (no 504 timeout)
 
 ---
 
 ## Related Documentation
 
 - [README.md](README.md) - Project overview
+- [MCP.md](MCP.md) - MCP server configuration
 - [CONTRIBUTING.md](CONTRIBUTING.md) - How to contribute
 - [SECURITY.md](SECURITY.md) - Security policy
+- [TECHNICAL-NARRATIVE.md](TECHNICAL-NARRATIVE.md) - 5-stage RAG pipeline details

@@ -270,51 +270,56 @@ Component Breakdown:
 
 ---
 
-## RAG Accuracy Roadmap (57% → 90%)
+## RAG Accuracy Journey (57% → 81% → 90%+)
 
-### Current State
+### Phase 0: Baseline (Jan 2025)
 
-**Accuracy**: 57.14% (from golden dataset evaluation)
+**Accuracy**: 57.14% (initial golden dataset evaluation)
 - ✅ Hallucination rate: 0%
 - ❌ Numerical value mismatches
-- ❌ Cross-document confusion
+- ❌ Cross-document confusion (A789/A790)
 - ❌ Insufficient table extraction
 
-### Phase 1: Quick Wins (2-3 weeks) → 75% accuracy
+### Phase 1: Infrastructure Hardening → 81%
 
-1. **Replace LLM re-ranking with BGE cross-encoder**
-   - **Pros**: 20-40% faster, better numerical precision, no API cost
-   - **Cons**: 4-6 hours setup, limited to 512 tokens
-   - **Expected impact**: +10-15% accuracy
+Implemented multi-query RAG, hybrid search, RAGAS evaluation, document mapper, and tightened system prompts. 124-query evaluation across 4 ASTM docs. Citation rate: 100%.
 
-2. **Upgrade table extraction (pdfplumber + Camelot)**
-   - **Pros**: 73% vs 40% accuracy on bordered tables
-   - **Cons**: Requires system dependencies, 2x slower
-   - **Expected impact**: +15-20% accuracy
+### Phase 2: Targeted Optimization → **91.3% Achieved**
 
-3. **Implement DeepEval/RAGAS evaluation framework**
-   - **Pros**: 14+ metrics, explains WHY score is low
-   - **Cons**: ~$5-10/month API calls
-   - **Expected impact**: Enables systematic improvement
+Root cause analysis identified that **easy queries** (67.5% accuracy) were failing because the reranker truncated chunks to 400 chars, cutting ASTM table data mid-row. Eight targeted fixes applied:
 
-### Phase 2: Robustness (3-4 weeks) → 85% accuracy
+| Fix | Change | Est. Impact |
+|-----|--------|-------------|
+| Reranker window 400→800 chars | Table data visible during scoring | +4-6% |
+| Cross-document dedup guard | Prevent merging similar tables from different specs | +2-3% |
+| Broader document filter patterns | ASTM/API code-first + API spec detection | +1-2% |
+| BM25 keyword expansion (+16 terms) | Better keyword matching for spec terminology | +0-1% |
+| Candidate pool 30→40 | More chunks survive to reranking | +0-1% |
+| Sub-query aware reranking | Chunks relevant to sub-queries scored fairly | +0-1% |
+| Hardness prompt tightening | Prevent HRC/HBW scale hallucination | +0-1% |
+| BM25 score in relevance tag | LLM sees keyword match confidence | informational |
 
-4. **Enhanced chunking with numerical fingerprinting**
-   - Add metadata: `yield_strength: [170, 205]`
-   - Exact number matching in search
-   - **Expected impact**: +10-15% accuracy
+**Verified results** (80-query test, Feb 2025):
 
-5. **Self-hosted embeddings (Arctic-Embed-L)**
-   - Apache 2.0, no rate limits, 1024-dim drop-in replacement
-   - **Priority**: Medium (only if hitting Voyage limits)
+| Document | Accuracy | Source |
+|----------|----------|--------|
+| ASTM A872 | 10/10 (100%) | 100% |
+| API 5CT | 10/10 (100%) | 90% |
+| API 16C | 10/10 (100%) | 100% |
+| API 5CRA | 10/10 (100%) | 80% |
+| ASTM A789 | 9/10 (90%) | 100% |
+| API 6A | 9/10 (90%) | 100% |
+| ASTM A790 | 8/10 (80%) | 100% |
+| ASTM A312 | 7/10 (70%) | 100% |
+| **Overall** | **73/80 (91.3%)** | **96.3%** |
 
-### Phase 3: Optimization (4-6 weeks) → 90%+ accuracy
+Medium: 87.5% | Complex: 96.9% | P50: 13.0s | P95: 24.2s
 
-6. **Fine-tune embedding model on domain data**
-   - Generate 1000+ synthetic Q&A pairs from PDFs
-   - Fine-tune Arctic-Embed or ModernBERT
-   - **Expected impact**: +15-25% accuracy on domain queries
-   - **Cost**: ~$5-10 training (one-time)
+### Future: Further Optimization
+
+1. **BGE cross-encoder re-ranking** — 20-40% faster, no API cost
+2. **Numerical fingerprinting** in chunk metadata for exact number matching
+3. **Fine-tuned domain embeddings** on ASTM/API spec vocabulary
 
 ---
 
@@ -322,17 +327,17 @@ Component Breakdown:
 
 ### "Tell me about the RAG system you built."
 
-*"I built a production-grade RAG system for technical document Q&A with zero hallucinations and audit-ready citations. The system uses a 5-stage pipeline:*
+*"I built a production-grade RAG system for technical document Q&A with zero hallucinations and audit-ready citations. The system handles 8 indexed engineering specifications (ASTM and API) using a 5-stage pipeline:*
 
 1. *Query analysis with agentic decomposition (handles complex queries like 'Compare A vs B')*
 2. *Hybrid search combining BM25 keyword matching and vector similarity (1024-dim Voyage embeddings)*
-3. *LLM-based re-ranking to score top 20 candidates down to top 5*
-4. *Context building with precise page numbers and character offsets*
-5. *Strict document-only LLM generation with mandatory citations*
+3. *LLM-based re-ranking with sub-query awareness to score top 40 candidates down to top 5*
+4. *Context building with precise page numbers, document-scoped dedup to prevent cross-spec contamination*
+5. *Strict document-only LLM generation with mandatory citations via Gemini 2.5 Flash*
 
-*The key innovation was semantic chunking that preserves table structure and detects technical codes (UNS, ASTM, API), plus adaptive search weighting based on query characteristics. For exact code queries like 'UNS S31803', we boost BM25 to 60% vs vector's 40%. For natural language, it's balanced at 30/70.*
+*The key innovation was semantic chunking that preserves table structure and detects technical codes (UNS, ASTM, API), plus adaptive search weighting based on query characteristics. We went from 57% to 81% through infrastructure hardening, then to 91.3% by applying 8 targeted fixes based on root cause analysis — widening the reranker's chunk window from 400 to 800 chars so it could see table data, preventing cross-document content dedup, and broadening document filter patterns for API specs. Source citation accuracy is 96.3%.*
 
-*We achieved 57% accuracy initially (fixing dimension mismatch from 3072 to 1024), with a roadmap to 90% by upgrading table extraction (pdfplumber + Camelot) and replacing LLM re-ranking with BGE cross-encoder. The entire stack stays on free tiers: Voyage AI (200M tokens/month), Groq (14,400 req/day), Supabase pgvector."*
+*The entire stack stays on free tiers: Voyage AI (200M tokens/month), Anthropic Claude for generation, Supabase pgvector. Complex queries (comparisons, multi-step) score 96.9% — higher than medium queries."*
 
 ---
 
@@ -354,11 +359,11 @@ Component Breakdown:
 
 *"Three priorities:*
 
-1. *Replace LLM re-ranking with BGE cross-encoder (20-40% faster, more accurate for numerical queries)*
-2. *Upgrade table extraction from unpdf to pdfplumber + Camelot (73% vs 40% accuracy on bordered tables)*
-3. *Add numerical fingerprinting to chunk metadata for exact number matching*
+1. *Replace LLM re-ranking with BGE cross-encoder (20-40% faster, no API cost, better numerical precision)*
+2. *Add numerical fingerprinting to chunk metadata for exact number matching in search*
+3. *Fine-tune embeddings on domain vocabulary — ASTM specs, steel grades, UNS codes — for another 15-25% retrieval gain*
 
-*These changes would boost accuracy from 57% to ~85-90%. Longer-term, I'd fine-tune the embedding model on domain-specific data (ASTM specs, steel grades) for another 15-25% gain."*
+*We have an 80-query accuracy test suite covering all 8 indexed documents with RAGAS LLM-as-judge evaluation, so we can measure the impact of each change systematically."*
 
 ---
 
@@ -382,7 +387,7 @@ Component Breakdown:
 
 | Metric | Current | Target | Status |
 |--------|---------|--------|--------|
-| **RAG Accuracy** | 57.14% | 90% | 🟡 In Progress |
+| **RAG Accuracy** | **91.3%** (80 queries) | 90%+ | ✅ Target exceeded |
 | **Hallucination Rate** | 0% | 0% | ✅ Maintained |
 | **P95 Query Latency** | 9.8s | <10s | ✅ Within SLA |
 | **P99 Query Latency** | 14.5s | <15s | ✅ Within SLA |
@@ -398,7 +403,7 @@ Component Breakdown:
 2. **[lib/multi-query-rag.ts](lib/multi-query-rag.ts)** - Agentic retrieval with query decomposition
 3. **[lib/semantic-chunking.ts](lib/semantic-chunking.ts)** - Variable-size chunking with metadata
 4. **[lib/hybrid-search.ts](lib/hybrid-search.ts)** - Adaptive BM25 + vector fusion
-5. **[lib/reranker.ts](lib/reranker.ts)** - LLM-based scoring (soon: BGE cross-encoder)
+5. **[lib/reranker.ts](lib/reranker.ts)** - LLM-based scoring (800-char window, sub-query aware)
 6. **[lib/embeddings.ts](lib/embeddings.ts)** - Voyage AI with caching
 7. **[supabase/migrations/add-hybrid-search.sql](supabase/migrations/add-hybrid-search.sql)** - pgvector search function
 8. **[tests/stress/](tests/stress/)** - Comprehensive stress testing framework
@@ -410,7 +415,10 @@ Component Breakdown:
 - [x] Dimension mismatch fixed (3072 → 1024)
 - [x] Quick prompts removed
 - [x] Semantic chunking implemented
-- [x] Re-ranking added
+- [x] Re-ranking added (800-char window, sub-query aware)
+- [x] Cross-document dedup guard
+- [x] Broadened document filter (ASTM + API specs)
+- [x] 80-query accuracy test suite (8 docs)
 - [x] Query decomposition (agentic)
 - [x] Strict document-only prompting
 - [x] Stress testing framework
