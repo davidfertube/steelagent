@@ -21,6 +21,18 @@ export async function GET(request: NextRequest) {
       );
     }
 
+    // Validate path to prevent traversal attacks
+    if (
+      storagePath.includes("..") ||
+      storagePath.includes("//") ||
+      !storagePath.match(/^[\w\-./]+\.pdf$/i)
+    ) {
+      return NextResponse.json(
+        { error: "Invalid path" },
+        { status: 400 }
+      );
+    }
+
     // Download the PDF from Supabase storage
     const { data, error } = await supabase.storage
       .from("documents")

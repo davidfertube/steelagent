@@ -80,8 +80,15 @@ export async function POST(request: NextRequest) {
 /**
  * GET /api/feedback — Retrieve feedback entries (for diagnostic report)
  * Query params: limit (default 50), rating (filter), issue_type (filter)
+ * Requires FEEDBACK_ADMIN_KEY header for authorization.
  */
 export async function GET(request: NextRequest) {
+  const adminKey = process.env.FEEDBACK_ADMIN_KEY;
+  const providedKey = request.headers.get("x-admin-key");
+  if (!adminKey || providedKey !== adminKey) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
   const { searchParams } = new URL(request.url);
   const limit = Math.min(parseInt(searchParams.get("limit") || "50"), 200);
   const rating = searchParams.get("rating");

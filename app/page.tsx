@@ -444,14 +444,6 @@ export default function Home() {
 
   const handleComparisonResult = useCallback(
     (steelAgent: { response: string; sources: Source[]; confidence?: ConfidenceScore }, genericLLM: GenericLLMResponse) => {
-      // Debug: Log sources to see if document_url is present
-      console.log("[Comparison Result] Sources received:", steelAgent.sources.map(s => ({
-        ref: s.ref,
-        document: s.document,
-        hasUrl: !!s.document_url,
-        url: s.document_url?.slice(0, 50) + "...",
-      })));
-
       setError(null);
       setResponse(steelAgent.response);
       setSources(steelAgent.sources);

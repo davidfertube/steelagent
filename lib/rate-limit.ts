@@ -186,13 +186,7 @@ export function getRateLimitHeaders(result: RateLimitResult): Record<string, str
  * Handles proxied requests (Vercel, Cloudflare, etc.)
  */
 export function getClientIp(request: Request): string {
-  // Check common proxy headers
-  const forwardedFor = request.headers.get('x-forwarded-for');
-  if (forwardedFor) {
-    // Take first IP (original client)
-    return forwardedFor.split(',')[0].trim();
-  }
-
+  // Prefer platform-set headers (not spoofable) over x-forwarded-for
   const realIp = request.headers.get('x-real-ip');
   if (realIp) {
     return realIp;
@@ -201,6 +195,12 @@ export function getClientIp(request: Request): string {
   const cfConnectingIp = request.headers.get('cf-connecting-ip');
   if (cfConnectingIp) {
     return cfConnectingIp;
+  }
+
+  // x-forwarded-for as last resort — first IP is the client
+  const forwardedFor = request.headers.get('x-forwarded-for');
+  if (forwardedFor) {
+    return forwardedFor.split(',')[0].trim();
   }
 
   // Fallback - shouldn't happen in production
