@@ -46,7 +46,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "Invalid JSON" }, { status: 400 });
   }
 
-  const { query, verified = false, stream = true } = body;
+  const { query, verified = false, stream = true, documentId } = body;
 
   // Validate query
   const validation = validateQuery(query);
@@ -59,7 +59,7 @@ export async function POST(request: NextRequest) {
 
   // If streaming is disabled, use the original non-streaming path
   if (!stream) {
-    return handleNonStreamingRequest(cleanedQuery, verified);
+    return handleNonStreamingRequest(cleanedQuery, verified, documentId);
   }
 
   // ========================================
@@ -81,7 +81,7 @@ export async function POST(request: NextRequest) {
 
       try {
         // Process the query
-        const result = await processRAGQuery(cleanedQuery, verified);
+        const result = await processRAGQuery(cleanedQuery, verified, documentId);
 
         // Send the final response
         controller.enqueue(encoder.encode(`data: ${JSON.stringify(result)}\n\n`));
@@ -109,9 +109,9 @@ export async function POST(request: NextRequest) {
 /**
  * Non-streaming request handler (for backwards compatibility)
  */
-async function handleNonStreamingRequest(cleanedQuery: string, verified: boolean) {
+async function handleNonStreamingRequest(cleanedQuery: string, verified: boolean, documentId?: number) {
   try {
-    const result = await processRAGQuery(cleanedQuery, verified);
+    const result = await processRAGQuery(cleanedQuery, verified, documentId);
     return NextResponse.json(result);
   } catch (error) {
     const { response, status } = handleApiError(error, "Chat API");
@@ -122,7 +122,7 @@ async function handleNonStreamingRequest(cleanedQuery: string, verified: boolean
 /**
  * Core RAG processing logic (shared by streaming and non-streaming)
  */
-async function processRAGQuery(cleanedQuery: string, verified: boolean) {
+async function processRAGQuery(cleanedQuery: string, verified: boolean, documentId?: number) {
   // DEBUG: Log incoming query to trace request flow
   console.log(`[Chat API] Incoming query: "${cleanedQuery}"`);
 
@@ -180,7 +180,7 @@ async function processRAGQuery(cleanedQuery: string, verified: boolean) {
       // Use enhanced query for search, but original query is shown to user
       // Reduced from 5 to 3 chunks to stay under Groq's 6000 TPM free tier limit
       const ragResult = await withTimeout(
-        multiQueryRAG(searchQuery, 3),
+        multiQueryRAG(searchQuery, 3, documentId),
         TIMEOUTS.MULTI_QUERY_RAG || 45000, // Use dedicated timeout for RAG pipeline
         "Multi-query RAG"
       );

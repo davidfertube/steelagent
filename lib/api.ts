@@ -191,7 +191,7 @@ export class ApiRequestError extends Error {
  * @param query - The user's question
  * @returns The AI-generated response with source citations
  */
-export async function queryKnowledgeBase(query: string): Promise<ChatResponse> {
+export async function queryKnowledgeBase(query: string, documentId?: number): Promise<ChatResponse> {
   try {
     const controller = new AbortController();
     // 2 minute timeout (120s) - exceeds server RAG pipeline timeout (75s)
@@ -202,7 +202,7 @@ export async function queryKnowledgeBase(query: string): Promise<ChatResponse> {
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({ query, stream: true }),
+      body: JSON.stringify({ query, stream: true, ...(documentId && { documentId }) }),
       signal: controller.signal,
     });
 
@@ -312,9 +312,9 @@ export async function queryGenericLLM(query: string): Promise<GenericLLMResponse
  * @param query - The user's question
  * @returns Both responses for side-by-side comparison
  */
-export async function queryWithComparison(query: string): Promise<ComparisonResult> {
+export async function queryWithComparison(query: string, documentId?: number): Promise<ComparisonResult> {
   const [steelAgent, genericLLM] = await Promise.all([
-    queryKnowledgeBase(query),
+    queryKnowledgeBase(query, documentId),
     queryGenericLLM(query),
   ]);
 

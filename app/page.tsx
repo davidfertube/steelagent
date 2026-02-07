@@ -560,7 +560,8 @@ export default function Home() {
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [hasDocumentUploaded, setHasDocumentUploaded] = useState(false);
+  const [uploadedDocumentId, setUploadedDocumentId] = useState<number | null>(null);
+  const hasDocumentUploaded = !!uploadedDocumentId;
 
   // Generic LLM response for comparison display
   const [genericLLMResponse, setGenericLLMResponse] = useState<string | null>(null);
@@ -587,8 +588,8 @@ export default function Home() {
     }
   }, [isLoading]);
 
-  const handleUploadComplete = useCallback((hasCompleted: boolean) => {
-    setHasDocumentUploaded(hasCompleted);
+  const handleUploadComplete = useCallback((documentId: number | null) => {
+    setUploadedDocumentId(documentId);
   }, []);
 
   const handleResult = useCallback((result: string, resultSources: Source[]) => {
@@ -1117,6 +1118,7 @@ export default function Home() {
                       onError={handleError}
                       onLoadingChange={handleLoadingChange}
                       onComparisonResult={handleComparisonResult}
+                      documentId={uploadedDocumentId}
                     />
                   </motion.div>
 

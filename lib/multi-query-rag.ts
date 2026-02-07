@@ -71,7 +71,8 @@ function mergeResults(results: HybridSearchResult[][]): HybridSearchResult[] {
  */
 export async function multiQueryRAG(
   query: string,
-  topK: number = 5
+  topK: number = 5,
+  filterDocumentId?: number
 ): Promise<MultiQueryRAGResult> {
   const startTime = Date.now();
   console.log(`[Multi-Query RAG] Processing query: "${query}"`);
@@ -110,10 +111,15 @@ export async function multiQueryRAG(
   // This is CRITICAL for fixing A789/A790 confusion
   // Pass full query to catch "per A790" patterns that preprocessing might miss
   const processed = preprocessQuery(query);
-  const documentIds = await resolveSpecsToDocuments(processed.extractedCodes, query);
+  // If a specific document was uploaded, scope search to that document
+  // Otherwise, fall back to spec-code-based filtering
+  const documentIds = filterDocumentId
+    ? [filterDocumentId]
+    : await resolveSpecsToDocuments(processed.extractedCodes, query);
 
   if (documentIds) {
-    console.log(`[Multi-Query RAG] Document filter: [${documentIds.join(", ")}] for ASTM codes: ${processed.extractedCodes.astm?.join(", ")}`);
+    const reason = filterDocumentId ? "uploaded document" : `ASTM codes: ${processed.extractedCodes.astm?.join(", ")}`;
+    console.log(`[Multi-Query RAG] Document filter: [${documentIds.join(", ")}] for ${reason}`);
   }
 
   // Step 1: Decompose query (skip for simple queries)

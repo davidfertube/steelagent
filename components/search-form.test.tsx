@@ -90,7 +90,7 @@ describe('SearchForm', () => {
     fireEvent.click(button);
 
     await waitFor(() => {
-      expect(queryKnowledgeBase).toHaveBeenCalledWith('What is A106 Grade B?');
+      expect(queryKnowledgeBase).toHaveBeenCalledWith('What is A106 Grade B?', undefined);
       expect(mockOnResult).toHaveBeenCalledWith('A106 Grade B is a seamless carbon steel pipe.', mockSources);
     });
   });

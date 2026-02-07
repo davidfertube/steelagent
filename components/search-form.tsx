@@ -14,6 +14,7 @@ interface SearchFormProps {
     steelAgent: { response: string; sources: Source[] },
     genericLLM: GenericLLMResponse
   ) => void;
+  documentId?: number | null;
 }
 
 
@@ -22,6 +23,7 @@ export function SearchForm({
   onError,
   onLoadingChange,
   onComparisonResult,
+  documentId,
 }: SearchFormProps) {
   const [query, setQuery] = useState("");
   const [isLoading, setIsLoading] = useState(false);
@@ -38,14 +40,14 @@ export function SearchForm({
       try {
         if (onComparisonResult) {
           // Always run comparison mode
-          const result = await queryWithComparison(query);
+          const result = await queryWithComparison(query, documentId ?? undefined);
           onComparisonResult(
             { response: result.steelAgent.response, sources: result.steelAgent.sources || [] },
             result.genericLLM
           );
         } else {
           // Fallback to single query if no comparison handler
-          const result = await queryKnowledgeBase(query);
+          const result = await queryKnowledgeBase(query, documentId ?? undefined);
           onResult(result.response, result.sources || []);
         }
       } catch (error) {
@@ -59,7 +61,7 @@ export function SearchForm({
         onLoadingChange?.(false);
       }
     },
-    [query, isLoading, onResult, onError, onLoadingChange, onComparisonResult]
+    [query, isLoading, onResult, onError, onLoadingChange, onComparisonResult, documentId]
   );
 
 

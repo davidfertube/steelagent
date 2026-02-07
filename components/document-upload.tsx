@@ -16,18 +16,19 @@ interface UploadedFile {
 }
 
 interface DocumentUploadProps {
-  onUploadComplete?: (hasCompleted: boolean) => void;
+  onUploadComplete?: (documentId: number | null) => void;
 }
 
 export function DocumentUpload({ onUploadComplete }: DocumentUploadProps) {
   const [file, setFile] = useState<UploadedFile | null>(null);
   const [isDragging, setIsDragging] = useState(false);
   const [uploadProgress, setUploadProgress] = useState<number>(0);
+  const [currentDocumentId, setCurrentDocumentId] = useState<number | null>(null);
 
   // Notify parent when file completes upload
   useEffect(() => {
-    onUploadComplete?.(file?.status === "complete" || false);
-  }, [file, onUploadComplete]);
+    onUploadComplete?.(file?.status === "complete" ? currentDocumentId : null);
+  }, [file, currentDocumentId, onUploadComplete]);
 
   const handleDrop = useCallback((e: React.DragEvent) => {
     e.preventDefault();
@@ -90,6 +91,7 @@ export function DocumentUpload({ onUploadComplete }: DocumentUploadProps) {
       }
 
       const { documentId, uploadUrl, path } = await urlResponse.json();
+      setCurrentDocumentId(documentId);
 
       // ========================================
       // Step 2: Upload Directly to Supabase Storage
@@ -184,11 +186,13 @@ export function DocumentUpload({ onUploadComplete }: DocumentUploadProps) {
         prev ? { ...prev, status: "error", error: errorMessage } : null
       );
       setUploadProgress(0);
+      setCurrentDocumentId(null);
     }
   };
 
   const removeFile = () => {
     setFile(null);
+    setCurrentDocumentId(null);
   };
 
   const formatFileSize = (bytes: number) => {
