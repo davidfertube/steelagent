@@ -4,14 +4,14 @@ import { useState, useCallback, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { ArrowRight, Loader2, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { queryKnowledgeBase, queryWithComparison, ApiRequestError, Source, GenericLLMResponse } from "@/lib/api";
+import { queryKnowledgeBase, queryWithComparison, ApiRequestError, Source, GenericLLMResponse, ConfidenceScore } from "@/lib/api";
 
 interface SearchFormProps {
   onResult: (response: string, sources: Source[]) => void;
   onError: (error: string) => void;
   onLoadingChange?: (loading: boolean) => void;
   onComparisonResult?: (
-    steelAgent: { response: string; sources: Source[] },
+    steelAgent: { response: string; sources: Source[]; confidence?: ConfidenceScore },
     genericLLM: GenericLLMResponse
   ) => void;
   documentId?: number | null;
@@ -42,7 +42,7 @@ export function SearchForm({
           // Always run comparison mode
           const result = await queryWithComparison(query, documentId ?? undefined);
           onComparisonResult(
-            { response: result.steelAgent.response, sources: result.steelAgent.sources || [] },
+            { response: result.steelAgent.response, sources: result.steelAgent.sources || [], confidence: result.steelAgent.confidence },
             result.genericLLM
           );
         } else {

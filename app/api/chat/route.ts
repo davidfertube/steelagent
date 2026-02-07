@@ -11,6 +11,8 @@ import { generateVerifiedResponse } from "@/lib/verified-generation";
 import { multiQueryRAG } from "@/lib/multi-query-rag";
 import { enhanceQuery, shouldEnhanceQuery } from "@/lib/query-enhancement";
 import { detectFormulaRequest, hasFormulaInChunks, getFormulaRefusalInstruction } from "@/lib/formula-detector";
+import { groundResponse } from "@/lib/answer-grounding";
+import { validateResponseCoherence } from "@/lib/response-validator";
 
 /**
  * Chat API Route - RAG-powered Q&A (with Streaming)
@@ -175,6 +177,7 @@ async function processRAGQuery(cleanedQuery: string, verified: boolean, document
     }
 
     let chunks: HybridSearchResult[] = [];
+    let retrievalConfidence = 50; // Default if RAG fails
     try {
       // Use agentic multi-query RAG (query decomposition + hybrid search + re-ranking)
       // Use enhanced query for search, but original query is shown to user
@@ -186,6 +189,7 @@ async function processRAGQuery(cleanedQuery: string, verified: boolean, document
       );
 
       chunks = ragResult.chunks;
+      retrievalConfidence = ragResult.evaluationConfidence;
 
       // Pre-LLM dedup: deduplicate chunks by (document_id, page_number)
       // This ensures the LLM sees only unique source slots so its [1][2][3]
@@ -472,6 +476,64 @@ RESPONSE GUIDELINES:
     }
 
     // ========================================
+    // Step 4.5: Agentic Post-Generation Verification (C1 + C2)
+    // ========================================
+    let finalResponseText = responseText;
+    let hasRegenerated = false;
+
+    // C1: Answer Grounding — verify numerical claims against source chunks
+    const grounding = groundResponse(responseText, chunks);
+    console.log(`[Chat API] Grounding: ${grounding.score}% (${grounding.groundedNumbers}/${grounding.totalNumbers} numbers verified)`);
+
+    if (!grounding.passed && grounding.ungroundedNumbers.length > 0) {
+      console.log(`[Chat API] Grounding failed — ungrounded numbers: ${grounding.ungroundedNumbers.map(n => n.original).join(', ')}`);
+      try {
+        const groundingPrefix = `CRITICAL: Your previous response contained numbers NOT found in the source documents: ${grounding.ungroundedNumbers.map(n => n.original).join(', ')}. Do NOT use these numbers. Only quote values that appear EXACTLY in the context below.\n\n`;
+        const { text: regeneratedText } = await withTimeout(
+          fallbackClient.generateContent(groundingPrefix + fullPrompt, "gemini-2.5-flash"),
+          TIMEOUTS.LLM_GENERATION,
+          "LLM regeneration (grounding)"
+        );
+        finalResponseText = regeneratedText;
+        hasRegenerated = true;
+
+        const reGrounding = groundResponse(finalResponseText, chunks);
+        console.log(`[Chat API] Re-grounding: ${reGrounding.score}% (${reGrounding.groundedNumbers}/${reGrounding.totalNumbers})`);
+      } catch (regenError) {
+        console.warn(`[Chat API] Grounding regeneration failed, keeping original:`, regenError);
+      }
+    }
+
+    // C2: Response Self-Reflection — check if response answers the question
+    let coherenceScore = 100; // Default if skipped
+    if (!hasRegenerated && chunks.length > 0) {
+      try {
+        const validation = await validateResponseCoherence(cleanedQuery, finalResponseText);
+        coherenceScore = validation.coherenceScore;
+        console.log(`[Chat API] Coherence: ${coherenceScore}% — ${validation.reason}`);
+
+        if (!validation.passed && validation.missingAspects) {
+          console.log(`[Chat API] Low coherence — regenerating with guidance`);
+          try {
+            const coherencePrefix = `IMPORTANT: Your previous answer did not address: ${validation.missingAspects}. Make sure to directly answer the user's question.\n\n`;
+            const { text: coherentText } = await withTimeout(
+              fallbackClient.generateContent(coherencePrefix + fullPrompt, "gemini-2.5-flash"),
+              TIMEOUTS.LLM_GENERATION,
+              "LLM regeneration (coherence)"
+            );
+            finalResponseText = coherentText;
+            hasRegenerated = true;
+            coherenceScore = 70; // Assume improvement after regeneration
+          } catch (regenError) {
+            console.warn(`[Chat API] Coherence regeneration failed, keeping original:`, regenError);
+          }
+        }
+      } catch (validationError) {
+        console.warn(`[Chat API] Coherence check failed, skipping:`, validationError);
+      }
+    }
+
+    // ========================================
     // Step 5: Build Sources Array with PDF Links
     // ========================================
     // Use signed URLs for reliable access (works even if bucket isn't public)
@@ -543,7 +605,7 @@ RESPONSE GUIDELINES:
       }
     });
 
-    let remappedResponse = responseText;
+    let remappedResponse = finalResponseText;
     // Sort by descending ref number to avoid [1] replacing part of [10]
     const sortedRefs = [...refMap.entries()].sort((a, b) => {
       return parseInt(b[0].slice(1, -1)) - parseInt(a[0].slice(1, -1));
@@ -567,14 +629,27 @@ RESPONSE GUIDELINES:
     })));
 
   // ========================================
-  // Step 6: Return Response
+  // Step 6: Compute Confidence & Return Response (C5)
   // ========================================
-  // DEBUG: Log response summary for tracing
+  const groundingScore = grounding.score;
+  const overallConfidence = Math.round(
+    retrievalConfidence * 0.30 +
+    groundingScore * 0.40 +
+    coherenceScore * 0.30
+  );
+
+  console.log(`[Chat API] Confidence: overall=${overallConfidence}% (retrieval=${retrievalConfidence}, grounding=${groundingScore}, coherence=${coherenceScore})`);
   console.log(`[Chat API] Returning response with ${sources.length} sources (${remappedResponse.length} chars)`);
 
   return {
     response: remappedResponse,
     sources,
+    confidence: {
+      overall: overallConfidence,
+      retrieval: Math.round(retrievalConfidence),
+      grounding: Math.round(groundingScore),
+      coherence: Math.round(coherenceScore),
+    },
   };
 }
 

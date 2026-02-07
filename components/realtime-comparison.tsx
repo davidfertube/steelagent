@@ -13,7 +13,7 @@ import {
   Check,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Source } from "@/lib/api";
+import { Source, ConfidenceScore } from "@/lib/api";
 
 interface RealtimeComparisonProps {
   steelAgentResponse: string | null;
@@ -21,6 +21,7 @@ interface RealtimeComparisonProps {
   genericLLMResponse: string | null;
   isLoading: boolean;
   error: string | null;
+  confidence?: ConfidenceScore | null;
 }
 
 // Typewriter effect hook
@@ -109,6 +110,7 @@ export function RealtimeComparison({
   genericLLMResponse,
   isLoading,
   error,
+  confidence,
 }: RealtimeComparisonProps) {
   const steelAgent = useTypewriter(steelAgentResponse || "", 12);
   const genericLLM = useTypewriter(genericLLMResponse || "", 12);
@@ -257,6 +259,29 @@ export function RealtimeComparison({
                         <SourceCitation key={source.ref} source={source} index={index} />
                       ))}
                     </div>
+
+                    {/* Confidence Badge */}
+                    {confidence && (
+                      <motion.div
+                        initial={{ opacity: 0, scale: 0.9 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        transition={{ delay: 0.6 }}
+                        className="mt-3 flex items-center gap-2"
+                      >
+                        <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${
+                          confidence.overall >= 80
+                            ? 'bg-green-100 text-green-700 border border-green-300'
+                            : confidence.overall >= 50
+                            ? 'bg-amber-100 text-amber-700 border border-amber-300'
+                            : 'bg-red-100 text-red-700 border border-red-300'
+                        }`}>
+                          {confidence.overall}% confident
+                        </span>
+                        <span className="text-[10px] text-muted-foreground">
+                          Retrieval {confidence.retrieval}% | Grounding {confidence.grounding}% | Coherence {confidence.coherence}%
+                        </span>
+                      </motion.div>
+                    )}
 
                     {/* AI-assisted disclaimer */}
                     <motion.div

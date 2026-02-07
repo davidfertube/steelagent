@@ -1,0 +1,102 @@
+/**
+ * Always-On Answer Grounding
+ *
+ * Lightweight numerical grounding check for the standard RAG path.
+ * Extracts numbers from the LLM response and verifies each exists
+ * in at least one source chunk. Pure regex — no LLM calls needed.
+ *
+ * This catches hallucinated numbers (e.g., LLM says "65 ksi" when
+ * chunks say "70 ksi") without the overhead of the full verified
+ * generation pipeline.
+ */
+
+import { extractNumericalValues } from "./structured-output";
+
+export interface GroundingResult {
+  /** Percentage of response numbers found in chunks (0-100) */
+  score: number;
+  /** True if score >= 50 */
+  passed: boolean;
+  /** Total numbers extracted from the response */
+  totalNumbers: number;
+  /** Numbers verified against source chunks */
+  groundedNumbers: number;
+  /** Numbers NOT found in any chunk */
+  ungroundedNumbers: { value: number; unit: string; original: string }[];
+}
+
+/**
+ * Check whether numerical values in the LLM response are grounded
+ * in the source chunks.
+ *
+ * Uses extractNumericalValues() from structured-output.ts to find
+ * numbers with units (MPa, ksi, HRC, %, etc.) and verifies each
+ * exists in at least one chunk with 0.01 tolerance.
+ *
+ * @param responseText - The LLM's generated response
+ * @param chunks - Source chunks used for generation
+ * @returns Grounding result with score and ungrounded numbers
+ */
+export function groundResponse(
+  responseText: string,
+  chunks: { content: string }[]
+): GroundingResult {
+  // Extract numbers from response
+  const responseNumbers = extractNumericalValues(responseText);
+
+  if (responseNumbers.length === 0) {
+    // No numerical claims to verify — pass by default
+    return {
+      score: 100,
+      passed: true,
+      totalNumbers: 0,
+      groundedNumbers: 0,
+      ungroundedNumbers: [],
+    };
+  }
+
+  // Collect all numbers from all source chunks into a flat set
+  const sourceNumbers = new Set<number>();
+  for (const chunk of chunks) {
+    const chunkNumbers = extractNumericalValues(chunk.content);
+    for (const n of chunkNumbers) {
+      sourceNumbers.add(n.value);
+    }
+  }
+
+  // Verify each response number against source numbers
+  const ungrounded: GroundingResult["ungroundedNumbers"] = [];
+  let groundedCount = 0;
+
+  for (const rn of responseNumbers) {
+    const isGrounded = hasMatchingNumber(rn.value, sourceNumbers);
+    if (isGrounded) {
+      groundedCount++;
+    } else {
+      ungrounded.push(rn);
+    }
+  }
+
+  const score = Math.round((groundedCount / responseNumbers.length) * 100);
+
+  return {
+    score,
+    passed: score >= 50,
+    totalNumbers: responseNumbers.length,
+    groundedNumbers: groundedCount,
+    ungroundedNumbers: ungrounded,
+  };
+}
+
+/**
+ * Check if a number exists in the source set with 0.01 tolerance.
+ * Same tolerance as claim-verification.ts verifyNumbers().
+ */
+function hasMatchingNumber(value: number, sourceNumbers: Set<number>): boolean {
+  for (const source of sourceNumbers) {
+    if (Math.abs(value - source) < 0.01) {
+      return true;
+    }
+  }
+  return false;
+}

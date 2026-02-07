@@ -24,6 +24,8 @@ import {
   analyzeQueryComplexity,
   timedOperation,
 } from "./latency-optimizer";
+import { evaluateRetrieval } from "./retrieval-evaluator";
+import { validateCoverage } from "./coverage-validator";
 
 export interface MultiQueryRAGResult {
   chunks: HybridSearchResult[];
@@ -34,6 +36,8 @@ export interface MultiQueryRAGResult {
     reranked: boolean;
     documentFilter: number[] | null;
   };
+  /** Retrieval evaluation confidence (0-100) for downstream confidence scoring */
+  evaluationConfidence: number;
 }
 
 /**
@@ -53,6 +57,52 @@ function mergeResults(results: HybridSearchResult[][]): HybridSearchResult[] {
   }
 
   return merged;
+}
+
+/**
+ * Rerank candidates and select top K. Consolidates the pattern
+ * used in initial ranking and retry paths.
+ */
+async function rerankAndSelect(
+  query: string,
+  candidates: HybridSearchResult[],
+  topK: number,
+  subqueries: string[]
+): Promise<HybridSearchResult[]> {
+  if (candidates.length > topK) {
+    try {
+      const ranked = await rerankChunks(query, candidates, topK, subqueries);
+      return ranked.map(r => r.chunk);
+    } catch {
+      return candidates.sort((a, b) => b.combined_score - a.combined_score).slice(0, topK);
+    }
+  }
+  return candidates.sort((a, b) => b.combined_score - a.combined_score).slice(0, topK);
+}
+
+/**
+ * Extract section-related keywords for ASTM convention-aware retry.
+ * Maps common property queries to standard ASTM table/section references.
+ */
+function extractSectionKeywords(query: string): string[] {
+  const keywords: string[] = [];
+  const lower = query.toLowerCase();
+
+  // Match explicit section/table references
+  const sectionMatch = query.match(/(?:section|table|clause|annex|appendix)\s+\w+/gi);
+  if (sectionMatch) {
+    keywords.push(...sectionMatch);
+  }
+
+  // Map property queries to ASTM section conventions
+  if (/heat\s*treat/i.test(lower)) keywords.push('heat treatment', 'Section 6');
+  if (/mechanic/i.test(lower)) keywords.push('mechanical properties', 'tensile requirements');
+  if (/chemic/i.test(lower)) keywords.push('chemical composition', 'chemical requirements');
+  if (/hardness/i.test(lower)) keywords.push('hardness', 'mechanical requirements');
+  if (/impact|charpy/i.test(lower)) keywords.push('impact test', 'supplementary requirements');
+  if (/scope/i.test(lower)) keywords.push('scope', 'Section 1');
+
+  return keywords;
 }
 
 /**
@@ -122,6 +172,12 @@ export async function multiQueryRAG(
     console.log(`[Multi-Query RAG] Document filter: [${documentIds.join(", ")}] for ${reason}`);
   }
 
+  // Extract section references for section-aware search boosting
+  const sectionRefs = processed.extractedCodes.sectionRef || null;
+  if (sectionRefs) {
+    console.log(`[Multi-Query RAG] Section refs detected: [${sectionRefs.join(", ")}]`);
+  }
+
   // Step 1: Decompose query (skip for simple queries)
   let decomposition: DecomposedQuery;
   if (complexity.skipDecomposition) {
@@ -151,16 +207,39 @@ export async function multiQueryRAG(
 
   const allResults = await Promise.all(
     decomposition.subqueries.map(async (subquery) => {
-      // Pass document filter to ensure we only search relevant specs
-      const results = await searchWithFallback(subquery, candidatesPerSubquery, documentIds);
+      // Pass document filter and section refs to ensure relevant search
+      const results = await searchWithFallback(subquery, candidatesPerSubquery, documentIds, sectionRefs);
       console.log(`[Multi-Query RAG] Sub-query "${subquery}" returned ${results.length} results`);
       return results;
     })
   );
 
   // Step 3: Merge and deduplicate results
-  const merged = mergeResults(allResults);
+  let merged = mergeResults(allResults);
   console.log(`[Multi-Query RAG] Merged to ${merged.length} unique candidates`);
+
+  // Step 3.5: Coverage validation (C4) — ensure all sub-queries have results
+  if (decomposition.subqueries.length > 1) {
+    const coverage = validateCoverage(decomposition, allResults);
+    console.log(`[Multi-Query RAG] Coverage: ${Math.round(coverage.coverageRatio * 100)}% (${decomposition.subqueries.length - coverage.missingSubqueries.length}/${decomposition.subqueries.length} sub-queries)`);
+
+    if (!coverage.covered) {
+      console.log(`[Multi-Query RAG] Missing sub-queries: ${coverage.missingSubqueries.join(', ')} — triggering gap fill`);
+      try {
+        const gapResults = await Promise.all(
+          coverage.missingSubqueries.map(async (subquery) => {
+            const results = await searchWithFallback(subquery, candidatesPerSubquery * 2, documentIds, sectionRefs);
+            console.log(`[Multi-Query RAG] Gap fill for "${subquery}" returned ${results.length} results`);
+            return results;
+          })
+        );
+        merged = mergeResults([merged, ...gapResults]);
+        console.log(`[Multi-Query RAG] After gap fill: ${merged.length} unique candidates`);
+      } catch (gapError) {
+        console.warn(`[Multi-Query RAG] Gap fill failed:`, gapError);
+      }
+    }
+  }
 
   // Step 4: Re-rank against ORIGINAL query
   // This ensures the final results are most relevant to what user actually asked
@@ -200,9 +279,73 @@ export async function multiQueryRAG(
     console.log(`[Multi-Query RAG] Returning all ${finalChunks.length} candidates`);
   }
 
-  // CACHE FULLY DISABLED: Previously cached responses here, but cache was causing
-  // identical results for different queries. Removed both cache read and write.
-  // Embedding cache (for Voyage AI) still provides optimization.
+  // ========================================
+  // Step 5: Evaluate retrieval quality and retry if needed (agentic loop)
+  // ========================================
+  const evaluation = await evaluateRetrieval(query, finalChunks);
+  console.log(`[Multi-Query RAG] Retrieval evaluation: confidence=${evaluation.confidence}, relevant=${evaluation.isRelevant}, reason="${evaluation.reason}"`);
+
+  if (!evaluation.isRelevant && evaluation.suggestedRetryStrategy) {
+    const strategy = evaluation.suggestedRetryStrategy;
+    console.log(`[Multi-Query RAG] Low confidence — adaptive retry with strategy: ${strategy}`);
+
+    try {
+      let retryChunks: HybridSearchResult[];
+
+      if (strategy === 'broader_search') {
+        // Remove document/section filters, search all docs with more candidates
+        const retryCandidates = Math.ceil(60 / decomposition.subqueries.length);
+        const retryResults = await Promise.all(
+          decomposition.subqueries.map(async (subquery) => {
+            return await searchWithFallback(subquery, retryCandidates, null, null);
+          })
+        );
+        const retryMerged = mergeResults(retryResults);
+        console.log(`[Multi-Query RAG] Broader retry: ${retryMerged.length} candidates (no filters)`);
+        retryChunks = await rerankAndSelect(query, retryMerged, topK, decomposition.subqueries);
+      } else if (strategy === 'section_lookup') {
+        // Augment sub-queries with section keywords for better section matching
+        const sectionKeywords = extractSectionKeywords(query);
+        const retryCandidates = Math.ceil(40 / decomposition.subqueries.length);
+        const retryResults = await Promise.all(
+          decomposition.subqueries.map(async (subquery) => {
+            const augmented = sectionKeywords.length > 0
+              ? `${subquery} ${sectionKeywords.join(' ')}`
+              : subquery;
+            return await searchWithFallback(augmented, retryCandidates, documentIds, sectionRefs || sectionKeywords);
+          })
+        );
+        const retryMerged = mergeResults(retryResults);
+        console.log(`[Multi-Query RAG] Section retry: ${retryMerged.length} candidates (augmented with: ${sectionKeywords.join(', ')})`);
+        retryChunks = await rerankAndSelect(query, retryMerged, topK, decomposition.subqueries);
+      } else {
+        // 'more_candidates' — current behavior: 2x candidates
+        const retryCandidates = Math.ceil(80 / decomposition.subqueries.length);
+        const retryResults = await Promise.all(
+          decomposition.subqueries.map(async (subquery) => {
+            return await searchWithFallback(subquery, retryCandidates, documentIds, sectionRefs);
+          })
+        );
+        const retryMerged = mergeResults(retryResults);
+        console.log(`[Multi-Query RAG] More candidates retry: ${retryMerged.length} candidates (2x)`);
+        retryChunks = await rerankAndSelect(query, retryMerged, topK, decomposition.subqueries);
+      }
+
+      // Evaluate retry results
+      const retryEvaluation = await evaluateRetrieval(query, retryChunks);
+      console.log(`[Multi-Query RAG] Retry evaluation: confidence=${retryEvaluation.confidence}`);
+
+      // Use whichever result set has higher confidence
+      if (retryEvaluation.confidence > evaluation.confidence) {
+        console.log(`[Multi-Query RAG] Retry improved confidence: ${evaluation.confidence} → ${retryEvaluation.confidence}`);
+        finalChunks = retryChunks;
+      } else {
+        console.log(`[Multi-Query RAG] Retry did not improve, keeping original results`);
+      }
+    } catch (retryError) {
+      console.warn(`[Multi-Query RAG] Retry failed, keeping original results:`, retryError);
+    }
+  }
 
   const totalTime = Date.now() - startTime;
   console.log(`[Multi-Query RAG] Total pipeline time: ${totalTime}ms`);
@@ -216,6 +359,7 @@ export async function multiQueryRAG(
       reranked,
       documentFilter: documentIds,
     },
+    evaluationConfidence: evaluation.confidence,
   };
 }
 

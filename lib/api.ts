@@ -148,9 +148,17 @@ export interface Source {
 }
 
 // Response types
+export interface ConfidenceScore {
+  overall: number;
+  retrieval: number;
+  grounding: number;
+  coherence: number;
+}
+
 export interface ChatResponse {
   response: string;
   sources: Source[];
+  confidence?: ConfidenceScore;
 }
 
 export interface GenericLLMResponse {

@@ -11,7 +11,7 @@ import { SearchForm } from "@/components/search-form";
 import { RealtimeComparison } from "@/components/realtime-comparison";
 import { DocumentUpload } from "@/components/document-upload";
 
-import { Source, GenericLLMResponse } from "@/lib/api";
+import { Source, GenericLLMResponse, ConfidenceScore } from "@/lib/api";
 import { NetworkVisualization } from "@/components/network-visualization";
 
 // Spline 3D Animation Component
@@ -565,6 +565,7 @@ export default function Home() {
 
   // Generic LLM response for comparison display
   const [genericLLMResponse, setGenericLLMResponse] = useState<string | null>(null);
+  const [confidence, setConfidence] = useState<ConfidenceScore | null>(null);
 
   // Refs for auto-scrolling
   const step2Ref = useRef<HTMLDivElement>(null);
@@ -610,11 +611,12 @@ export default function Home() {
       setSources([]);
       setError(null);
       setGenericLLMResponse(null);
+      setConfidence(null);
     }
   }, []);
 
   const handleComparisonResult = useCallback(
-    (steelAgent: { response: string; sources: Source[] }, genericLLM: GenericLLMResponse) => {
+    (steelAgent: { response: string; sources: Source[]; confidence?: ConfidenceScore }, genericLLM: GenericLLMResponse) => {
       // Debug: Log sources to see if document_url is present
       console.log("[Comparison Result] Sources received:", steelAgent.sources.map(s => ({
         ref: s.ref,
@@ -627,6 +629,7 @@ export default function Home() {
       setResponse(steelAgent.response);
       setSources(steelAgent.sources);
       setGenericLLMResponse(genericLLM.response);
+      setConfidence(steelAgent.confidence ?? null);
     },
     []
   );
@@ -1162,6 +1165,7 @@ export default function Home() {
                           genericLLMResponse={genericLLMResponse}
                           isLoading={isLoading}
                           error={error}
+                          confidence={confidence}
                         />
                       </motion.div>
                     </>

@@ -30,6 +30,8 @@ export interface ProcessedQuery {
     grade?: string[];
     /** NACE references (MR0175, etc.) - ALL found in query */
     nace?: string[];
+    /** Document section references (1.4, 5.5, 3.2.1, etc.) */
+    sectionRef?: string[];
   };
 
   /** True if query contains technical codes that benefit from BM25 */
@@ -84,6 +86,14 @@ const GRADE_PATTERN = /\b(?:2205|2507|2304|2101|316L?|304L?|317L?|321|347|410|42
  */
 const NACE_PATTERN = /\b(?:NACE\s*)?MR\d{4}(?:\/ISO\s*\d+)?\b/gi;
 const ISO_15156_PATTERN = /\bISO\s*15156(?:-\d+)?\b/gi;
+
+/**
+ * Section reference patterns
+ * Explicit: "section 5.5", "clause 3.2", "paragraph 1.4"
+ * Contextual: bare "1.4" or "5.5.3" when near section-related words
+ */
+const SECTION_EXPLICIT_PATTERN = /\b(?:section|clause|para(?:graph)?|subsection)\s*(\d+(?:\.\d+)+)/gi;
+const SECTION_CONTEXT_WORDS = /\b(?:scope|about|says?|describes?|covers?|regarding|refers?\s+to|meaning\s+of|details?\s+of)\b/i;
 
 /**
  * Property keywords that benefit from BM25
@@ -258,6 +268,37 @@ function expandElementNames(query: string): string {
   return expanded;
 }
 
+/**
+ * Extract section references from query text
+ * Handles both explicit ("section 5.5") and contextual ("what is 1.4 about") patterns
+ */
+function extractSectionRefs(query: string): string[] {
+  const refs = new Set<string>();
+
+  // Explicit: "section 5.5", "clause 3.2.1"
+  let match;
+  const explicitPattern = new RegExp(SECTION_EXPLICIT_PATTERN.source, 'gi');
+  while ((match = explicitPattern.exec(query)) !== null) {
+    refs.add(match[1]);
+  }
+
+  // Contextual: bare dotted numbers like "1.4" or "5.5.3" near section-related words
+  if (SECTION_CONTEXT_WORDS.test(query)) {
+    const bareNumberPattern = /\b(\d+\.\d+(?:\.\d+)*)\b/g;
+    while ((match = bareNumberPattern.exec(query)) !== null) {
+      const num = match[1];
+      // Skip version-like numbers (e.g., years 2014, 2024) and pure decimals
+      // Section refs have at least one dot and first part is small (1-99)
+      const firstPart = parseInt(num.split('.')[0]);
+      if (firstPart < 100 && !refs.has(num)) {
+        refs.add(num);
+      }
+    }
+  }
+
+  return refs.size > 0 ? [...refs] : [];
+}
+
 // ============================================================================
 // Main Functions
 // ============================================================================
@@ -295,6 +336,7 @@ export function preprocessQuery(query: string): ProcessedQuery {
     ...(original.match(NACE_PATTERN) || []),
     ...(original.match(ISO_15156_PATTERN) || []),
   ];
+  const sectionRefs = extractSectionRefs(original);
 
   // Determine if we should boost exact matches
   // Any technical code warrants BM25 boosting
@@ -351,8 +393,9 @@ export function preprocessQuery(query: string): ProcessedQuery {
       api: uniqueApi,
       grade: uniqueGrade,
       nace: uniqueNace,
+      sectionRef: sectionRefs.length > 0 ? sectionRefs : undefined,
     },
-    boostExactMatch: hasExactCodes || hasPropertyKeywords,
+    boostExactMatch: hasExactCodes || hasPropertyKeywords || sectionRefs.length > 0,
   };
 }
 
@@ -386,6 +429,11 @@ export function getSearchWeights(query: ProcessedQuery): {
     (query.extractedCodes.api?.length ?? 0) +
     (query.extractedCodes.grade?.length ?? 0) +
     (query.extractedCodes.nace?.length ?? 0);
+
+  // Section references → Strong BM25 to match "5.5" literally in chunk text
+  if (query.extractedCodes.sectionRef?.length) {
+    return { bm25Weight: 0.7, vectorWeight: 0.3 };
+  }
 
   if (codeCount >= 2) {
     // Multiple codes → Heavy BM25 weight
@@ -545,6 +593,7 @@ export function formatExtractedCodes(
   if (codes.api?.length) parts.push(`API: ${codes.api.join(", ")}`);
   if (codes.grade?.length) parts.push(`Grade: ${codes.grade.join(", ")}`);
   if (codes.nace?.length) parts.push(`NACE: ${codes.nace.join(", ")}`);
+  if (codes.sectionRef?.length) parts.push(`Section: ${codes.sectionRef.join(", ")}`);
   return parts.length > 0 ? parts.join(", ") : "none";
 }
 

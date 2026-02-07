@@ -35,6 +35,8 @@ export interface HybridSearchResult {
   content: string;
   /** Page number in source PDF */
   page_number: number;
+  /** Section title from chunking metadata */
+  section_title?: string;
   /** Starting character position within the page for citation highlighting */
   char_offset_start?: number;
   /** Ending character position within the page for citation highlighting */
@@ -152,7 +154,8 @@ function applyTableBoost(results: HybridSearchResult[]): HybridSearchResult[] {
 export async function hybridSearchChunks(
   query: string,
   matchCount: number = 5,
-  documentIds: number[] | null = null
+  documentIds: number[] | null = null,
+  sectionRefs: string[] | null = null
 ): Promise<HybridSearchResult[]> {
   const startTime = Date.now();
 
@@ -188,6 +191,11 @@ export async function hybridSearchChunks(
     console.log(`[Hybrid Search] Filtering to documents: [${documentIds.join(", ")}]`);
   }
 
+  // Log section filter if applied
+  if (sectionRefs && sectionRefs.length > 0) {
+    console.log(`[Hybrid Search] Boosting sections: [${sectionRefs.join(", ")}]`);
+  }
+
   // Step 3: Call hybrid search function in Supabase
   // Use expanded query for BM25 text matching (e.g., "nitrogen N" matches both)
   // Pass document filter if provided (for spec-specific queries like "per A790")
@@ -198,6 +206,7 @@ export async function hybridSearchChunks(
     bm25_weight: weights.bm25Weight,
     vector_weight: weights.vectorWeight,
     filter_document_ids: documentIds,
+    filter_section_refs: sectionRefs,
   });
 
   if (error) {
@@ -241,10 +250,11 @@ export async function hybridSearchChunks(
 export async function searchWithFallback(
   query: string,
   matchCount: number = 5,
-  documentIds: number[] | null = null
+  documentIds: number[] | null = null,
+  sectionRefs: string[] | null = null
 ): Promise<HybridSearchResult[]> {
   try {
-    return await hybridSearchChunks(query, matchCount, documentIds);
+    return await hybridSearchChunks(query, matchCount, documentIds, sectionRefs);
   } catch (error) {
     console.warn(
       "[Hybrid Search] Falling back to vector-only search:",

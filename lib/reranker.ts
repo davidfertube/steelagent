@@ -121,8 +121,17 @@ Respond ONLY with valid JSON (no markdown, no explanation):
     // Sort by relevance score (descending)
     ranked.sort((a, b) => b.relevance_score - a.relevance_score);
 
+    // Filter out clearly irrelevant chunks (score < 4/10)
+    // Fall back to best available if nothing passes the threshold
+    const MIN_RELEVANCE_SCORE = 4;
+    const filtered = ranked.filter(r => r.relevance_score >= MIN_RELEVANCE_SCORE);
+    if (filtered.length > 0 && filtered.length < ranked.length) {
+      console.log(`[Re-ranker] Filtered out ${ranked.length - filtered.length} chunks below relevance threshold (${MIN_RELEVANCE_SCORE}/10)`);
+    }
+    const candidates = filtered.length > 0 ? filtered : ranked;
+
     // Return top K
-    return ranked.slice(0, topK);
+    return candidates.slice(0, topK);
   } catch (error) {
     console.error("[Re-ranker] Failed to re-rank chunks:", error);
 
