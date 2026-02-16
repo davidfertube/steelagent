@@ -50,7 +50,7 @@ jobs:
           VOYAGE_API_KEY: ${{ secrets.VOYAGE_API_KEY }}
 
       - name: Deploy to Vercel (Production)
-        if: github.event_name == 'push'
+        if: github.event_name == 'push' && secrets.VERCEL_TOKEN != ''
         uses: amondnet/vercel-action@v25
         with:
           vercel-token: ${{ secrets.VERCEL_TOKEN }}
@@ -60,7 +60,7 @@ jobs:
           working-directory: ./
 
       - name: Run production smoke tests
-        if: success() && github.event_name == 'push'
+        if: success() && github.event_name == 'push' && secrets.VERCEL_TOKEN != ''
         run: npx tsx scripts/production-smoke-test.ts || true
         env:
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
