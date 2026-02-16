@@ -398,17 +398,35 @@ export default function Home() {
             </Link>
 
             {/* Desktop Navigation */}
-            <nav className="hidden md:flex items-center gap-4 lg:gap-8">
-              {["Why", "Demo", "Contact"].map((item) => (
-                <a
-                  key={item}
-                  href={`#${item.toLowerCase()}`}
-                  className="relative text-sm text-black/60 dark:text-white/60 hover:text-black dark:hover:text-white transition-colors group"
-                >
-                  {item}
-                  <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-green-500 transition-all duration-300 group-hover:w-full" />
-                </a>
-              ))}
+            <nav className="hidden md:flex items-center gap-3 lg:gap-6">
+              {[
+                { label: "Features", href: "#features" },
+                { label: "Why", href: "#why" },
+                { label: "Compare", href: "#compare" },
+                { label: "Demo", href: "#demo" },
+                { label: "Pricing", href: "/pricing" },
+                { label: "Contact", href: "#contact" },
+              ].map((item) =>
+                item.href.startsWith("#") ? (
+                  <a
+                    key={item.label}
+                    href={item.href}
+                    className="relative text-sm text-black/60 dark:text-white/60 hover:text-black dark:hover:text-white transition-colors group"
+                  >
+                    {item.label}
+                    <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-green-500 transition-all duration-300 group-hover:w-full" />
+                  </a>
+                ) : (
+                  <Link
+                    key={item.label}
+                    href={item.href}
+                    className="relative text-sm text-black/60 dark:text-white/60 hover:text-black dark:hover:text-white transition-colors group"
+                  >
+                    {item.label}
+                    <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-green-500 transition-all duration-300 group-hover:w-full" />
+                  </Link>
+                )
+              )}
 
               {/* Dark/Light Mode Toggle */}
               {mounted && (
@@ -424,6 +442,14 @@ export default function Home() {
                   )}
                 </button>
               )}
+
+              {/* Sign In */}
+              <Link
+                href="/auth/login"
+                className="ml-2 inline-flex items-center justify-center h-9 px-4 text-sm font-medium rounded-md border border-black/20 dark:border-white/20 text-black dark:text-white hover:bg-black/5 dark:hover:bg-white/10 transition-colors"
+              >
+                Sign In
+              </Link>
             </nav>
 
             {/* Mobile menu button */}
@@ -452,29 +478,68 @@ export default function Home() {
             transition={{ duration: 0.2 }}
             className="fixed inset-0 z-40 bg-white dark:bg-neutral-950 md:hidden"
           >
-            <div className="flex flex-col items-center justify-center h-full gap-8">
-              {["Why", "Demo", "Contact"].map((item, i) => (
-                <motion.a
-                  key={item}
-                  href={`#${item.toLowerCase()}`}
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: i * 0.1 }}
-                  className="text-3xl font-semibold text-black/80 dark:text-white/80 hover:text-black dark:hover:text-white transition-colors"
+            <div className="flex flex-col items-center justify-center h-full gap-6">
+              {[
+                { label: "Features", href: "#features" },
+                { label: "Why", href: "#why" },
+                { label: "Compare", href: "#compare" },
+                { label: "Demo", href: "#demo" },
+                { label: "Pricing", href: "/pricing" },
+                { label: "Contact", href: "#contact" },
+              ].map((item, i) =>
+                item.href.startsWith("#") ? (
+                  <motion.a
+                    key={item.label}
+                    href={item.href}
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: i * 0.08 }}
+                    className="text-3xl font-semibold text-black/80 dark:text-white/80 hover:text-black dark:hover:text-white transition-colors"
+                    onClick={() => setMobileMenuOpen(false)}
+                  >
+                    {item.label}
+                  </motion.a>
+                ) : (
+                  <motion.div
+                    key={item.label}
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: i * 0.08 }}
+                  >
+                    <Link
+                      href={item.href}
+                      className="text-3xl font-semibold text-black/80 dark:text-white/80 hover:text-black dark:hover:text-white transition-colors"
+                      onClick={() => setMobileMenuOpen(false)}
+                    >
+                      {item.label}
+                    </Link>
+                  </motion.div>
+                )
+              )}
+
+              {/* Sign In link */}
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.5 }}
+              >
+                <Link
+                  href="/auth/login"
+                  className="inline-flex items-center justify-center h-12 px-8 text-lg font-semibold rounded-lg border-2 border-black/20 dark:border-white/20 text-black dark:text-white hover:bg-black/5 dark:hover:bg-white/10 transition-colors"
                   onClick={() => setMobileMenuOpen(false)}
                 >
-                  {item}
-                </motion.a>
-              ))}
+                  Sign In
+                </Link>
+              </motion.div>
 
               {/* Theme toggle in mobile menu */}
               {mounted && (
                 <motion.button
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.3 }}
+                  transition={{ delay: 0.6 }}
                   onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
-                  className="flex items-center gap-3 text-lg text-black/60 dark:text-white/60 hover:text-black dark:hover:text-white transition-colors mt-4"
+                  className="flex items-center gap-3 text-lg text-black/60 dark:text-white/60 hover:text-black dark:hover:text-white transition-colors mt-2"
                 >
                   {theme === "dark" ? (
                     <>
@@ -616,7 +681,7 @@ export default function Home() {
         </section>
 
         {/* Who This Is For - Persona Section */}
-        <section className="relative py-12 sm:py-16 md:py-20 border-t border-black/5 dark:border-white/10 bg-black/[0.02] dark:bg-white/[0.02]">
+        <section id="features" className="relative py-12 sm:py-16 md:py-20 border-t border-black/5 dark:border-white/10 bg-black/[0.02] dark:bg-white/[0.02]">
           <div className="container-center">
             <motion.div
               initial={{ opacity: 0, y: 20 }}
@@ -685,7 +750,7 @@ export default function Home() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.6 }}
-              className="space-y-16" // Increased spacing
+              className="space-y-16"
             >
               {/* Section Header */}
               <div className="text-center space-y-6">
@@ -813,7 +878,7 @@ export default function Home() {
         </section>
 
         {/* Live Comparison Section */}
-        <section className="relative py-12 sm:py-16 md:py-20 bg-black/[0.02] dark:bg-white/[0.02]">
+        <section id="compare" className="relative py-12 sm:py-16 md:py-20 bg-black/[0.02] dark:bg-white/[0.02]">
           <div className="container-center">
             <motion.div
               initial={{ opacity: 0, y: 20 }}
@@ -1132,19 +1197,62 @@ export default function Home() {
       </main>
 
       {/* Footer */}
-      <footer className="border-t border-black/5 dark:border-white/10 py-8 sm:py-12 bg-white dark:bg-neutral-950">
+      <footer className="border-t border-black/5 dark:border-white/10 py-12 sm:py-16 bg-white dark:bg-neutral-950">
         <div className="container-center">
-          <p className="text-center text-xs text-black/40 dark:text-white/40">&copy; {new Date().getFullYear()} SteelAgent. All rights reserved.</p>
-          <Separator className="my-8 bg-black/5 dark:bg-white/10" />
-          <p className="text-center text-xs text-black/40 dark:text-white/40 max-w-2xl mx-auto">
-            <strong>Disclaimer:</strong> SteelAgent provides AI-generated responses for reference only.
-            Always verify specifications against original source documents. Not intended for safety-critical
-            decisions without professional engineering review. Users are responsible for their own document licenses.
-          </p>
-          <div className="flex justify-center gap-4 mt-4 text-xs text-black/40 dark:text-white/40">
-            <Link href="/terms" className="hover:text-black/60 dark:hover:text-white/60 transition-colors">Terms of Service</Link>
-            <span>·</span>
-            <Link href="/privacy" className="hover:text-black/60 dark:hover:text-white/60 transition-colors">Privacy Policy</Link>
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-8 mb-12">
+            {/* Brand */}
+            <div className="col-span-2 sm:col-span-1 space-y-3">
+              <div className="flex items-center gap-2 text-lg font-semibold text-black dark:text-white">
+                <Logo size={24} />
+                SteelAgent
+              </div>
+              <p className="text-sm text-black/50 dark:text-white/50 leading-relaxed">
+                Specification intelligence for steel &amp; materials engineering.
+              </p>
+            </div>
+
+            {/* Product */}
+            <div className="space-y-3">
+              <h4 className="text-xs font-semibold tracking-widest text-black/40 dark:text-white/40 uppercase">Product</h4>
+              <ul className="space-y-2 text-sm">
+                <li><a href="#features" className="text-black/60 dark:text-white/60 hover:text-black dark:hover:text-white transition-colors">Features</a></li>
+                <li><a href="#why" className="text-black/60 dark:text-white/60 hover:text-black dark:hover:text-white transition-colors">Why SteelAgent</a></li>
+                <li><a href="#compare" className="text-black/60 dark:text-white/60 hover:text-black dark:hover:text-white transition-colors">Compare</a></li>
+                <li><a href="#demo" className="text-black/60 dark:text-white/60 hover:text-black dark:hover:text-white transition-colors">Demo</a></li>
+                <li><Link href="/pricing" className="text-black/60 dark:text-white/60 hover:text-black dark:hover:text-white transition-colors">Pricing</Link></li>
+              </ul>
+            </div>
+
+            {/* Company */}
+            <div className="space-y-3">
+              <h4 className="text-xs font-semibold tracking-widest text-black/40 dark:text-white/40 uppercase">Company</h4>
+              <ul className="space-y-2 text-sm">
+                <li><a href="#contact" className="text-black/60 dark:text-white/60 hover:text-black dark:hover:text-white transition-colors">Contact</a></li>
+                <li><Link href="/terms" className="text-black/60 dark:text-white/60 hover:text-black dark:hover:text-white transition-colors">Terms of Service</Link></li>
+                <li><Link href="/privacy" className="text-black/60 dark:text-white/60 hover:text-black dark:hover:text-white transition-colors">Privacy Policy</Link></li>
+              </ul>
+            </div>
+
+            {/* Account */}
+            <div className="space-y-3">
+              <h4 className="text-xs font-semibold tracking-widest text-black/40 dark:text-white/40 uppercase">Account</h4>
+              <ul className="space-y-2 text-sm">
+                <li><Link href="/auth/login" className="text-black/60 dark:text-white/60 hover:text-black dark:hover:text-white transition-colors">Sign In</Link></li>
+                <li><Link href="/auth/signup" className="text-black/60 dark:text-white/60 hover:text-black dark:hover:text-white transition-colors">Sign Up</Link></li>
+                <li><Link href="/dashboard" className="text-black/60 dark:text-white/60 hover:text-black dark:hover:text-white transition-colors">Dashboard</Link></li>
+              </ul>
+            </div>
+          </div>
+
+          <Separator className="bg-black/5 dark:bg-white/10" />
+
+          <div className="mt-8 space-y-4">
+            <p className="text-center text-xs text-black/40 dark:text-white/40 max-w-2xl mx-auto">
+              <strong>Disclaimer:</strong> SteelAgent provides AI-generated responses for reference only.
+              Always verify specifications against original source documents. Not intended for safety-critical
+              decisions without professional engineering review. Users are responsible for their own document licenses.
+            </p>
+            <p className="text-center text-xs text-black/40 dark:text-white/40">&copy; {new Date().getFullYear()} SteelAgent. All rights reserved.</p>
           </div>
         </div>
       </footer>
