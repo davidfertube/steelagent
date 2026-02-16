@@ -293,7 +293,7 @@ async function queryRAG(query: string): Promise<{ data: RAGResponse; latencyMs: 
 
 async function runTest(): Promise<void> {
   console.log("=".repeat(70));
-  console.log("  SpecVault MVP 10-Query Accuracy Test");
+  console.log("  SteelAgent MVP 10-Query Accuracy Test");
   console.log("  Budget-friendly validation across all document types");
   console.log("=".repeat(70));
   console.log();

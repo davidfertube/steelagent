@@ -195,7 +195,7 @@ export function RealtimeComparison({
 
       {/* Side-by-side Comparison */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-        {/* SpecVault Column */}
+        {/* SteelAgent Column */}
         <motion.div
           initial={{ opacity: 0, x: -20 }}
           animate={{ opacity: 1, x: 0 }}
@@ -211,7 +211,7 @@ export function RealtimeComparison({
               >
                 <Sparkles className="h-4 w-4 text-green-600" />
               </motion.div>
-              <span className="text-sm font-semibold text-green-700">SpecVault</span>
+              <span className="text-sm font-semibold text-green-700">SteelAgent</span>
               <motion.span
                 initial={{ opacity: 0, scale: 0 }}
                 animate={{ opacity: 1, scale: 1 }}
@@ -417,6 +417,22 @@ export function RealtimeComparison({
         </motion.div>
       </div>
 
+      {/* AI Disclaimer Banner */}
+      {(steelAgentResponse || genericLLMResponse) && !isLoading && (
+        <motion.div
+          initial={{ opacity: 0, y: 5 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="p-3 bg-amber-50 dark:bg-amber-950/30 border border-amber-300 dark:border-amber-700 rounded-lg"
+        >
+          <p className="text-sm text-amber-800 dark:text-amber-200 flex items-center gap-2">
+            <AlertTriangle className="h-4 w-4 flex-shrink-0" />
+            <span>
+              <strong>AI-generated content.</strong> Always verify against original specifications before making compliance decisions.
+            </span>
+          </p>
+        </motion.div>
+      )}
+
       {/* Comparison Summary */}
       {steelAgent.isComplete && genericLLM.isComplete && (
         <motion.div
@@ -431,7 +447,7 @@ export function RealtimeComparison({
             </div>
             <div>
               <p className="text-sm font-medium text-foreground">
-                SpecVault provides traceable, audit-ready answers
+                SteelAgent provides traceable, audit-ready answers
               </p>
               <p className="text-xs text-muted-foreground mt-1">
                 {steelAgentSources.length > 0 ? (

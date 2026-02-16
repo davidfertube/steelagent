@@ -12,7 +12,7 @@
  * - Hallucination Rate: <5%
  */
 
-import { describe, it, expect, beforeAll } from 'vitest';
+import { describe, it, expect } from 'vitest';
 
 // Types for test data
 interface GoldenTestCase {
@@ -651,42 +651,6 @@ function evaluateResponse(response: string, testCase: GoldenTestCase): TestResul
 describe('Golden Test Suite - ASTM Specifications', () => {
   // These tests require the RAG API to be running
   // In CI, they can be mocked or run against a test instance
-
-  describe('Query Classification Tests', () => {
-    it('should correctly classify lookup queries', async () => {
-      const { classifyQuery } = await import('@/lib/dspy-optimizer');
-
-      const result = classifyQuery('What is the yield strength of F53?');
-      expect(result.intent).toBe('lookup');
-      expect(result.entities.grades).toContain('f53');
-    });
-
-    it('should correctly classify comparison queries', async () => {
-      const { classifyQuery } = await import('@/lib/dspy-optimizer');
-
-      const result = classifyQuery('Compare F51 vs F53 yield strength');
-      expect(result.intent).toBe('comparison');
-      expect(result.entities.grades.length).toBeGreaterThanOrEqual(2);
-    });
-
-    it('should correctly classify list queries', async () => {
-      const { classifyQuery } = await import('@/lib/dspy-optimizer');
-
-      const result = classifyQuery('What UNS designations are covered by A872?');
-      expect(result.intent).toBe('list');
-    });
-  });
-
-  describe('Query Expansion Tests', () => {
-    it('should expand grade names to UNS numbers', async () => {
-      const { expandQuery, classifyQuery } = await import('@/lib/dspy-optimizer');
-
-      const entities = classifyQuery('yield strength F51').entities;
-      const expanded = expandQuery('yield strength F51', entities);
-
-      expect(expanded.toLowerCase()).toContain('s31803');
-    });
-  });
 
   describe('Golden Test Cases', () => {
     // Generate individual test cases

@@ -131,7 +131,7 @@ interface Result {
 
 async function runSmokeTest(): Promise<void> {
   console.log("=".repeat(70));
-  console.log("  SpecVault Production Smoke Test");
+  console.log("  SteelAgent Production Smoke Test");
   console.log("  8 complex queries × Claude Sonnet 4.5");
   console.log("=".repeat(70));
   console.log();

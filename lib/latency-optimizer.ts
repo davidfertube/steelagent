@@ -98,7 +98,6 @@ interface ComplexityAnalysis {
  * This is a fast heuristic check (no LLM calls)
  */
 export function analyzeQueryComplexity(query: string): ComplexityAnalysis {
-  const lower = query.toLowerCase();
   const wordCount = query.split(/\s+/).length;
 
   // Complex indicators

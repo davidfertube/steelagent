@@ -2,8 +2,9 @@ import { NextRequest, NextResponse } from "next/server";
 import { supabase } from "@/lib/supabase";
 import { MAX_PDF_SIZE } from "@/lib/validation";
 import { handleApiError, createValidationError, getErrorStatusCode } from "@/lib/errors";
-import { serverAuth } from "@/lib/auth";
+import { serverAuth, createServiceAuthClient } from "@/lib/auth";
 import { enforceQuota, QuotaExceededError } from "@/lib/quota";
+import { isAnonymousDocument } from "@/lib/rate-limit";
 
 /**
  * Document Upload Confirmation API Route
@@ -41,26 +42,31 @@ export async function POST(request: NextRequest) {
     // Step 0: Authentication and Quota Check
     // ========================================
     const user = await serverAuth.getCurrentUser();
-    if (!user) {
-      return NextResponse.json({ error: "Unauthorized - Authentication required" }, { status: 401 });
-    }
+    const anonymousSessionId = request.cookies.get('anon_session')?.value;
+    let isAnonymous = false;
 
-    const profile = await serverAuth.getUserProfile(user.id);
-    if (!profile || !profile.workspace_id) {
-      return NextResponse.json({ error: "User profile or workspace not found" }, { status: 403 });
-    }
-
-    // Check document quota before processing upload
-    try {
-      await enforceQuota(profile.workspace_id, 'document');
-    } catch (error) {
-      if (error instanceof QuotaExceededError) {
-        return NextResponse.json(
-          { error: error.message, code: "QUOTA_EXCEEDED" },
-          { status: 429 }
-        );
+    if (user) {
+      const profile = await serverAuth.getUserProfile(user.id);
+      if (!profile || !profile.workspace_id) {
+        return NextResponse.json({ error: "User profile or workspace not found" }, { status: 403 });
       }
-      throw error;
+
+      // Check document quota before processing upload
+      try {
+        await enforceQuota(profile.workspace_id, 'document');
+      } catch (error) {
+        if (error instanceof QuotaExceededError) {
+          return NextResponse.json(
+            { error: error.message, code: "QUOTA_EXCEEDED" },
+            { status: 429 }
+          );
+        }
+        throw error;
+      }
+    } else if (anonymousSessionId) {
+      isAnonymous = true;
+    } else {
+      return NextResponse.json({ error: "Unauthorized - Authentication required" }, { status: 401 });
     }
 
     // ========================================
@@ -90,7 +96,17 @@ export async function POST(request: NextRequest) {
     // ========================================
     // Step 2: Verify Database Record Exists
     // ========================================
-    const { data: docData, error: docError } = await supabase
+    const db = isAnonymous ? createServiceAuthClient() : supabase;
+
+    // Verify anonymous ownership
+    if (isAnonymous) {
+      const ownsDoc = await isAnonymousDocument(anonymousSessionId!, documentId);
+      if (!ownsDoc) {
+        return NextResponse.json({ error: "Document not found" }, { status: 404 });
+      }
+    }
+
+    const { data: docData, error: docError } = await db
       .from("documents")
       .select("id, status, filename, storage_path")
       .eq("id", documentId)
@@ -113,7 +129,7 @@ export async function POST(request: NextRequest) {
     // ========================================
     // Step 3: Verify File Exists in Storage
     // ========================================
-    const { data: fileList, error: listError } = await supabase.storage
+    const { data: fileList, error: listError } = await db.storage
       .from("documents")
       .list("", {
         search: path,
@@ -124,7 +140,7 @@ export async function POST(request: NextRequest) {
 
       // Clean up orphaned database record
       try {
-        await supabase.from("documents").delete().eq("id", documentId);
+        await db.from("documents").delete().eq("id", documentId);
       } catch (cleanupError) {
         console.error("[Upload Confirm API] Failed to clean up orphaned record:", cleanupError);
       }
@@ -140,7 +156,7 @@ export async function POST(request: NextRequest) {
     // Step 4: Download File for PDF Validation
     // ========================================
     // This is a security check - verify the file is actually a PDF
-    const { data: fileData, error: downloadError } = await supabase.storage
+    const { data: fileData, error: downloadError } = await db.storage
       .from("documents")
       .download(path);
 
@@ -163,8 +179,8 @@ export async function POST(request: NextRequest) {
 
       // Clean up invalid file
       try {
-        await supabase.storage.from("documents").remove([path]);
-        await supabase.from("documents").delete().eq("id", documentId);
+        await db.storage.from("documents").remove([path]);
+        await db.from("documents").delete().eq("id", documentId);
       } catch (cleanupError) {
         console.error("[Upload Confirm API] Failed to clean up invalid file:", cleanupError);
       }
@@ -184,8 +200,8 @@ export async function POST(request: NextRequest) {
 
       // Clean up file that exceeds size limit
       try {
-        await supabase.storage.from("documents").remove([path]);
-        await supabase.from("documents").delete().eq("id", documentId);
+        await db.storage.from("documents").remove([path]);
+        await db.from("documents").delete().eq("id", documentId);
       } catch (cleanupError) {
         console.error("[Upload Confirm API] Failed to clean up oversized file:", cleanupError);
       }
@@ -199,14 +215,14 @@ export async function POST(request: NextRequest) {
     // ========================================
     // Step 6: Get Public URL
     // ========================================
-    const { data: urlData } = supabase.storage
+    const { data: urlData } = db.storage
       .from("documents")
       .getPublicUrl(path);
 
     // ========================================
     // Step 7: Update Database Status
     // ========================================
-    const { error: updateError } = await supabase
+    const { error: updateError } = await db
       .from("documents")
       .update({
         status: "pending", // Will be updated to "indexed" after processing

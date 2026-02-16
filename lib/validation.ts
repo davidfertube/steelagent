@@ -48,7 +48,7 @@ export async function validatePdfMagicBytes(file: File): Promise<{
     }
 
     return { isValid: true };
-  } catch (error) {
+  } catch {
     return {
       isValid: false,
       error: 'Failed to read file. Please try again.',
@@ -100,6 +100,31 @@ const PROMPT_INJECTION_PATTERNS = [
   /DAN\s+mode/i,
   /developer\s+mode/i,
   /bypass\s+(?:filter|safety|restriction)/i,
+
+  // XML/HTML injection (attempt to inject tags into prompts)
+  /<system>/i,
+  /<\/system>/i,
+  /<human>/i,
+  /<\/human>/i,
+  /<assistant>/i,
+  /<\/assistant>/i,
+
+  // Anthropic-specific control tokens
+  /\bHuman:/,
+  /\bAssistant:/,
+
+  // Base64 payload detection (common obfuscation technique)
+  /base64[_\s]*(?:decode|encode)/i,
+  /atob\s*\(/i,
+  /btoa\s*\(/i,
+
+  // Unicode direction override attacks (can hide malicious text)
+  /[\u200E\u200F\u202A-\u202E\u2066-\u2069]/,
+
+  // Prompt leaking attempts
+  /(?:print|show|reveal|display|output)\s+(?:your|the|me\s+your|me\s+the)\s+(?:system\s+)?(?:prompt|instructions?|rules?)/i,
+  /(?:print|show|reveal|display|output)\s+(?:the\s+)?system\s+(?:prompt|instructions?|rules?)/i,
+  /what\s+(?:are|is)\s+your\s+(?:system\s+)?(?:prompt|instructions?|rules?)/i,
 ];
 
 /**
@@ -312,60 +337,4 @@ function extractMatchingText(claim: string, sourceText: string): string {
   }
 
   return bestMatch;
-}
-
-/**
- * Structured data extraction for common queries
- */
-export interface MaterialSpecification {
-  grade: string;
-  unsNumber: string;
-  chemicalComposition: Record<string, string>;
-  mechanicalProperties: {
-    tensileStrength?: string;
-    yieldStrength?: string;
-    elongation?: string;
-    hardness?: string;
-  };
-  heatTreatment?: {
-    temperature: string;
-    quenchMethod: string;
-  };
-  sourceDocument: string;
-  pageNumbers: number[];
-}
-
-export async function extractStructuredData(
-  query: string,
-  sources: Array<{ content: string; document_name: string; page_number: number }>
-): Promise<MaterialSpecification | null> {
-  // Extract UNS number or grade from query
-  const unsMatch = query.match(/UNS [A-Z]\d{5}/i);
-  const gradeMatch = query.match(/(?:Grade |F)(\d{2,3}[A-Z]?)/i);
-
-  if (!unsMatch && !gradeMatch) {
-    return null;
-  }
-
-  // Search for specification in sources
-  for (const source of sources) {
-    const spec = parseSpecificationFromText(source.content, unsMatch?.[0], gradeMatch?.[0]);
-    if (spec) {
-      spec.sourceDocument = source.document_name;
-      spec.pageNumbers = [source.page_number];
-      return spec;
-    }
-  }
-
-  return null;
-}
-
-function parseSpecificationFromText(
-  text: string,
-  unsNumber?: string,
-  grade?: string
-): MaterialSpecification | null {
-  // This would implement parsing logic based on the document structure
-  // For now, returning null as placeholder
-  return null;
 }

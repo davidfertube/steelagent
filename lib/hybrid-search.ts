@@ -1,5 +1,5 @@
 /**
- * Hybrid Search for SpecVault
+ * Hybrid Search for SteelAgent
  *
  * Combines BM25 (keyword-based) and vector (semantic) search to achieve
  * better accuracy for technical queries with exact codes like UNS numbers.

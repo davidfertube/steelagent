@@ -55,7 +55,7 @@ export default function ResetPasswordPage() {
         {/* Logo */}
         <div className="text-center mb-8">
           <Link href="/" className="inline-block">
-            <h1 className="text-3xl font-bold text-white">SpecVault</h1>
+            <h1 className="text-3xl font-bold text-white">SteelAgent</h1>
           </Link>
           <p className="text-gray-400 mt-2">Set your new password</p>
         </div>

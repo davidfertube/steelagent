@@ -66,12 +66,6 @@ const UNS_PATTERN = /\b[SNCGHJKWRT]\d{5}\b/gi;
 const ASTM_A_PATTERN = /\b(?:ASTM\s*)?A\d{3,4}(?:[/-]\d{2,4})?\b/gi;
 
 /**
- * API standards — requires "API" prefix to avoid false positives on bare numbers
- * Examples: API 5L, API 5CT, API 6A, API 16C, API 5CRA, API-5CT
- */
-const API_PATTERN = /\bAPI[\s-]+(?:SPEC(?:IFICATION)?\s+)?(\d{1,2}[A-Z]{1,4})\b/gi;
-
-/**
  * Common duplex and stainless steel grades
  * Duplex: 2205, 2507, 2304, etc.
  * Austenitic: 304, 304L, 316, 316L, 317L, 321, 347
@@ -448,14 +442,6 @@ export function getSearchWeights(query: ProcessedQuery): {
     query.extractedCodes.grade?.length ?? 0,
     query.extractedCodes.nace?.length ?? 0,
   ].filter(count => count > 0).length;
-
-  // Also count total individual codes for weighting
-  const totalCodes =
-    (query.extractedCodes.uns?.length ?? 0) +
-    (query.extractedCodes.astm?.length ?? 0) +
-    (query.extractedCodes.api?.length ?? 0) +
-    (query.extractedCodes.grade?.length ?? 0) +
-    (query.extractedCodes.nace?.length ?? 0);
 
   // Section references → Strong BM25 to match "5.5" literally in chunk text
   if (query.extractedCodes.sectionRef?.length) {

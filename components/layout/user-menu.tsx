@@ -8,15 +8,13 @@
 import { useState, useRef, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/contexts/auth-context';
-import type { User } from '@supabase/supabase-js';
 import type { UserProfile } from '@/lib/auth';
 
 interface UserMenuProps {
-  user: User;
   profile: UserProfile;
 }
 
-export function UserMenu({ user, profile }: UserMenuProps) {
+export function UserMenu({ profile }: UserMenuProps) {
   const router = useRouter();
   const { signOut } = useAuth();
   const [isOpen, setIsOpen] = useState(false);
@@ -65,9 +63,9 @@ export function UserMenu({ user, profile }: UserMenuProps) {
       </button>
 
       {isOpen && (
-        <div className="absolute right-0 mt-2 w-64 bg-[#16213e] border border-gray-800 rounded-lg shadow-xl py-2 z-50">
+        <div className="absolute right-0 mt-2 w-64 bg-neutral-800 border border-neutral-700 rounded-lg shadow-xl py-2 z-50">
           {/* User Info */}
-          <div className="px-4 py-3 border-b border-gray-800">
+          <div className="px-4 py-3 border-b border-neutral-700">
             <p className="text-white font-medium">{profile.full_name || 'User'}</p>
             <p className="text-gray-400 text-sm">{profile.email}</p>
             {profile.company && (
@@ -109,7 +107,7 @@ export function UserMenu({ user, profile }: UserMenuProps) {
           </div>
 
           {/* Sign Out */}
-          <div className="border-t border-gray-800 pt-2">
+          <div className="border-t border-neutral-700 pt-2">
             <button
               onClick={handleSignOut}
               className="w-full text-left px-4 py-2 text-red-400 hover:bg-gray-800/50 transition-colors"

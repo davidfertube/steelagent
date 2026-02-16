@@ -3,15 +3,17 @@
  * Profile management, API keys, subscription
  */
 
-import { redirect } from 'next/link';
+import { redirect } from 'next/navigation';
 import { serverAuth } from '@/lib/auth';
 import { ProfileForm } from '@/components/account/profile-form';
 import { ApiKeyManager } from '@/components/account/api-key-manager';
 import { UserMenu } from '@/components/layout/user-menu';
+import BillingSection from '@/components/account/billing-section';
 import Link from 'next/link';
+import { Suspense } from 'react';
 
 export const metadata = {
-  title: 'Account Settings | SpecVault',
+  title: 'Account Settings | SteelAgent',
   description: 'Manage your account and API keys',
 };
 
@@ -34,7 +36,7 @@ export default async function AccountPage() {
       <header className="border-b border-gray-800 bg-[#16213e]/50 backdrop-blur-sm">
         <div className="max-w-7xl mx-auto px-4 py-4 flex items-center justify-between">
           <Link href="/dashboard" className="text-2xl font-bold text-white">
-            SpecVault
+            SteelAgent
           </Link>
 
           <nav className="flex items-center gap-6">
@@ -49,7 +51,7 @@ export default async function AccountPage() {
                 Workspace
               </Link>
             ) : null}
-            <UserMenu user={user} profile={profile} />
+            <UserMenu profile={profile} />
           </nav>
         </div>
       </header>
@@ -63,6 +65,13 @@ export default async function AccountPage() {
           <section>
             <h2 className="text-2xl font-bold text-white mb-4">Profile</h2>
             <ProfileForm profile={profile} />
+          </section>
+
+          {/* Billing Section */}
+          <section>
+            <Suspense fallback={<div className="bg-[#16213e]/50 border border-gray-800 rounded-lg p-6 animate-pulse h-48" />}>
+              <BillingSection />
+            </Suspense>
           </section>
 
           {/* API Keys Section */}

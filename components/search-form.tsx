@@ -4,7 +4,7 @@ import { useState, useCallback, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { ArrowRight, Loader2, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { queryKnowledgeBase, queryWithComparison, ApiRequestError, Source, GenericLLMResponse, ConfidenceScore } from "@/lib/api";
+import { queryKnowledgeBase, queryWithComparison, ApiRequestError, Source, GenericLLMResponse, ConfidenceScore, AnonymousQueryInfo } from "@/lib/api";
 
 interface SearchFormProps {
   onResult: (response: string, sources: Source[]) => void;
@@ -15,6 +15,7 @@ interface SearchFormProps {
     genericLLM: GenericLLMResponse
   ) => void;
   onQuerySubmit?: (query: string) => void;
+  onAnonymousInfo?: (info: AnonymousQueryInfo) => void;
   documentId?: number | null;
 }
 
@@ -25,6 +26,7 @@ export function SearchForm({
   onLoadingChange,
   onComparisonResult,
   onQuerySubmit,
+  onAnonymousInfo,
   documentId,
 }: SearchFormProps) {
   const [query, setQuery] = useState("");
@@ -44,6 +46,9 @@ export function SearchForm({
         if (onComparisonResult) {
           // Always run comparison mode
           const result = await queryWithComparison(query, documentId ?? undefined);
+          if (result.steelAgent.anonymousQueryInfo && onAnonymousInfo) {
+            onAnonymousInfo(result.steelAgent.anonymousQueryInfo);
+          }
           onComparisonResult(
             { response: result.steelAgent.response, sources: result.steelAgent.sources || [], confidence: result.steelAgent.confidence },
             result.genericLLM
@@ -51,10 +56,16 @@ export function SearchForm({
         } else {
           // Fallback to single query if no comparison handler
           const result = await queryKnowledgeBase(query, documentId ?? undefined);
+          if (result.anonymousQueryInfo && onAnonymousInfo) {
+            onAnonymousInfo(result.anonymousQueryInfo);
+          }
           onResult(result.response, result.sources || []);
         }
       } catch (error) {
         if (error instanceof ApiRequestError) {
+          if (error.code === 'ANONYMOUS_QUOTA_EXCEEDED' && onAnonymousInfo) {
+            onAnonymousInfo({ used: 3, remaining: 0, limit: 3 });
+          }
           onError(error.message);
         } else {
           onError("An unexpected error occurred. Please try again.");
@@ -64,7 +75,7 @@ export function SearchForm({
         onLoadingChange?.(false);
       }
     },
-    [query, isLoading, onResult, onError, onLoadingChange, onComparisonResult, onQuerySubmit, documentId]
+    [query, isLoading, onResult, onError, onLoadingChange, onComparisonResult, onQuerySubmit, onAnonymousInfo, documentId]
   );
 
 

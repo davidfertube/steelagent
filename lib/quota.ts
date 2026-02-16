@@ -120,36 +120,64 @@ export async function incrementQuota(
 }
 
 /**
- * Check quota and throw if exceeded
+ * Atomically check quota and increment if allowed.
+ * Uses a single RPC call to prevent race conditions where concurrent
+ * requests could bypass quota limits (TOCTOU vulnerability).
  */
 export async function enforceQuota(
   workspaceId: string,
   quotaType: 'query' | 'document' | 'api_call',
   increment = 1
 ): Promise<void> {
-  const status = await checkQuota(workspaceId, quotaType, increment);
+  const supabase = createServiceAuthClient();
 
-  if (!status.allowed) {
-    const resetDate = new Date(status.resetDate).toLocaleDateString('en-US', {
-      month: 'long',
-      day: 'numeric',
-      year: 'numeric',
+  // Atomic check-and-increment via database RPC
+  const { data, error } = await supabase.rpc('check_and_increment_quota', {
+    p_workspace_id: workspaceId,
+    p_quota_type: quotaType,
+    p_increment: increment,
+  });
+
+  if (error) {
+    // If the RPC doesn't exist yet, fall back to non-atomic path
+    if (error.message?.includes('function') && error.message?.includes('does not exist')) {
+      const status = await checkQuota(workspaceId, quotaType, increment);
+      if (!status.allowed) {
+        const resetDate = new Date(status.resetDate).toLocaleDateString('en-US', {
+          month: 'long', day: 'numeric', year: 'numeric',
+        });
+        throw new QuotaExceededError(
+          `Quota exceeded: ${status.used}/${status.limit} ${quotaType}s used this period. Resets on ${resetDate}.`,
+          quotaType
+        );
+      }
+      await incrementQuota(workspaceId, quotaType, increment);
+      return;
+    }
+    console.error('Quota enforcement error:', error);
+    throw new Error('Failed to check quota');
+  }
+
+  const result = Array.isArray(data) ? data[0] : data;
+  if (!result) {
+    throw new Error(`No quota found for workspace ${workspaceId}`);
+  }
+
+  if (!result.allowed) {
+    const resetDate = new Date(result.period_end).toLocaleDateString('en-US', {
+      month: 'long', day: 'numeric', year: 'numeric',
     });
-
     throw new QuotaExceededError(
-      `Quota exceeded: ${status.used}/${status.limit} ${quotaType}s used this period. Resets on ${resetDate}.`,
+      `Quota exceeded: ${result.used_count}/${result.limit_count} ${quotaType}s used this period. Resets on ${resetDate}.`,
       quotaType
     );
   }
-
-  // Increment usage counter
-  await incrementQuota(workspaceId, quotaType, increment);
 }
 
 /**
  * Get current usage for specific quota type
  */
-function getUsed(quota: any, quotaType: string): number {
+function getUsed(quota: Record<string, number>, quotaType: string): number {
   switch (quotaType) {
     case 'query':
       return quota.queries_used;
@@ -165,7 +193,7 @@ function getUsed(quota: any, quotaType: string): number {
 /**
  * Get limit for specific quota type
  */
-function getLimit(quota: any, quotaType: string): number {
+function getLimit(quota: Record<string, number>, quotaType: string): number {
   switch (quotaType) {
     case 'query':
       return quota.queries_limit;

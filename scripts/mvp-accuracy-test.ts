@@ -403,7 +403,7 @@ const TEST_CASES: MVPTestCase[] = [
 // Test Runner
 // ============================================
 
-async function querySpecVault(query: string): Promise<{
+async function querySteelAgent(query: string): Promise<{
   response: string;
   sources: Array<{ document: string; page?: string; ref: string }>;
   latencyMs: number;
@@ -667,13 +667,13 @@ async function runMVPTest(): Promise<void> {
   for (const testCase of TEST_CASES) {
     process.stdout.write(`  ${testCase.id} [${testCase.category}]... `);
 
-    let queryResult = await querySpecVault(testCase.query);
+    let queryResult = await querySteelAgent(testCase.query);
 
     // Retry once on 429/504/timeout errors with 10s backoff
     if (queryResult.response.includes('429') || queryResult.response.includes('504') || queryResult.response.includes('timed out')) {
       process.stdout.write(`RETRY... `);
       await new Promise(r => setTimeout(r, 10_000));
-      queryResult = await querySpecVault(testCase.query);
+      queryResult = await querySteelAgent(testCase.query);
     }
 
     const { response, sources, latencyMs } = queryResult;

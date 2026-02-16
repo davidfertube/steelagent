@@ -11,18 +11,28 @@ export async function POST(request: Request) {
     // Require authentication
     const user = await serverAuth.requireAuth();
 
-    const body = await request.json();
-    const { name, workspace_id } = body;
-
-    if (!name || !workspace_id) {
+    // SECURITY: Derive workspace_id from authenticated user's profile.
+    // Never trust client-supplied workspace_id — prevents IDOR attacks.
+    const profile = await serverAuth.getUserProfile(user.id);
+    if (!profile || !profile.workspace_id) {
       return NextResponse.json(
-        { error: 'Missing required fields: name, workspace_id' },
+        { error: 'User profile or workspace not found' },
+        { status: 403 }
+      );
+    }
+
+    const body = await request.json();
+    const { name } = body;
+
+    if (!name) {
+      return NextResponse.json(
+        { error: 'Missing required field: name' },
         { status: 400 }
       );
     }
 
-    // Generate API key
-    const apiKey = await apiKeyAuth.generateApiKey(user.id, workspace_id, name);
+    // Generate API key using the authenticated user's workspace
+    const apiKey = await apiKeyAuth.generateApiKey(user.id, profile.workspace_id, name);
 
     return NextResponse.json({
       success: true,
@@ -32,7 +42,7 @@ export async function POST(request: Request) {
   } catch (error) {
     console.error('API key creation error:', error);
     return NextResponse.json(
-      { error: error instanceof Error ? error.message : 'Failed to create API key' },
+      { error: 'Failed to create API key' },
       { status: 500 }
     );
   }

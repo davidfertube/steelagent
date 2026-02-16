@@ -5,7 +5,7 @@
  * and the MVP RAG system, collecting comprehensive metrics.
  */
 
-import { BaselineClient, BaselineResponse, getBaselineClient } from './baseline-client';
+import { BaselineClient, getBaselineClient } from './baseline-client';
 
 // Types for test cases and results
 export interface GoldenTestCase {
@@ -153,21 +153,6 @@ export interface ComparisonMetrics {
  */
 function extractNumericalValues(text: string): Map<string, number> {
   const values = new Map<string, number>();
-
-  // Pattern for numbers with optional units
-  // Matches: 65, 65.5, 65 ksi, 450 MPa, 0.030%, etc.
-  const patterns = [
-    // Yield/tensile strength: "65 ksi", "450 MPa"
-    /(\d+(?:\.\d+)?)\s*(ksi|MPa)/gi,
-    // Percentages: "25%", "0.030%"
-    /(\d+(?:\.\d+)?)\s*%/g,
-    // Temperatures: "1900°F", "1038°C"
-    /(\d+(?:\.\d+)?)\s*°([FC])/gi,
-    // Hardness: "280 HBW", "32 HRC"
-    /(\d+(?:\.\d+)?)\s*(HBW|HRC|HRB)/gi,
-    // Ranges: "21.0-23.0"
-    /(\d+(?:\.\d+)?)\s*-\s*(\d+(?:\.\d+)?)/g,
-  ];
 
   // Extract stress values (ksi/MPa)
   const stressRegex = /(\d+(?:\.\d+)?)\s*(ksi|MPa)/gi;

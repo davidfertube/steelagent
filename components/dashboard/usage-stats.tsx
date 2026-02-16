@@ -6,6 +6,7 @@
  */
 
 import { useEffect, useState } from 'react';
+import Link from 'next/link';
 import { createAuthClient } from '@/lib/auth';
 
 interface UsageData {
@@ -139,9 +140,12 @@ export function UsageStats({ workspaceId }: { workspaceId: string }) {
       {usage.plan === 'free' && (queriesPercent >= 75 || documentsPercent >= 75) && (
         <div className="p-4 bg-blue-500/10 border border-blue-500/50 rounded-lg text-center">
           <p className="text-white mb-2">Running low on quota?</p>
-          <button className="px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white rounded-lg transition-colors">
+          <Link
+            href="/pricing"
+            className="inline-block px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white rounded-lg transition-colors"
+          >
             Upgrade to Pro
-          </button>
+          </Link>
         </div>
       )}
     </div>

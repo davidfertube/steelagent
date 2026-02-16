@@ -282,17 +282,17 @@ export function createEmbeddingError(error: unknown): SafeErrorResponse {
       };
     }
 
-    // Show actual Voyage API errors (auth failures, etc.) for debugging
+    // Embedding service errors — don't leak provider details to clients
     if (msg.includes('voyageai') || msg.includes('voyage')) {
       return {
-        error: `Voyage AI error: ${error.message}`,
+        error: 'Embedding service error. Please try again or contact support.',
         code: 'SERVICE_UNAVAILABLE',
       };
     }
 
     if (msg.includes('api key') || msg.includes('api_key') || msg.includes('invalid key')) {
       return {
-        error: `API key error: ${error.message}`,
+        error: 'Embedding service configuration error. Please contact support.',
         code: 'SERVICE_UNAVAILABLE',
       };
     }

@@ -2,7 +2,7 @@
 
 import { useState, useCallback, FormEvent, useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { ArrowRight, Menu, X, Sun, Moon, CheckCircle } from "lucide-react";
+import { ArrowRight, Menu, X, Sun, Moon, CheckCircle, Shield, FileText, Microscope, ClipboardCheck, Package, Scale } from "lucide-react";
 import { useTheme } from "next-themes";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
@@ -12,208 +12,138 @@ import { SearchForm } from "@/components/search-form";
 import { RealtimeComparison } from "@/components/realtime-comparison";
 import { DocumentUpload } from "@/components/document-upload";
 
-import { Source, GenericLLMResponse, ConfidenceScore } from "@/lib/api";
+import { Source, GenericLLMResponse, ConfidenceScore, AnonymousQueryInfo } from "@/lib/api";
 import { NetworkVisualization } from "@/components/network-visualization";
+import { Logo } from "@/components/ui/logo";
+import AnonymousQuotaBanner from "@/components/anonymous-quota-banner";
 
-function Hero3DAnimation() {
+// Simulated product interface for hero section
+function ProductPreview() {
+  const responseText = 'The minimum yield strength for S32205 duplex stainless steel per ASTM A790 is 65 ksi (450 MPa).';
+  const [displayedChars, setDisplayedChars] = useState(0);
+  const [showDetails, setShowDetails] = useState(false);
+
+  useEffect(() => {
+    const timeout = setTimeout(() => {
+      if (displayedChars < responseText.length) {
+        setDisplayedChars(prev => prev + 1);
+      } else if (!showDetails) {
+        setTimeout(() => setShowDetails(true), 300);
+      }
+    }, 25);
+    return () => clearTimeout(timeout);
+  }, [displayedChars, showDetails]);
+
+  const displayed = responseText.slice(0, displayedChars);
+  // Bold the value portion once fully typed
+  const boldStart = responseText.indexOf('65 ksi');
+  const boldEnd = boldStart + '65 ksi (450 MPa)'.length;
+
   return (
-    <div className="relative w-full aspect-square max-w-[500px] mx-auto">
-      <div className="absolute inset-0 flex items-center justify-center">
-        <DocumentFlowAnimation />
-      </div>
-    </div>
-  );
-}
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.8, delay: 0.4 }}
+      className="relative"
+      style={{ perspective: '1200px' }}
+    >
+      <motion.div
+        className="bg-neutral-900 dark:bg-neutral-800 rounded-xl border border-neutral-700 dark:border-neutral-600 shadow-2xl shadow-black/30 overflow-hidden"
+        initial={{ rotateY: -5 }}
+        whileHover={{ rotateY: 0 }}
+        transition={{ duration: 0.4 }}
+        style={{ transformStyle: 'preserve-3d' }}
+      >
+        {/* Browser chrome */}
+        <div className="flex items-center gap-2 px-4 py-3 bg-neutral-800 dark:bg-neutral-700 border-b border-neutral-700 dark:border-neutral-600">
+          <div className="flex gap-1.5">
+            <div className="w-3 h-3 rounded-full bg-red-400" />
+            <div className="w-3 h-3 rounded-full bg-amber-400" />
+            <div className="w-3 h-3 rounded-full bg-green-400" />
+          </div>
+          <span className="text-xs text-neutral-400 ml-2 font-medium">SteelAgent</span>
+        </div>
 
-// Fallback SVG animation - Documents flowing into central AI
-function DocumentFlowAnimation() {
-  const documents = [
-    { id: 1, x: 50, y: 50, delay: 0 },
-    { id: 2, x: 300, y: 50, delay: 0.3 },
-    { id: 3, x: 25, y: 175, delay: 0.6 },
-    { id: 4, x: 325, y: 175, delay: 0.9 },
-    { id: 5, x: 50, y: 300, delay: 1.2 },
-    { id: 6, x: 300, y: 300, delay: 1.5 },
-  ];
+        <div className="p-5 space-y-4">
+          {/* Query input */}
+          <div className="bg-neutral-800 dark:bg-neutral-900 rounded-lg px-4 py-3 border border-neutral-700 dark:border-neutral-600">
+            <p className="text-sm text-neutral-300 font-mono">
+              What is the yield strength of S32205 per ASTM A790?
+            </p>
+          </div>
 
-  const centerX = 200;
-  const centerY = 200;
+          {/* Response */}
+          <div className="space-y-3">
+            <div className="flex items-center gap-2">
+              <div className="w-2 h-2 rounded-full bg-green-500" />
+              <span className="text-xs font-semibold text-green-400 uppercase tracking-wider">Answer</span>
+            </div>
+            <p className="text-sm text-neutral-200 leading-relaxed min-h-[3rem]">
+              {displayedChars <= boldStart
+                ? displayed
+                : (
+                  <>
+                    {responseText.slice(0, boldStart)}
+                    <strong className="text-green-400">
+                      {displayed.slice(boldStart, Math.min(displayedChars, boldEnd))}
+                    </strong>
+                    {displayedChars > boldEnd ? responseText.slice(boldEnd, displayedChars) : ''}
+                  </>
+                )
+              }
+              {displayedChars < responseText.length && (
+                <motion.span
+                  className="inline-block w-0.5 h-4 bg-green-400 ml-0.5 align-middle"
+                  animate={{ opacity: [1, 0] }}
+                  transition={{ duration: 0.8, repeat: Infinity }}
+                />
+              )}
+            </p>
 
-  return (
-    <svg viewBox="0 0 400 400" className="w-full h-full [&_.doc-rect]:fill-white dark:[&_.doc-rect]:fill-neutral-800 [&_.doc-stroke]:stroke-black dark:[&_.doc-stroke]:stroke-white [&_.doc-line]:stroke-black dark:[&_.doc-line]:stroke-white [&_.brain-fill]:fill-white dark:[&_.brain-fill]:fill-neutral-800">
-      <defs>
-        <radialGradient id="brainGlow" cx="50%" cy="50%" r="50%">
-          <stop offset="0%" stopColor="#22c55e" stopOpacity="0.4" />
-          <stop offset="70%" stopColor="#22c55e" stopOpacity="0.1" />
-          <stop offset="100%" stopColor="#22c55e" stopOpacity="0" />
-        </radialGradient>
-        <filter id="glow">
-          <feGaussianBlur stdDeviation="3" result="coloredBlur" />
-          <feMerge>
-            <feMergeNode in="coloredBlur" />
-            <feMergeNode in="SourceGraphic" />
-          </feMerge>
-        </filter>
-      </defs>
+            {/* Source citation */}
+            <AnimatePresence>
+              {showDetails && (
+                <motion.div
+                  initial={{ opacity: 0, y: 8 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.3 }}
+                  className="space-y-3"
+                >
+                  <div className="flex items-center gap-2">
+                    <div className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-green-500/10 border border-green-500/20 rounded-md">
+                      <FileText className="w-3 h-3 text-green-400" />
+                      <span className="text-xs font-medium text-green-400">ASTM A790-14, Table 1, p.3</span>
+                    </div>
+                  </div>
 
-      {/* Connection lines */}
-      {documents.map((doc) => (
-        <motion.line
-          key={`line-${doc.id}`}
-          x1={doc.x + 22}
-          y1={doc.y + 27}
-          x2={centerX}
-          y2={centerY}
-          stroke="#22c55e"
-          strokeWidth="2"
-          strokeDasharray="8 4"
-          initial={{ pathLength: 0, opacity: 0 }}
-          animate={{
-            pathLength: 1,
-            opacity: 0.6,
-            strokeDashoffset: [0, -12]
-          }}
-          transition={{
-            pathLength: { duration: 0.8, delay: doc.delay + 0.3 },
-            opacity: { duration: 0.3, delay: doc.delay + 0.3 },
-            strokeDashoffset: { duration: 1.5, repeat: Infinity, ease: "linear" }
-          }}
-        />
-      ))}
+                  {/* Confidence bar */}
+                  <div className="space-y-1.5">
+                    <div className="flex items-center justify-between">
+                      <span className="text-xs text-neutral-400">Confidence</span>
+                      <span className="text-xs font-semibold text-green-400">94%</span>
+                    </div>
+                    <div className="h-1.5 bg-neutral-700 rounded-full overflow-hidden">
+                      <motion.div
+                        className="h-full bg-gradient-to-r from-green-500 to-green-400 rounded-full"
+                        initial={{ width: '0%' }}
+                        animate={{ width: '94%' }}
+                        transition={{ duration: 1, delay: 0.2, ease: 'easeOut' }}
+                      />
+                    </div>
+                  </div>
 
-      {/* Particles */}
-      {documents.map((doc) => (
-        <motion.circle
-          key={`particle-${doc.id}`}
-          r="5"
-          fill="#22c55e"
-          filter="url(#glow)"
-          initial={{ opacity: 0 }}
-          animate={{
-            opacity: [0, 1, 1, 0],
-            cx: [doc.x + 22, centerX],
-            cy: [doc.y + 27, centerY],
-          }}
-          transition={{
-            duration: 2,
-            repeat: Infinity,
-            delay: doc.delay + 1,
-            ease: "easeInOut",
-            times: [0, 0.1, 0.9, 1]
-          }}
-        />
-      ))}
-
-      {/* Documents */}
-      {documents.map((doc) => (
-        <g key={`doc-${doc.id}`}>
-          <motion.rect
-            x={doc.x}
-            y={doc.y}
-            width="45"
-            height="55"
-            className="doc-rect doc-stroke"
-            strokeWidth="2"
-            rx="3"
-            initial={{ opacity: 0, scale: 0.8 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ duration: 0.4, delay: doc.delay }}
-          />
-          {[12, 22, 32, 42].map((yOffset, i) => (
-            <motion.line
-              key={i}
-              x1={doc.x + 8}
-              y1={doc.y + yOffset}
-              x2={doc.x + (i === 2 ? 30 : 37)}
-              y2={doc.y + yOffset}
-              className="doc-line"
-              strokeWidth="1"
-              strokeOpacity="0.3"
-              initial={{ pathLength: 0 }}
-              animate={{ pathLength: 1 }}
-              transition={{ duration: 0.3, delay: doc.delay + 0.2 + i * 0.05 }}
-            />
-          ))}
-        </g>
-      ))}
-
-      {/* Central Brain */}
-      <motion.circle
-        cx={centerX}
-        cy={centerY}
-        r="60"
-        fill="url(#brainGlow)"
-        initial={{ scale: 0 }}
-        animate={{ scale: [1, 1.15, 1] }}
-        transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
-      />
-      <motion.circle
-        cx={centerX}
-        cy={centerY}
-        r="45"
-        className="brain-fill"
-        stroke="#22c55e"
-        strokeWidth="3"
-        filter="url(#glow)"
-        initial={{ scale: 0 }}
-        animate={{ scale: 1 }}
-        transition={{ duration: 0.6, delay: 0.8, type: "spring" }}
-      />
-      <motion.circle
-        cx={centerX}
-        cy={centerY}
-        r="35"
-        fill="none"
-        stroke="#22c55e"
-        strokeWidth="1.5"
-        strokeDasharray="6 3"
-        initial={{ pathLength: 0 }}
-        animate={{ pathLength: 1 }}
-        transition={{ duration: 1, delay: 1.2 }}
-      />
-
-      {/* Neural nodes */}
-      {[
-        { x: centerX - 15, y: centerY - 12 },
-        { x: centerX + 15, y: centerY - 12 },
-        { x: centerX, y: centerY + 5 },
-        { x: centerX - 10, y: centerY + 18 },
-        { x: centerX + 10, y: centerY + 18 },
-      ].map((node, i) => (
-        <motion.circle
-          key={`node-${i}`}
-          cx={node.x}
-          cy={node.y}
-          r="5"
-          fill="#22c55e"
-          initial={{ scale: 0 }}
-          animate={{ scale: [1, 1.4, 1] }}
-          transition={{ duration: 1.5, repeat: Infinity, delay: 1.5 + i * 0.2 }}
-        />
-      ))}
-
-      {/* Neural connections */}
-      <motion.path
-        d={`M ${centerX - 15} ${centerY - 12} L ${centerX} ${centerY + 5} L ${centerX + 15} ${centerY - 12}`}
-        fill="none"
-        stroke="#22c55e"
-        strokeWidth="2"
-        strokeOpacity="0.6"
-        initial={{ pathLength: 0 }}
-        animate={{ pathLength: 1 }}
-        transition={{ duration: 0.8, delay: 1.5 }}
-      />
-      <motion.path
-        d={`M ${centerX - 10} ${centerY + 18} L ${centerX} ${centerY + 5} L ${centerX + 10} ${centerY + 18}`}
-        fill="none"
-        stroke="#22c55e"
-        strokeWidth="2"
-        strokeOpacity="0.6"
-        initial={{ pathLength: 0 }}
-        animate={{ pathLength: 1 }}
-        transition={{ duration: 0.8, delay: 1.7 }}
-      />
-    </svg>
+                  {/* Verification */}
+                  <div className="flex items-center gap-1.5 text-xs text-neutral-400">
+                    <Shield className="w-3 h-3 text-green-400" />
+                    <span>3 numerical claims verified against source</span>
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </div>
+        </div>
+      </motion.div>
+    </motion.div>
   );
 }
 
@@ -268,7 +198,7 @@ function LeadForm() {
             </svg>
           </div>
           <h3 className="text-xl font-semibold text-black dark:text-white mb-2">You&apos;re on the list!</h3>
-          <p className="text-black/70 dark:text-white/70">We&apos;ll contact you when SpecVault is ready.</p>
+          <p className="text-black/70 dark:text-white/70">We&apos;ll contact you when SteelAgent is ready.</p>
         </CardContent>
       </Card>
     );
@@ -368,7 +298,7 @@ function LeadForm() {
         </form>
 
         <p className="text-xs text-black/50 dark:text-white/50 text-center mt-4">
-          We&apos;ll contact you when SpecVault is ready. No spam, ever.
+          We&apos;ll contact you when SteelAgent is ready. No spam, ever.
         </p>
       </CardContent>
     </Card>
@@ -390,12 +320,14 @@ export default function Home() {
   // Generic LLM response for comparison display
   const [genericLLMResponse, setGenericLLMResponse] = useState<string | null>(null);
   const [confidence, setConfidence] = useState<ConfidenceScore | null>(null);
+  const [anonymousInfo, setAnonymousInfo] = useState<AnonymousQueryInfo | null>(null);
 
   // Refs for auto-scrolling
   const step2Ref = useRef<HTMLDivElement>(null);
   const step3Ref = useRef<HTMLDivElement>(null);
 
   // Prevent hydration mismatch for theme toggle
+  // eslint-disable-next-line react-hooks/set-state-in-effect
   useEffect(() => { setMounted(true); }, []);
 
   // Auto-scroll to Step 2 when upload completes
@@ -460,8 +392,9 @@ export default function Home() {
         <div className="container-center">
           <div className="flex h-16 items-center justify-between">
             {/* Logo */}
-            <Link href="/" className="text-lg font-semibold tracking-tight text-black dark:text-white">
-              SpecVault
+            <Link href="/" className="flex items-center gap-2 text-lg font-semibold tracking-tight text-black dark:text-white">
+              <Logo size={28} />
+              SteelAgent
             </Link>
 
             {/* Desktop Navigation */}
@@ -563,99 +496,188 @@ export default function Home() {
 
       <main className="flex-1 pt-16">
         {/* Hero Section */}
-        <section className="relative py-16 sm:py-24 md:py-40 overflow-hidden">
+        <section className="relative py-16 sm:py-24 md:py-32 overflow-hidden">
           <div className="container-wide">
-            <div className="flex flex-col lg:flex-row gap-12 lg:gap-8 items-center">
-              {/* Center/Left: Text content */}
-              <div className="flex-1 text-center space-y-8">
-                <div className="space-y-6">
+            <div className="flex flex-col lg:flex-row gap-12 lg:gap-16 items-center">
+              {/* Left: Text content */}
+              <div className="flex-1 text-center lg:text-left space-y-8">
+                {/* Badge */}
+                <motion.div
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.4 }}
+                  className="inline-flex items-center gap-2 px-3 py-1.5 border border-green-200 dark:border-green-800 bg-green-50 dark:bg-green-950/30 rounded-full text-xs font-semibold text-green-700 dark:text-green-400"
+                >
+                  <motion.span
+                    className="w-2 h-2 bg-green-500 rounded-full"
+                    animate={{ scale: [1, 1.3, 1], opacity: [1, 0.6, 1] }}
+                    transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+                  />
+                  Now in Beta
+                </motion.div>
+
+                {/* Headline */}
+                <div className="space-y-5">
                   <motion.h1
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.6, delay: 0.1 }}
-                    className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold tracking-tight leading-[1.05] text-black dark:text-white"
+                    className="text-4xl sm:text-5xl md:text-6xl font-bold tracking-tight leading-[1.08] text-black dark:text-white"
                   >
-                    <motion.span
-                      initial={{ opacity: 0 }}
-                      animate={{ opacity: 1 }}
-                      transition={{ duration: 0.5, delay: 0.2 }}
-                    >
-                      SPECVAULT
-                    </motion.span>
+                    Specification Intelligence<br />
+                    for{" "}
+                    <span className="relative inline-block">
+                      Steel & Materials
+                      <motion.span
+                        className="absolute -bottom-1.5 left-0 right-0 h-[3px] bg-green-500"
+                        initial={{ scaleX: 0 }}
+                        animate={{ scaleX: 1 }}
+                        transition={{ duration: 0.6, delay: 0.7 }}
+                        style={{ transformOrigin: "left" }}
+                      />
+                    </span>
                   </motion.h1>
                   <motion.p
                     initial={{ opacity: 0, y: 10 }}
                     animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.5, delay: 0.4 }}
-                    className="text-lg sm:text-xl text-black/60 dark:text-white/60 max-w-2xl mx-auto leading-relaxed px-4"
+                    transition={{ duration: 0.5, delay: 0.3 }}
+                    className="text-base sm:text-lg text-black/60 dark:text-white/60 max-w-xl leading-relaxed"
                   >
-                    ASTM, NACE, and API specs, instantly searchable.
-                    <br />
-                    Built for materials engineers who need{" "}
-                    <span className="relative inline-block text-black dark:text-white font-semibold">
-                      audit-ready answers
-                      <motion.span
-                        className="absolute -bottom-1 left-0 right-0 h-[3px] bg-green-500"
-                        initial={{ scaleX: 0 }}
-                        animate={{ scaleX: 1 }}
-                        transition={{ duration: 0.6, delay: 0.8 }}
-                        style={{ transformOrigin: "left" }}
-                      />
-                    </span>
-                    .
+                    Search across ASTM, API, and NACE standards with natural language. Every answer includes source citations, confidence scoring, and numerical verification against the original document.
                   </motion.p>
                 </div>
 
+                {/* CTAs */}
                 <motion.div
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.5, delay: 0.8 }}
-                  className="flex flex-wrap gap-3 sm:gap-4 justify-center px-4"
+                  transition={{ duration: 0.5, delay: 0.5 }}
+                  className="flex flex-wrap gap-3 sm:gap-4 justify-center lg:justify-start"
                 >
-                  <Button size="lg" className="bg-black dark:bg-white text-white dark:text-black hover:bg-black/90 dark:hover:bg-white/90 h-12 sm:h-14 px-6 sm:px-8 text-base sm:text-lg touch-target transition-all duration-300 hover:scale-105 hover:shadow-lg" asChild>
-                    <a href="#demo">
-                      Try Demo
-                    </a>
-                  </Button>
-                  <Button size="lg" variant="outline" className="border-black/20 dark:border-white/20 bg-white dark:bg-transparent text-black dark:text-white hover:bg-black/5 dark:hover:bg-white/10 h-12 sm:h-14 px-5 sm:px-6 text-base sm:text-lg touch-target transition-all duration-300 hover:scale-105 hover:shadow-lg" asChild>
-                    <a href="#contact">
-                      Get Access
-                    </a>
-                  </Button>
+                  <a href="#demo" className="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium bg-black dark:bg-white text-white dark:text-black hover:bg-black/90 dark:hover:bg-white/90 h-12 sm:h-14 px-6 sm:px-8 text-base sm:text-lg touch-target transition-all duration-300 hover:scale-105 hover:shadow-lg">
+                    Try Demo
+                    <ArrowRight className="ml-2 h-4 w-4" />
+                  </a>
+                  <a href="#contact" className="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium border border-black/20 dark:border-white/20 bg-white dark:bg-transparent text-black dark:text-white hover:bg-black/5 dark:hover:bg-white/10 h-12 sm:h-14 px-5 sm:px-6 text-base sm:text-lg touch-target transition-all duration-300 hover:scale-105 hover:shadow-lg">
+                    Get Access
+                  </a>
                 </motion.div>
 
-                {/* Key Metrics */}
+                {/* 4-Metric Stats Row */}
                 <motion.div
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.5, delay: 1.0 }}
-                  className="grid grid-cols-2 gap-4 sm:gap-6 pt-4 max-w-md mx-auto px-4"
+                  transition={{ duration: 0.5, delay: 0.7 }}
+                  className="flex flex-wrap lg:flex-nowrap divide-x divide-black/10 dark:divide-white/10 pt-4"
                 >
-                  <div className="text-center">
-                    <p className="text-xl sm:text-2xl md:text-3xl font-semibold text-black dark:text-white">4+ hrs</p>
-                    <p className="text-xs sm:text-sm text-black/60 dark:text-white/60">Saved per day</p>
-                  </div>
-                  <div className="text-center">
-                    <p className="text-xl sm:text-2xl md:text-3xl font-semibold text-black dark:text-white">100%</p>
-                    <p className="text-xs sm:text-sm text-black/60 dark:text-white/60">Cited sources</p>
-                  </div>
+                  {[
+                    { value: "91.3%", label: "Accuracy" },
+                    { value: "~0%", label: "Hallucinations" },
+                    { value: "96.3%", label: "Citation Rate" },
+                    { value: "<15s", label: "Response Time" },
+                  ].map((stat, i) => (
+                    <div key={i} className="flex-1 text-center px-3 sm:px-4 py-2 first:pl-0 last:pr-0">
+                      <p className="text-lg sm:text-xl md:text-2xl font-bold text-black dark:text-white">{stat.value}</p>
+                      <p className="text-xs text-black/50 dark:text-white/50 mt-0.5">{stat.label}</p>
+                    </div>
+                  ))}
+                </motion.div>
+
+                {/* Standards Badges */}
+                <motion.div
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.5, delay: 0.9 }}
+                  className="flex flex-wrap gap-2 justify-center lg:justify-start"
+                >
+                  <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-neutral-100 dark:bg-neutral-800 text-neutral-600 dark:text-neutral-300 border border-neutral-200 dark:border-neutral-700">
+                    ASTM
+                  </span>
+                  <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-blue-50 dark:bg-blue-950/30 text-blue-600 dark:text-blue-400 border border-blue-200 dark:border-blue-800">
+                    API
+                  </span>
+                  <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-amber-50 dark:bg-amber-950/30 text-amber-600 dark:text-amber-400 border border-amber-200 dark:border-amber-800">
+                    NACE
+                  </span>
                 </motion.div>
               </div>
 
-              {/* Right: 3D Animation */}
+              {/* Right: Product Preview */}
               <motion.div
                 initial={{ opacity: 0, scale: 0.95 }}
                 animate={{ opacity: 1, scale: 1 }}
-                transition={{ duration: 0.8, delay: 0.2 }}
-                className="hidden lg:block flex-shrink-0 w-[500px]"
+                transition={{ duration: 0.8, delay: 0.3 }}
+                className="flex-1 w-full max-w-lg lg:max-w-none"
               >
-                <Hero3DAnimation />
+                <ProductPreview />
               </motion.div>
             </div>
           </div>
         </section>
 
-        {/* Why SpecVault vs Generic LLMs Section */}
+        {/* Who This Is For - Persona Section */}
+        <section className="relative py-12 sm:py-16 md:py-20 border-t border-black/5 dark:border-white/10 bg-black/[0.02] dark:bg-white/[0.02]">
+          <div className="container-center">
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.6 }}
+              className="space-y-10"
+            >
+              <div className="text-center space-y-3">
+                <span className="text-xs font-semibold tracking-widest text-black/40 dark:text-white/40 uppercase">Built for your team</span>
+                <h2 className="text-3xl sm:text-4xl font-bold tracking-tight text-black dark:text-white">
+                  Who Uses SteelAgent
+                </h2>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                {[
+                  {
+                    icon: Microscope,
+                    role: "Materials Engineers",
+                    description: "Find mechanical properties across specs in seconds",
+                  },
+                  {
+                    icon: ClipboardCheck,
+                    role: "QA/QC Inspectors",
+                    description: "Verify MTR data against specification requirements",
+                  },
+                  {
+                    icon: Package,
+                    role: "Procurement Teams",
+                    description: "Compare material grades across standards",
+                  },
+                  {
+                    icon: Scale,
+                    role: "Compliance Officers",
+                    description: "Generate audit-ready documentation with citations",
+                  },
+                ].map((persona, i) => (
+                  <motion.div
+                    key={i}
+                    initial={{ opacity: 0, y: 15 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true }}
+                    transition={{ duration: 0.4, delay: i * 0.1 }}
+                    className="group rounded-xl border border-black/5 dark:border-white/10 bg-white dark:bg-neutral-900 p-6 space-y-4 hover:shadow-lg hover:-translate-y-1 transition-all duration-300"
+                  >
+                    <div className="w-10 h-10 rounded-lg bg-green-50 dark:bg-green-950/40 border border-green-200 dark:border-green-800 flex items-center justify-center">
+                      <persona.icon className="w-5 h-5 text-green-600 dark:text-green-400" />
+                    </div>
+                    <div className="space-y-1.5">
+                      <h3 className="font-semibold text-black dark:text-white text-sm">{persona.role}</h3>
+                      <p className="text-sm text-black/60 dark:text-white/60 leading-relaxed">{persona.description}</p>
+                    </div>
+                  </motion.div>
+                ))}
+              </div>
+            </motion.div>
+          </div>
+        </section>
+
+        {/* Why SteelAgent vs Generic LLMs Section */}
         <section id="why" className="relative min-h-screen flex items-center py-12 sm:py-16 md:py-20 border-t border-black/5 dark:border-white/10 bg-black/[0.02] dark:bg-white/[0.02]">
           <div className="container-center">
             <motion.div
@@ -674,7 +696,7 @@ export default function Home() {
                   transition={{ duration: 0.5, delay: 0.1 }}
                   className="text-4xl sm:text-5xl md:text-6xl font-bold tracking-tight text-black dark:text-white"
                 >
-                  Why SpecVault?
+                  Why SteelAgent?
                 </motion.h2>
                 <motion.p
                   initial={{ opacity: 0, y: 10 }}
@@ -684,13 +706,13 @@ export default function Home() {
                   className="text-xl text-black/60 dark:text-white/60 max-w-3xl mx-auto leading-relaxed"
                 >
                   Generic LLMs (ChatGPT, Claude, Gemini) hallucinate specs. <br className="hidden sm:block" />
-                  SpecVault only answers from <span className="text-black dark:text-white font-semibold">your documents</span>.
+                  SteelAgent only answers from <span className="text-black dark:text-white font-semibold">your documents</span>.
                 </motion.p>
               </div>
 
               {/* Comparison Grid */}
               <div className="grid md:grid-cols-2 gap-8 max-w-5xl mx-auto px-4">
-                {/* SpecVault Card */}
+                {/* SteelAgent Card */}
                 <motion.div
                   initial={{ opacity: 0, x: -20 }}
                   whileInView={{ opacity: 1, x: 0 }}
@@ -705,7 +727,7 @@ export default function Home() {
                       </svg>
                     </div>
                     <div>
-                      <h3 className="text-2xl font-bold text-green-700 dark:text-green-400">SpecVault</h3>
+                      <h3 className="text-2xl font-bold text-green-700 dark:text-green-400">SteelAgent</h3>
                       <p className="text-sm text-green-600/80 dark:text-green-400/80 font-medium mt-1">Trustworthy & Traceable</p>
                     </div>
                   </div>
@@ -808,7 +830,7 @@ export default function Home() {
               </div>
 
               <div className="grid md:grid-cols-2 gap-8">
-                {/* SpecVault Response */}
+                {/* SteelAgent Response */}
                 <div className="space-y-4">
                   <div className="flex items-center justify-center gap-2">
                     <div className="w-6 h-6 rounded-full bg-green-500 flex items-center justify-center">
@@ -816,7 +838,7 @@ export default function Home() {
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                       </svg>
                     </div>
-                    <span className="font-bold text-green-700 dark:text-green-400">SpecVault</span>
+                    <span className="font-bold text-green-700 dark:text-green-400">SteelAgent</span>
                   </div>
                   <div className="bg-green-50 dark:bg-green-950/30 rounded-xl p-5 border border-green-100 dark:border-green-800 relative">
                     <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 w-3 h-3 bg-green-50 dark:bg-green-950/30 border-t border-l border-green-100 dark:border-green-800 rotate-45 transform"></div>
@@ -960,14 +982,38 @@ export default function Home() {
                         Click a quick prompt below or type your own question
                       </motion.p>
                     )}
-                    <SearchForm
-                      onResult={handleResult}
-                      onError={handleError}
-                      onLoadingChange={handleLoadingChange}
-                      onComparisonResult={handleComparisonResult}
-                      onQuerySubmit={setLastQuery}
-                      documentId={uploadedDocumentId}
-                    />
+                    {anonymousInfo && (
+                      <div className="mb-4">
+                        <AnonymousQuotaBanner
+                          used={anonymousInfo.used}
+                          remaining={anonymousInfo.remaining}
+                          limit={anonymousInfo.limit}
+                        />
+                      </div>
+                    )}
+                    {anonymousInfo && anonymousInfo.remaining <= 0 ? (
+                      <div className="text-center py-6 space-y-4">
+                        <p className="text-black/70 dark:text-white/70">
+                          Sign up for a free account to continue querying your documents.
+                        </p>
+                        <a
+                          href="/auth/signup"
+                          className="inline-flex items-center justify-center px-6 py-3 bg-black dark:bg-white text-white dark:text-black font-semibold rounded-lg hover:opacity-90 transition-opacity"
+                        >
+                          Sign Up Free
+                        </a>
+                      </div>
+                    ) : (
+                      <SearchForm
+                        onResult={handleResult}
+                        onError={handleError}
+                        onLoadingChange={handleLoadingChange}
+                        onComparisonResult={handleComparisonResult}
+                        onQuerySubmit={setLastQuery}
+                        onAnonymousInfo={setAnonymousInfo}
+                        documentId={uploadedDocumentId}
+                      />
+                    )}
                   </motion.div>
 
                   {/* Response Display */}
@@ -1088,17 +1134,10 @@ export default function Home() {
       {/* Footer */}
       <footer className="border-t border-black/5 dark:border-white/10 py-8 sm:py-12 bg-white dark:bg-neutral-950">
         <div className="container-center">
-          <div className="flex justify-center">
-            <div>
-              <span className="font-semibold text-black dark:text-white">SpecVault</span>
-              <span className="text-black/60 dark:text-white/60 text-sm ml-2">
-                by Antigravity
-              </span>
-            </div>
-          </div>
+          <p className="text-center text-xs text-black/40 dark:text-white/40">&copy; {new Date().getFullYear()} SteelAgent. All rights reserved.</p>
           <Separator className="my-8 bg-black/5 dark:bg-white/10" />
           <p className="text-center text-xs text-black/40 dark:text-white/40 max-w-2xl mx-auto">
-            <strong>Disclaimer:</strong> SpecVault provides AI-generated responses for reference only.
+            <strong>Disclaimer:</strong> SteelAgent provides AI-generated responses for reference only.
             Always verify specifications against original source documents. Not intended for safety-critical
             decisions without professional engineering review. Users are responsible for their own document licenses.
           </p>

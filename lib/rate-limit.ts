@@ -74,6 +74,7 @@ export const RATE_LIMITS: Record<string, RateLimitConfig> = {
   '/api/documents/upload': { windowMs: 60 * 1000, maxRequests: 5 },     // 5/min
   '/api/documents/process': { windowMs: 60 * 1000, maxRequests: 10 },   // 10/min
   '/api/leads': { windowMs: 60 * 1000, maxRequests: 10 },               // 10/min
+  '/api/feedback': { windowMs: 60 * 1000, maxRequests: 20 },            // 20/min
   'default': { windowMs: 60 * 1000, maxRequests: 60 },                  // 60/min default
 };
 
@@ -186,6 +187,12 @@ export function getRateLimitHeaders(result: RateLimitResult): Record<string, str
  * Handles proxied requests (Vercel, Cloudflare, etc.)
  */
 export function getClientIp(request: Request): string {
+  // Vercel sets this header and it cannot be spoofed by clients
+  const vercelForwardedFor = request.headers.get('x-vercel-forwarded-for');
+  if (vercelForwardedFor) {
+    return vercelForwardedFor.split(',')[0].trim();
+  }
+
   // Prefer platform-set headers (not spoofable) over x-forwarded-for
   const realIp = request.headers.get('x-real-ip');
   if (realIp) {
@@ -212,4 +219,161 @@ export function getClientIp(request: Request): string {
  */
 export function isUpstashConfigured(): boolean {
   return UPSTASH_CONFIGURED;
+}
+
+// ============================================
+// Anonymous Trial Quota (3 queries per IP per 30 days)
+// ============================================
+
+const ANONYMOUS_QUERY_LIMIT = 3;
+const ANONYMOUS_QUERY_WINDOW_MS = 30 * 24 * 60 * 60 * 1000; // 30 days
+export const ANONYMOUS_DOC_LIMIT = 1;
+
+export interface AnonymousQuotaResult {
+  allowed: boolean;
+  used: number;
+  limit: number;
+  remaining: number;
+}
+
+// In-memory fallback stores for anonymous tracking
+const anonymousQueryStore = new Map<string, { count: number; expiry: number }>();
+const anonymousDocStore = new Map<string, Set<number>>();
+
+// Clean up expired anonymous entries every 10 minutes
+if (!UPSTASH_CONFIGURED) {
+  setInterval(() => {
+    const now = Date.now();
+    for (const [key, entry] of anonymousQueryStore.entries()) {
+      if (entry.expiry < now) {
+        anonymousQueryStore.delete(key);
+      }
+    }
+  }, 10 * 60 * 1000);
+}
+
+/**
+ * Check if an anonymous IP has remaining free queries
+ */
+export async function checkAnonymousQuota(ip: string): Promise<AnonymousQuotaResult> {
+  const key = `anon_quota:${ip}`;
+
+  if (redis) {
+    try {
+      const count = await redis.get<number>(key) || 0;
+      const remaining = Math.max(0, ANONYMOUS_QUERY_LIMIT - count);
+      return {
+        allowed: count < ANONYMOUS_QUERY_LIMIT,
+        used: count,
+        limit: ANONYMOUS_QUERY_LIMIT,
+        remaining,
+      };
+    } catch (error) {
+      console.warn('[Anonymous Quota] Redis error, falling back to in-memory:', error);
+    }
+  }
+
+  // In-memory fallback
+  const entry = anonymousQueryStore.get(key);
+  const now = Date.now();
+
+  if (!entry || entry.expiry < now) {
+    return { allowed: true, used: 0, limit: ANONYMOUS_QUERY_LIMIT, remaining: ANONYMOUS_QUERY_LIMIT };
+  }
+
+  const remaining = Math.max(0, ANONYMOUS_QUERY_LIMIT - entry.count);
+  return {
+    allowed: entry.count < ANONYMOUS_QUERY_LIMIT,
+    used: entry.count,
+    limit: ANONYMOUS_QUERY_LIMIT,
+    remaining,
+  };
+}
+
+/**
+ * Increment anonymous query counter for an IP
+ */
+export async function incrementAnonymousQuota(ip: string): Promise<void> {
+  const key = `anon_quota:${ip}`;
+
+  if (redis) {
+    try {
+      const exists = await redis.exists(key);
+      await redis.incr(key);
+      if (!exists) {
+        await redis.expire(key, Math.floor(ANONYMOUS_QUERY_WINDOW_MS / 1000));
+      }
+      return;
+    } catch (error) {
+      console.warn('[Anonymous Quota] Redis incr error, falling back:', error);
+    }
+  }
+
+  // In-memory fallback
+  const now = Date.now();
+  const entry = anonymousQueryStore.get(key);
+
+  if (!entry || entry.expiry < now) {
+    anonymousQueryStore.set(key, { count: 1, expiry: now + ANONYMOUS_QUERY_WINDOW_MS });
+  } else {
+    entry.count++;
+  }
+}
+
+/**
+ * Track a document uploaded by an anonymous session
+ */
+export async function trackAnonymousDocument(sessionId: string, documentId: number): Promise<void> {
+  const key = `anon_docs:${sessionId}`;
+
+  if (redis) {
+    try {
+      await redis.sadd(key, documentId);
+      await redis.expire(key, Math.floor(ANONYMOUS_QUERY_WINDOW_MS / 1000));
+      return;
+    } catch (error) {
+      console.warn('[Anonymous Docs] Redis error, falling back:', error);
+    }
+  }
+
+  // In-memory fallback
+  if (!anonymousDocStore.has(key)) {
+    anonymousDocStore.set(key, new Set());
+  }
+  anonymousDocStore.get(key)!.add(documentId);
+}
+
+/**
+ * Check if an anonymous session owns a specific document
+ */
+export async function isAnonymousDocument(sessionId: string, documentId: number): Promise<boolean> {
+  const key = `anon_docs:${sessionId}`;
+
+  if (redis) {
+    try {
+      const result = await redis.sismember(key, documentId);
+      return result === 1;
+    } catch (error) {
+      console.warn('[Anonymous Docs] Redis error, falling back:', error);
+    }
+  }
+
+  return anonymousDocStore.get(key)?.has(documentId) ?? false;
+}
+
+/**
+ * Check how many documents an anonymous session has uploaded
+ */
+export async function getAnonymousDocCount(sessionId: string): Promise<number> {
+  const key = `anon_docs:${sessionId}`;
+
+  if (redis) {
+    try {
+      return await redis.scard(key);
+    } catch (error) {
+      console.warn('[Anonymous Docs] Redis error, falling back:', error);
+    }
+  }
+
+  return anonymousDocStore.get(key)?.size ?? 0;
 }

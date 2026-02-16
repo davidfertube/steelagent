@@ -6,6 +6,8 @@ import { extractText } from "unpdf";
 import { handleApiError, createValidationError, createEmbeddingError, getErrorStatusCode } from "@/lib/errors";
 import { extractTextWithOCR, shouldAttemptOCR } from "@/lib/ocr";
 import { semanticChunk, DEFAULT_CHUNK_OPTIONS } from "@/lib/semantic-chunking";
+import { serverAuth, createServiceAuthClient } from "@/lib/auth";
+import { isAnonymousDocument } from "@/lib/rate-limit";
 
 /**
  * Document Processing API Route
@@ -150,13 +152,45 @@ export async function POST(request: NextRequest) {
     }
 
     // ========================================
+    // Step 1.5: Authenticate (supports anonymous)
+    // ========================================
+    let user;
+    try {
+      user = await serverAuth.requireAuth();
+    } catch {
+      user = null;
+    }
+
+    const anonymousSessionId = request.cookies.get('anon_session')?.value;
+    const isAnonymous = !user && !!anonymousSessionId;
+
+    if (!user && !anonymousSessionId) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    // Use service client for anonymous (bypasses RLS)
+    const db = isAnonymous ? createServiceAuthClient() : supabase;
+
+    // ========================================
     // Step 2: Retrieve Document from Database
     // ========================================
-    const { data: doc, error: docError } = await supabase
-      .from("documents")
-      .select("*")
-      .eq("id", documentId)
-      .single();
+    let docQuery = db.from("documents").select("*").eq("id", documentId);
+
+    if (user) {
+      const profile = await serverAuth.getUserProfile(user.id);
+      if (!profile || !profile.workspace_id) {
+        return NextResponse.json({ error: "User profile or workspace not found" }, { status: 403 });
+      }
+      docQuery = docQuery.eq("workspace_id", profile.workspace_id);
+    } else if (isAnonymous) {
+      // Verify anonymous ownership
+      const ownsDoc = await isAnonymousDocument(anonymousSessionId!, documentId);
+      if (!ownsDoc) {
+        return NextResponse.json({ error: "Document not found" }, { status: 404 });
+      }
+    }
+
+    const { data: doc, error: docError } = await docQuery.single();
 
     if (docError || !doc) {
       console.error("[Process API] Document not found:", documentId);
@@ -167,7 +201,7 @@ export async function POST(request: NextRequest) {
     // ========================================
     // Step 3: Update Status to Processing
     // ========================================
-    await supabase
+    await db
       .from("documents")
       .update({ status: "processing" })
       .eq("id", documentId);
@@ -175,7 +209,7 @@ export async function POST(request: NextRequest) {
     // ========================================
     // Step 4: Download PDF from Storage
     // ========================================
-    const { data: fileData, error: downloadError } = await supabase.storage
+    const { data: fileData, error: downloadError } = await db.storage
       .from("documents")
       .download(doc.storage_path);
 
@@ -369,7 +403,9 @@ async function updateDocumentStatus(
   documentId: number,
   status: "pending" | "processing" | "indexed" | "error"
 ): Promise<void> {
-  await supabase
+  // Use service client to ensure updates work for both auth and anonymous docs
+  const serviceClient = createServiceAuthClient();
+  await serviceClient
     .from("documents")
     .update({ status })
     .eq("id", documentId);

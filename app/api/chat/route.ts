@@ -17,6 +17,7 @@ import { getLangfuse, flushLangfuse } from "@/lib/langfuse";
 import { getCachedResponse, setCachedResponse } from "@/lib/query-cache";
 import { serverAuth } from "@/lib/auth";
 import { enforceQuota, QuotaExceededError } from "@/lib/quota";
+import { checkAnonymousQuota, incrementAnonymousQuota, isAnonymousDocument, getClientIp } from "@/lib/rate-limit";
 
 /**
  * Chat API Route - RAG-powered Q&A (with Streaming)
@@ -44,28 +45,48 @@ import { enforceQuota, QuotaExceededError } from "@/lib/quota";
  */
 
 export async function POST(request: NextRequest) {
-  // Require authentication
+  // Check authentication (supports anonymous)
   const user = await serverAuth.getCurrentUser();
-  if (!user) {
-    return NextResponse.json({ error: "Unauthorized - Authentication required" }, { status: 401 });
-  }
+  let anonymousQuotaInfo: { used: number; remaining: number; limit: number } | null = null;
 
-  const profile = await serverAuth.getUserProfile(user.id);
-  if (!profile || !profile.workspace_id) {
-    return NextResponse.json({ error: "User profile or workspace not found" }, { status: 403 });
-  }
+  if (user) {
+    // Authenticated path — enforce workspace quota
+    const profile = await serverAuth.getUserProfile(user.id);
+    if (!profile || !profile.workspace_id) {
+      return NextResponse.json({ error: "User profile or workspace not found" }, { status: 403 });
+    }
 
-  // Check quota before processing
-  try {
-    await enforceQuota(profile.workspace_id, 'query');
-  } catch (error) {
-    if (error instanceof QuotaExceededError) {
+    try {
+      await enforceQuota(profile.workspace_id, 'query');
+    } catch (error) {
+      if (error instanceof QuotaExceededError) {
+        return NextResponse.json(
+          { error: error.message, code: "QUOTA_EXCEEDED", upgradeUrl: "/pricing" },
+          { status: 429 }
+        );
+      }
+      throw error;
+    }
+  } else {
+    // Anonymous path — enforce IP-based quota (3 queries per IP per 30 days)
+    const ip = getClientIp(request);
+    const quota = await checkAnonymousQuota(ip);
+
+    if (!quota.allowed) {
       return NextResponse.json(
-        { error: error.message, code: "QUOTA_EXCEEDED" },
+        {
+          error: "You've used all 3 free queries. Sign up for 10 free queries per month.",
+          code: "ANONYMOUS_QUOTA_EXCEEDED",
+          signupUrl: "/auth/signup",
+          used: quota.used,
+          limit: quota.limit,
+          remaining: 0,
+        },
         { status: 429 }
       );
     }
-    throw error;
+
+    anonymousQuotaInfo = { used: quota.used, remaining: quota.remaining, limit: quota.limit };
   }
 
   // Parse body first (outside try block for streaming)
@@ -77,6 +98,37 @@ export async function POST(request: NextRequest) {
   }
 
   const { query, verified = false, stream = true, documentId } = body;
+
+  // Anonymous users MUST specify a documentId (can only query their own doc)
+  if (!user) {
+    if (!documentId) {
+      return NextResponse.json(
+        { error: "Anonymous users must specify a documentId to query." },
+        { status: 400 }
+      );
+    }
+
+    const anonymousSessionId = request.cookies.get('anon_session')?.value;
+    if (!anonymousSessionId) {
+      return NextResponse.json(
+        { error: "No anonymous session found. Please upload a document first." },
+        { status: 401 }
+      );
+    }
+
+    const ownsDoc = await isAnonymousDocument(anonymousSessionId, documentId);
+    if (!ownsDoc) {
+      return NextResponse.json({ error: "Document not found" }, { status: 404 });
+    }
+
+    // Increment anonymous quota BEFORE processing
+    const ip = getClientIp(request);
+    await incrementAnonymousQuota(ip);
+    if (anonymousQuotaInfo) {
+      anonymousQuotaInfo.used += 1;
+      anonymousQuotaInfo.remaining -= 1;
+    }
+  }
 
   // Validate query
   const validation = validateQuery(query);
@@ -113,8 +165,18 @@ export async function POST(request: NextRequest) {
         // Process the query
         const result = await processRAGQuery(cleanedQuery, verified, documentId);
 
+        // Add anonymous quota info and AI disclaimer
+        const enrichedResult = {
+          ...result,
+          disclaimer: "AI-generated content. Always verify against original specifications before making compliance decisions.",
+          ...(anonymousQuotaInfo ? {
+            anonymousQueryInfo: anonymousQuotaInfo,
+            ...(anonymousQuotaInfo.remaining <= 1 ? { signupPrompt: "Sign up free for 10 queries/month" } : {}),
+          } : {}),
+        };
+
         // Send the final response
-        controller.enqueue(encoder.encode(`data: ${JSON.stringify(result)}\n\n`));
+        controller.enqueue(encoder.encode(`data: ${JSON.stringify(enrichedResult)}\n\n`));
         controller.close();
       } catch (error) {
         // Send safe error response — never leak raw error messages to client
@@ -384,7 +446,7 @@ async function processRAGQuery(cleanedQuery: string, verified: boolean, document
 
     // System prompt with Chain-of-Thought reasoning (ReAct pattern)
     // Following AI agent best practices: Define role, structured output, reasoning steps
-    const systemPrompt = `You are a materials engineer assistant for SpecVault, specialized in ASTM and API specifications for steel pipe, tubing, forgings, and oilfield equipment.
+    const systemPrompt = `You are a materials engineer assistant for SteelAgent, specialized in ASTM and API specifications for steel pipe, tubing, forgings, and oilfield equipment.
 
 ## YOUR ROLE
 - Extract precise technical data from provided document context
@@ -871,6 +933,7 @@ RESPONSE GUIDELINES:
       grounding: Math.round(groundingScore),
       coherence: Math.round(coherenceScore),
     },
+    disclaimer: "AI-generated content. Always verify against original specifications before making compliance decisions.",
   };
 
   // D8: Cache the response for repeated queries

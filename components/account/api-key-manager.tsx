@@ -5,7 +5,7 @@
  * Create, view, and revoke API keys
  */
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { createAuthClient } from '@/lib/auth';
 
 interface ApiKey {
@@ -26,12 +26,10 @@ export function ApiKeyManager({ userId, workspaceId }: { userId: string; workspa
   const [newKey, setNewKey] = useState<string | null>(null);
   const [creating, setCreating] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [copied, setCopied] = useState(false);
+  const [confirmingRevoke, setConfirmingRevoke] = useState<string | null>(null);
 
-  useEffect(() => {
-    fetchKeys();
-  }, [userId]);
-
-  async function fetchKeys() {
+  const fetchKeys = useCallback(async () => {
     try {
       const supabase = createAuthClient();
       const { data, error } = await supabase
@@ -48,7 +46,11 @@ export function ApiKeyManager({ userId, workspaceId }: { userId: string; workspa
     } finally {
       setLoading(false);
     }
-  }
+  }, [userId]);
+
+  useEffect(() => {
+    fetchKeys();
+  }, [fetchKeys]);
 
   async function createKey() {
     if (!newKeyName.trim()) {
@@ -87,10 +89,6 @@ export function ApiKeyManager({ userId, workspaceId }: { userId: string; workspa
   }
 
   async function revokeKey(keyId: string) {
-    if (!confirm('Are you sure you want to revoke this API key? This action cannot be undone.')) {
-      return;
-    }
-
     try {
       const response = await fetch(`/api/auth/api-keys/${keyId}`, {
         method: 'DELETE',
@@ -100,10 +98,12 @@ export function ApiKeyManager({ userId, workspaceId }: { userId: string; workspa
         throw new Error('Failed to revoke API key');
       }
 
+      setConfirmingRevoke(null);
       await fetchKeys();
     } catch (err) {
       console.error('Error revoking API key:', err);
       setError(err instanceof Error ? err.message : 'Failed to revoke API key');
+      setConfirmingRevoke(null);
     }
   }
 
@@ -131,7 +131,7 @@ export function ApiKeyManager({ userId, workspaceId }: { userId: string; workspa
         <div className="bg-green-500/10 border border-green-500/50 rounded-lg p-6">
           <h3 className="text-white font-semibold mb-2">API Key Created!</h3>
           <p className="text-gray-300 text-sm mb-4">
-            Copy this key now. You won't be able to see it again.
+            Copy this key now. You won&apos;t be able to see it again.
           </p>
           <div className="flex items-center gap-2">
             <code className="flex-1 px-4 py-3 bg-[#1a1a2e] border border-gray-700 rounded-lg text-green-400 font-mono text-sm">
@@ -140,18 +140,21 @@ export function ApiKeyManager({ userId, workspaceId }: { userId: string; workspa
             <button
               onClick={() => {
                 navigator.clipboard.writeText(newKey);
-                alert('API key copied to clipboard!');
+                setCopied(true);
+                setTimeout(() => setCopied(false), 2000);
               }}
-              className="px-4 py-3 bg-blue-600 hover:bg-blue-500 text-white rounded-lg transition-colors"
+              className={`px-4 py-3 text-white rounded-lg transition-colors ${
+                copied ? 'bg-green-600' : 'bg-blue-600 hover:bg-blue-500'
+              }`}
             >
-              Copy
+              {copied ? 'Copied!' : 'Copy'}
             </button>
           </div>
           <button
             onClick={() => setNewKey(null)}
             className="mt-4 text-gray-400 hover:text-white text-sm transition-colors"
           >
-            I've saved my key
+            I&apos;ve saved my key
           </button>
         </div>
       )}
@@ -211,7 +214,7 @@ export function ApiKeyManager({ userId, workspaceId }: { userId: string; workspa
         <div className="p-6 border-b border-gray-800 flex items-center justify-between">
           <div>
             <h3 className="text-white font-semibold">Your API Keys</h3>
-            <p className="text-gray-400 text-sm mt-1">Use these keys to access SpecVault API</p>
+            <p className="text-gray-400 text-sm mt-1">Use these keys to access SteelAgent API</p>
           </div>
           {!showCreateForm && (
             <button
@@ -260,12 +263,29 @@ export function ApiKeyManager({ userId, workspaceId }: { userId: string; workspa
                     </td>
                     <td className="p-4">
                       {key.is_active && (
-                        <button
-                          onClick={() => revokeKey(key.id)}
-                          className="text-red-400 hover:text-red-300 text-sm transition-colors"
-                        >
-                          Revoke
-                        </button>
+                        confirmingRevoke === key.id ? (
+                          <div className="flex gap-2">
+                            <button
+                              onClick={() => revokeKey(key.id)}
+                              className="text-red-400 hover:text-red-300 text-sm font-semibold transition-colors"
+                            >
+                              Confirm
+                            </button>
+                            <button
+                              onClick={() => setConfirmingRevoke(null)}
+                              className="text-gray-400 hover:text-gray-300 text-sm transition-colors"
+                            >
+                              Cancel
+                            </button>
+                          </div>
+                        ) : (
+                          <button
+                            onClick={() => setConfirmingRevoke(key.id)}
+                            className="text-red-400 hover:text-red-300 text-sm transition-colors"
+                          >
+                            Revoke
+                          </button>
+                        )
                       )}
                     </td>
                   </tr>

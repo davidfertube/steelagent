@@ -1,14 +1,37 @@
-# CLAUDE.md — SpecVault
+# CLAUDE.md -- SteelAgent
 
 ## Quick Reference
 
 - **Framework**: Next.js 16, React 19, Tailwind CSS
-- **Primary LLM**: Claude Sonnet 4.5 via Anthropic API
-- **Fallback LLMs**: Groq → Cerebras → SambaNova → OpenRouter (Llama 3.3 70B)
+- **Primary LLM**: Claude Opus 4.6 via Anthropic API
+- **Fallback LLMs**: Groq -> Cerebras -> SambaNova -> OpenRouter (Llama 3.3 70B)
 - **Embeddings**: Voyage AI voyage-3-lite (1024 dim, 200M tokens FREE/month)
+- **Re-ranker**: Voyage AI rerank-2 (cross-encoder, ~200ms)
 - **Database**: Supabase PostgreSQL + pgvector (HNSW)
 - **Hosting**: Vercel (free tier)
+- **Auth**: Supabase Auth (email/password, API keys)
+- **Rate Limiting**: Upstash Redis (free tier) + in-memory fallback
+- **Payments**: Stripe (planned)
+- **Email**: Resend (planned)
 - **OCR**: Google Gemini Vision (`lib/ocr.ts`)
+- **Observability**: Langfuse (`lib/langfuse.ts`)
+
+---
+
+## Codebase Statistics
+
+| Category | Count | Details |
+|----------|-------|---------|
+| **Library modules** | 45 | `lib/*.ts` -- core pipeline, auth, utilities |
+| **API routes** | 11 | `app/api/**/route.ts` |
+| **Page components** | 12 | `app/**/page.tsx` -- dashboard, auth, legal |
+| **React components** | 20 | `components/**/*.tsx` -- UI, auth, dashboard |
+| **SQL migrations** | 11 | `supabase/migrations/*.sql` |
+| **CI/CD workflows** | 6 | `.github/workflows/*.yml` |
+| **Test files** | 17 | `tests/**/*.test.ts` + helpers |
+| **Golden datasets** | 10 | `tests/golden-dataset/*.json` |
+| **Scripts** | 12 | `scripts/*.ts` -- accuracy, smoke, feedback, dedup |
+| **Total TypeScript** | ~140+ | ~25,000 lines |
 
 ---
 
@@ -77,9 +100,9 @@ git push origin main           # Auto-deploys to Vercel via GitHub Actions
 | Overall accuracy | **91.3%** (73/80) | 90%+ | Exceeded |
 | Source citation | **96.3%** (77/80) | 90%+ | Exceeded |
 | Hallucination rate | ~0% | 0% | Maintained |
-| P50 latency | 13.0s | — | Good |
+| P50 latency | 13.0s | -- | Good |
 | P95 latency | 24.2s | 30-60s | Within target |
-| Post-improvement (10-query) | **100%** (10/10) | — | Validated |
+| Post-improvement (10-query) | **100%** (10/10) | -- | Validated |
 
 Golden datasets: `tests/golden-dataset/*.json` (8 files, 80+ queries total)
 
@@ -87,13 +110,13 @@ Golden datasets: `tests/golden-dataset/*.json` (8 files, 80+ queries total)
 
 The full pipeline is documented in **[AGENTS.md](AGENTS.md)**. Summary:
 
-1. **Query Analysis** — `query-preprocessing.ts` extracts UNS/ASTM/API codes, sets adaptive search weights
-2. **Query Decomposition** — `multi-query-rag.ts` decomposes complex queries into parallel sub-queries
-3. **Hybrid Search** — `hybrid-search.ts` runs BM25 + vector search with document filtering
-4. **Re-ranking** — `reranker.ts` Voyage AI rerank-2 (primary, ~200ms) + LLM fallback, dynamic topK (8 API/comparison, 5 standard)
-5. **Generation** — Claude Sonnet 4.5 with CoT system prompt, SSE streaming
-6. **Post-Generation Verification** — answer grounding + false refusal detection + coherence validation
-7. **Confidence Gate** — weighted score (retrieval 35% + grounding 25% + coherence 40%), regenerates if < 55%
+1. **Query Analysis** -- `query-preprocessing.ts` extracts UNS/ASTM/API codes, sets adaptive search weights
+2. **Query Decomposition** -- `multi-query-rag.ts` decomposes complex queries into parallel sub-queries
+3. **Hybrid Search** -- `hybrid-search.ts` runs BM25 + vector search with document filtering
+4. **Re-ranking** -- `reranker.ts` Voyage AI rerank-2 (primary, ~200ms) + LLM fallback, dynamic topK (8 API/comparison, 5 standard)
+5. **Generation** -- Claude Opus 4.6 with CoT system prompt, SSE streaming
+6. **Post-Generation Verification** -- answer grounding + false refusal detection + coherence validation
+7. **Confidence Gate** -- weighted score (retrieval 35% + grounding 25% + coherence 40%), regenerates if < 55%
 
 ### Key Files
 
@@ -101,6 +124,9 @@ The full pipeline is documented in **[AGENTS.md](AGENTS.md)**. Summary:
 |------|---------|
 | `app/api/chat/route.ts` | Main RAG endpoint (SSE streaming, agentic verification) |
 | `app/api/documents/process/route.ts` | PDF text extraction + embedding + storage |
+| `app/api/documents/pdf/route.ts` | PDF retrieval endpoint |
+| `app/api/auth/api-keys/route.ts` | API key management (create, list) |
+| `app/api/feedback/route.ts` | Feedback submission + retrieval |
 | `lib/multi-query-rag.ts` | Query decomposition + multi-hop retrieval |
 | `lib/hybrid-search.ts` | BM25 + vector fusion search |
 | `lib/reranker.ts` | Voyage AI rerank-2 + LLM fallback (800-char window) |
@@ -115,10 +141,16 @@ The full pipeline is documented in **[AGENTS.md](AGENTS.md)**. Summary:
 | `lib/coverage-validator.ts` | Sub-query coverage checking (regex) |
 | `lib/claim-verification.ts` | Claim-level verification engine |
 | `lib/structured-output.ts` | Structured JSON output parsing |
+| `lib/auth.ts` | Authentication, session management, API keys |
+| `lib/quota.ts` | Usage quota enforcement (per-workspace) |
+| `lib/rate-limit.ts` | Upstash Redis rate limiting + in-memory fallback |
 | `lib/timeout.ts` | Async timeout wrappers (45s LLM, 15s search) |
 | `lib/langfuse.ts` | Observability + RAG pipeline tracing |
 | `lib/evaluation-engine.ts` | Pattern-based RAG evaluation |
 | `lib/rag-metrics.ts` | RAGAS-style LLM-as-judge evaluation |
+| `lib/query-cache.ts` | Query result caching |
+| `lib/supabase.ts` | Supabase client configuration |
+| `middleware.ts` | Security middleware (auth, CSRF, rate limiting) |
 | `components/realtime-comparison.tsx` | Side-by-side RAG vs generic LLM display |
 
 ---
@@ -131,10 +163,10 @@ A789 (tubing) and A790 (pipe) have DIFFERENT yield strengths for S32205:
 - A790: **65 ksi** / 450 MPa
 
 `lib/document-mapper.ts` resolves specs to document IDs to prevent cross-contamination.
-Content-level dedup in `chat/route.ts` is **document-scoped** — chunks from different documents are never merged even if they share 80%+ vocabulary overlap.
+Content-level dedup in `chat/route.ts` is **document-scoped** -- chunks from different documents are never merged even if they share 80%+ vocabulary overlap.
 
 ### Reranker Chunk Window
-Reranker truncates chunks to **800 chars** (was 400) for relevance scoring. This preserves ~6-8 table rows — enough to include header + data rows for most ASTM tables. Increasing further risks slower reranking without proportional accuracy gains.
+Reranker truncates chunks to **800 chars** (was 400) for relevance scoring. This preserves ~6-8 table rows -- enough to include header + data rows for most ASTM tables. Increasing further risks slower reranking without proportional accuracy gains.
 
 ### Document Filter Patterns
 `lib/document-mapper.ts` detects document references via three pattern types:
@@ -152,7 +184,7 @@ Post-generation agents share a budget of `MAX_REGENS = 3` to prevent infinite lo
 Total across all checks is capped at 3. Each regen adds ~10-15s latency.
 
 ### Groq TPM Limits (Fallback Only)
-Groq is now a fallback provider (primary is Claude Sonnet 4.5).
+Groq is now a fallback provider (primary is Claude Opus 4.6).
 Free tier: 6000 TPM. Chunks limited to 3 to stay under limit.
 If 429 errors occur, `model-fallback.ts` auto-switches providers.
 
@@ -164,28 +196,49 @@ Tables preserved intact. Increasing chunk size improves coverage but risks TPM l
 10-second request limit. SSE streaming with 3s heartbeat keeps connection alive.
 See `app/api/chat/route.ts` lines 70-107.
 
+### SUPABASE_SERVICE_KEY Not in .env.example
+`lib/quota.ts` and some admin operations require `SUPABASE_SERVICE_KEY` (not the anon key). This is intentionally excluded from `.env.example` because it grants full database access. Set it manually in `.env.local` and Vercel environment variables.
+
 ---
 
 ## Environment Variables
 
 ```bash
 # Required
-ANTHROPIC_API_KEY=xxx             # Claude Sonnet 4.5 — primary LLM (console.anthropic.com)
+ANTHROPIC_API_KEY=xxx             # Claude Opus 4.6 -- primary LLM (console.anthropic.com)
 VOYAGE_API_KEY=xxx                # Voyage AI (voyageai.com)
 NEXT_PUBLIC_SUPABASE_URL=xxx      # Supabase project URL
 NEXT_PUBLIC_SUPABASE_ANON_KEY=xxx # Supabase anon key
 
+# Required for admin operations
+SUPABASE_SERVICE_KEY=xxx          # Supabase service role key (quota enforcement, admin)
+
 # Optional (fallback LLMs + OCR)
-GOOGLE_API_KEY=xxx                # Gemini (ai.google.dev) — used for OCR vision
+GOOGLE_API_KEY=xxx                # Gemini (ai.google.dev) -- used for OCR vision
 GROQ_API_KEY=xxx                  # Groq fallback (console.groq.com)
 CEREBRAS_API_KEY=xxx              # Cerebras fallback
 SAMBANOVA_API_KEY=xxx             # SambaNova fallback (sambanova.ai)
 OPENROUTER_API_KEY=xxx            # OpenRouter fallback (openrouter.ai)
 
+# Optional (rate limiting)
+UPSTASH_REDIS_REST_URL=xxx        # Upstash Redis (upstash.com)
+UPSTASH_REDIS_REST_TOKEN=xxx      # Falls back to in-memory if not set
+
 # Optional (observability)
 LANGFUSE_SECRET_KEY=xxx           # LangFuse tracing (langfuse.com)
 LANGFUSE_PUBLIC_KEY=xxx           # LangFuse public key
 LANGFUSE_BASE_URL=xxx             # LangFuse base URL
+
+# Optional (feedback admin)
+FEEDBACK_ADMIN_KEY=xxx            # Required to read feedback via GET /api/feedback
+
+# Planned (Stripe billing)
+STRIPE_SECRET_KEY=xxx             # Stripe secret key (dashboard.stripe.com)
+NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=xxx  # Stripe publishable key (client-side)
+STRIPE_WEBHOOK_SECRET=xxx         # Stripe webhook endpoint secret (whsec_...)
+
+# Planned (email service)
+RESEND_API_KEY=xxx                # Resend (resend.com) -- billing notifications, quota warnings
 ```
 
 ---
@@ -194,13 +247,25 @@ LANGFUSE_BASE_URL=xxx             # LangFuse base URL
 
 | Method | Endpoint | Request | Response |
 |--------|----------|---------|----------|
-| POST | `/api/chat` | `{ query, stream?, verified?, documentId? }` | SSE stream → `{ response, sources, confidence }` |
+| POST | `/api/chat` | `{ query, stream?, verified?, documentId? }` | SSE stream -> `{ response, sources, confidence }` |
 | POST | `/api/chat/compare` | `{ query }` | `{ response }` (generic LLM, no RAG) |
 | POST | `/api/documents/upload` | `FormData(file)` | `{ success, message }` |
 | POST | `/api/documents/upload-url` | `{ filename, contentType }` | `{ signedUrl }` |
 | POST | `/api/documents/process` | `{ documentId }` | `{ success, chunks }` |
+| GET | `/api/documents/pdf` | `?id=documentId` | PDF file stream |
 | POST/GET | `/api/feedback` | `{ query, response, sources, confidence, rating, issue_type?, comment? }` | `{ success }` / `{ data: FeedbackEntry[] }` |
+| POST | `/api/auth/api-keys` | `{ name, expiresAt? }` | `{ key, id }` |
+| DELETE | `/api/auth/api-keys/[id]` | -- | `{ success }` |
 | POST | `/api/leads` | `{ firstName, lastName, email, company?, phone? }` | `{ success }` |
+
+### Planned Endpoints (Stripe Billing)
+
+| Method | Endpoint | Request | Response |
+|--------|----------|---------|----------|
+| POST | `/api/billing/checkout` | `{ priceId }` | `{ url }` (Stripe Checkout URL) |
+| POST | `/api/billing/portal` | -- | `{ url }` (Stripe Portal URL) |
+| GET | `/api/billing/subscription` | -- | `{ plan, status, periodEnd }` |
+| POST | `/api/webhooks/stripe` | Stripe event payload | `{ received: true }` |
 
 ---
 
@@ -221,22 +286,83 @@ Shared test helpers: `tests/helpers/test-env.ts`, `tests/helpers/citation-valida
 
 ---
 
+## Human-in-the-Loop (Planned)
+
+Materials compliance is safety-critical -- AI errors can lead to using incorrect materials in structural applications. The planned HITL system uses confidence-gated routing:
+
+| Confidence Level | Action | User Experience |
+|-----------------|--------|-----------------|
+| **> 70%** | Auto-deliver | Response with AI disclaimer |
+| **55-70%** | Deliver with warning | "Low confidence" banner + suggest human review |
+| **< 55%** | Queue for human review | "Queued for expert review" notification, email when ready |
+
+**Implementation plan**: Priority queue in Supabase (`human_review_queue` table), email notifications via Resend, enterprise customers can designate their own materials engineer as reviewer. Every human review is logged for audit compliance.
+
+---
+
+## Security Architecture
+
+See **[SECURITY.md](SECURITY.md)** for full details. Summary:
+
+**Middleware flow** (`middleware.ts`):
+1. Authentication check (session cookie or API key)
+2. CSRF protection (Origin/Referer validation)
+3. Rate limiting (Upstash Redis, per-route limits)
+4. Quota enforcement (per-workspace limits)
+5. Route handler
+
+**Protected routes**: `/api/chat`, `/api/documents/*`, `/api/feedback`, `/dashboard/*`, `/account/*`
+**Public routes**: `/`, `/auth/*`, `/privacy`, `/terms`, `/api/health`, `/api/leads`
+
+---
+
 ## Deployment Checklist
 
 - [ ] All env vars set in Vercel Dashboard
+- [ ] `SUPABASE_SERVICE_KEY` set (not just anon key)
 - [ ] `npm run build` passes locally
 - [ ] `npm run lint` passes
 - [ ] `npm test` passes (113 unit tests, 0 skips)
 - [ ] Upload test PDF and verify indexing works
 - [ ] Run a query and verify cited response with confidence score
 - [ ] Check SSE streaming works (no 504 timeout)
+- [ ] Verify rate limiting works (Upstash Redis connected)
+- [ ] Verify auth flow (signup -> login -> dashboard)
+- [ ] Verify API key creation and authentication
+- [ ] *(When Stripe is live)* Stripe webhook endpoint configured
+- [ ] *(When Stripe is live)* Test checkout flow end-to-end
+
+---
+
+## Database Migrations
+
+Located in `supabase/migrations/`. Run in order via Supabase SQL Editor:
+
+| File | Purpose |
+|------|---------|
+| `002_voyage_embeddings.sql` | Voyage AI embedding schema (1024-dim) |
+| `add-char-offsets.sql` | Character offset tracking for chunks |
+| `add-chunk-metadata.sql` | Chunk enrichment metadata |
+| `add-document-filter.sql` | Document filtering for search |
+| `add-hybrid-search.sql` | BM25 + vector hybrid search functions |
+| `add_uploading_status.sql` | Document upload status tracking |
+| `enhance-table-boosting.sql` | Table content score boosting |
+| `add-section-boost.sql` | Section-level score boosting |
+| `003_add_user_tables.sql` | Users, workspaces, API keys, invitations |
+| `004_add_subscription_tables.sql` | Stripe customers, quotas, invoices, payments |
+| `006_update_rls_policies.sql` | RLS policies, audit logs, triggers |
+
+Additional standalone SQL:
+- `supabase/feedback-migration.sql` -- Feedback table
+- `supabase/dedup-migration.sql` -- Dedup cleanup (run via SQL Editor, bypasses RLS)
 
 ---
 
 ## Related Documentation
 
-- [README.md](README.md) — Project overview
-- [AGENTS.md](AGENTS.md) — Agentic RAG pipeline architecture
-- [MCP.md](MCP.md) — MCP server configuration
-- [CONTRIBUTING.md](CONTRIBUTING.md) — How to contribute
-- [SECURITY.md](SECURITY.md) — Security policy
+- [README.md](README.md) -- Project overview + non-technical summary
+- [AGENTS.md](AGENTS.md) -- Agentic RAG pipeline architecture + improvement recommendations
+- [SECURITY.md](SECURITY.md) -- Security policy + enterprise compliance
+- [ENVIRONMENT.md](ENVIRONMENT.md) -- Environment setup + deployment configuration
+- [MCP.md](MCP.md) -- MCP server configuration for Claude Code
+- [BUSINESS-PLAN.md](BUSINESS-PLAN.md) -- SaaS business plan + go-to-market strategy

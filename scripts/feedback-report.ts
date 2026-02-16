@@ -123,7 +123,7 @@ async function main() {
   const partial = entries.filter(e => e.rating === "partial").length;
 
   console.log("=".repeat(70));
-  console.log("  SPECVAULT FEEDBACK DIAGNOSTIC REPORT");
+  console.log("  STEELAGENT FEEDBACK DIAGNOSTIC REPORT");
   console.log("=".repeat(70));
   console.log();
   console.log(`  Total Feedback:   ${total}`);

@@ -1,6 +1,6 @@
-# Agentic RAG Pipeline — SpecVault
+# Agentic RAG Pipeline -- SteelAgent
 
-SpecVault uses a **7-stage agentic pipeline** that goes beyond basic retrieve-and-generate. The system self-corrects through retrieval evaluation, answer grounding, false refusal detection, coherence validation, and confidence-gated regeneration.
+SteelAgent uses a **7-stage agentic pipeline** that goes beyond basic retrieve-and-generate. The system self-corrects through retrieval evaluation, answer grounding, false refusal detection, coherence validation, and confidence-gated regeneration.
 
 ---
 
@@ -8,16 +8,16 @@ SpecVault uses a **7-stage agentic pipeline** that goes beyond basic retrieve-an
 
 ```
 User Query
-  │
-  ├─ 1. Query Analysis         (regex, ~1ms)
-  ├─ 2. Query Decomposition     (LLM, ~2s for complex queries)
-  ├─ 3. Hybrid Search           (BM25 + vector, ~3s)
-  ├─ 4. Re-ranking               (Voyage AI rerank-2, ~200ms)
-  ├─ 5. Generation              (Claude Sonnet 4.5, ~10s)
-  ├─ 6. Post-Generation Agents  (grounding + refusal + coherence, ~5s)
-  └─ 7. Confidence Gate         (score → return or regenerate)
-       │
-       └─ Cited Response + Confidence Score
+  |
+  +- 1. Query Analysis         (regex, ~1ms)
+  +- 2. Query Decomposition     (LLM, ~2s for complex queries)
+  +- 3. Hybrid Search           (BM25 + vector, ~3s)
+  +- 4. Re-ranking               (Voyage AI rerank-2, ~200ms)
+  +- 5. Generation              (Claude Opus 4.6, ~10s)
+  +- 6. Post-Generation Agents  (grounding + refusal + coherence, ~5s)
+  +- 7. Confidence Gate         (score -> return or regenerate)
+       |
+       +- Cited Response + Confidence Score
 ```
 
 ---
@@ -33,8 +33,8 @@ Extracts technical identifiers from the user's question:
 - Grades (316L, 2205, 2507)
 
 Sets adaptive BM25/vector search weights:
-- Queries with exact codes → higher keyword weight (0.6 BM25)
-- Natural language queries → higher semantic weight (0.7 vector)
+- Queries with exact codes -> higher keyword weight (0.6 BM25)
+- Natural language queries -> higher semantic weight (0.7 vector)
 
 **File:** `lib/query-enhancement.ts`
 
@@ -51,8 +51,8 @@ Complex queries are decomposed into parallel sub-queries via LLM. Simple queries
 Example:
 ```
 "Compare A789 vs A790 yield strength for S32205"
-  → Sub-query 1: "A789 S32205 yield strength"
-  → Sub-query 2: "A790 S32205 yield strength"
+  -> Sub-query 1: "A789 S32205 yield strength"
+  -> Sub-query 2: "A790 S32205 yield strength"
 ```
 
 After parallel retrieval, results are merged and deduplicated by chunk ID.
@@ -67,7 +67,7 @@ After parallel retrieval, results are merged and deduplicated by chunk ID.
 
 Runs BM25 keyword search and vector similarity search in parallel, then fuses results with adaptive weighting.
 
-**Document filtering** (`lib/document-mapper.ts`) restricts search to the correct specification. This prevents cross-contamination — critical because A789 (tubing) and A790 (pipe) have different yield strengths for the same UNS designation (70 ksi vs 65 ksi for S32205).
+**Document filtering** (`lib/document-mapper.ts`) restricts search to the correct specification. This prevents cross-contamination -- critical because A789 (tubing) and A790 (pipe) have different yield strengths for the same UNS designation (70 ksi vs 65 ksi for S32205).
 
 Table content gets a +0.15 score boost since ASTM specifications store most data in tables.
 
@@ -79,15 +79,15 @@ Table content gets a +0.15 score boost since ASTM specifications store most data
 
 Two-tier re-ranking strategy:
 
-1. **Primary: Voyage AI rerank-2** — Dedicated cross-encoder model (~200ms for 40 documents). 10-50x faster than LLM reranking with better consistency.
-2. **Fallback: LLM-based scoring** — Claude/Llama scores chunks on a 0-10 relevance scale (5-15s). Used only when Voyage API is unavailable.
+1. **Primary: Voyage AI rerank-2** -- Dedicated cross-encoder model (~200ms for 40 documents). 10-50x faster than LLM reranking with better consistency.
+2. **Fallback: LLM-based scoring** -- Claude/Llama scores chunks on a 0-10 relevance scale (5-15s). Used only when Voyage API is unavailable.
 
 Dynamic topK based on query type:
 - **API specifications** (6A, 5CT, 16C): topK = 8 (large specs need more coverage)
 - **Comparison queries** (2+ ASTM codes): topK = 8
 - **Standard ASTM queries**: topK = 5
 
-Chunks truncated to 800-1000 characters for scoring — wide enough to preserve 6-8 table rows (header + data) in ASTM specification tables. Sub-query aware: chunks scored against the specific sub-query that retrieved them.
+Chunks truncated to 800-1000 characters for scoring -- wide enough to preserve 6-8 table rows (header + data) in ASTM specification tables. Sub-query aware: chunks scored against the specific sub-query that retrieved them.
 
 ---
 
@@ -95,9 +95,9 @@ Chunks truncated to 800-1000 characters for scoring — wide enough to preserve 
 
 **File:** `app/api/chat/route.ts`
 
-Claude Sonnet 4.5 with a Chain-of-Thought system prompt. The prompt includes:
+Claude Opus 4.6 with a Chain-of-Thought system prompt. The prompt includes:
 - Role definition (materials engineer assistant)
-- 5-step reasoning framework (SCAN → SEARCH → VERIFY → CITE → RESPOND)
+- 5-step reasoning framework (SCAN -> SEARCH -> VERIFY -> CITE -> RESPOND)
 - Specification-specific knowledge (A790 = pipe, A789 = tubing, etc.)
 - Table extraction guidance
 - Hardness scale rules (only report what's in the document)
@@ -115,7 +115,7 @@ Three independent verification agents run after generation, sharing a regenerati
 
 **File:** `lib/answer-grounding.ts`
 
-Pure regex — no LLM call. Extracts numerical values with units (MPa, ksi, HRC, %) from the response and verifies each exists in at least one source chunk (0.01 tolerance).
+Pure regex -- no LLM call. Extracts numerical values with units (MPa, ksi, HRC, %) from the response and verifies each exists in at least one source chunk (0.01 tolerance).
 
 If grounding fails (score < 50%), the response is regenerated with a prefix instructing the LLM to only quote values that appear exactly in the context.
 
@@ -123,7 +123,7 @@ If grounding fails (score < 50%), the response is regenerated with a prefix inst
 
 **File:** `app/api/chat/route.ts` (inline)
 
-Pattern-based detection of false refusals — when the LLM says "I cannot answer" despite having relevant chunks. Uses 10 regex patterns covering common refusal phrasings.
+Pattern-based detection of false refusals -- when the LLM says "I cannot answer" despite having relevant chunks. Uses 10 regex patterns covering common refusal phrasings.
 
 Context-aware triggering: only fires when chunks have meaningful relevance (BM25 keyword match or combined score > 0.3). This avoids wasting regen budget on queries where the model correctly identified irrelevant context.
 
@@ -143,7 +143,7 @@ When triggered, regenerates with a data-first prompt that instructs the model to
 
 LLM-as-judge call to assess whether the response actually answers the user's question. Returns a coherence score (0-100) and identifies missing aspects.
 
-If coherence is low (< 50), the response is regenerated with guidance about what was missed. Fails open on timeout — the pipeline is never blocked by a coherence check failure.
+If coherence is low (< 50), the response is regenerated with guidance about what was missed. Fails open on timeout -- the pipeline is never blocked by a coherence check failure.
 
 ---
 
@@ -163,7 +163,7 @@ overall = retrieval (35%) + grounding (25%) + coherence (40%)
 | Grounding score | `lib/answer-grounding.ts` (regex) | 25% |
 | Coherence score | `lib/response-validator.ts` (LLM judge) | 40% |
 
-Coherence has the highest weight because it directly measures whether the response answers the question. Grounding was reduced from 40% → 25% since regex-based grounding can be overly strict on natural-language responses that paraphrase rather than quote verbatim.
+Coherence has the highest weight because it directly measures whether the response answers the question. Grounding was reduced from 40% -> 25% since regex-based grounding can be overly strict on natural-language responses that paraphrase rather than quote verbatim.
 
 If overall confidence drops below 55% and the regeneration budget hasn't been exhausted, one final regeneration attempt is made with targeted guidance based on the weakest component.
 
@@ -176,9 +176,9 @@ The confidence score is returned to the frontend in the API response.
 **File:** `lib/retrieval-evaluator.ts`
 
 Before generation, an LLM call evaluates whether the retrieved chunks can actually answer the query. If confidence is low, it suggests a retry strategy:
-- `broader_search` — widen search parameters
-- `section_lookup` — target specific document sections
-- `more_candidates` — retrieve more candidates for re-ranking
+- `broader_search` -- widen search parameters
+- `section_lookup` -- target specific document sections
+- `more_candidates` -- retrieve more candidates for re-ranking
 
 This evaluation feeds into the overall confidence score and drives the retry loop in `lib/multi-query-rag.ts`.
 
@@ -205,13 +205,13 @@ Not used in the default path due to higher latency, but available for high-stake
 
 All LLM calls go through `ModelFallbackClient`, which chains providers:
 
-1. **Anthropic** — Claude Sonnet 4.5 (primary), Claude Haiku 4.5 (fast fallback)
-2. **Groq** — Llama 3.3 70B (free tier)
-3. **Cerebras** — Llama 3.3 70B (free tier)
-4. **SambaNova** — Llama 3.3 70B (free tier)
-5. **OpenRouter** — Llama 3.3 70B (paid, then free)
+1. **Anthropic** -- Claude Opus 4.6 (primary), Claude Haiku 4.5 (fast fallback)
+2. **Groq** -- Llama 3.3 70B (free tier)
+3. **Cerebras** -- Llama 3.3 70B (free tier)
+4. **SambaNova** -- Llama 3.3 70B (free tier)
+5. **OpenRouter** -- Llama 3.3 70B (paid, then free)
 
-Progressive backoff on rate limits: `500ms × 2^n`, capped at 4 seconds. Model-not-found errors skip immediately without backoff.
+Progressive backoff on rate limits: `500ms x 2^n`, capped at 4 seconds. Model-not-found errors skip immediately without backoff.
 
 ---
 
@@ -256,11 +256,11 @@ Each trace captures the full query lifecycle for debugging and optimization.
 
 End-to-end system for collecting and analyzing user feedback on response quality:
 
-1. **UI Widget** — After each response, users see thumbs up/down/partial buttons. Negative feedback expands to show issue type (false refusal, wrong data, missing info, wrong source, hallucination, other) and an optional comment.
-2. **API** — `POST /api/feedback` stores the query, response, sources, confidence scores, rating, issue type, and comment in Supabase.
-3. **Diagnostic Script** — `scripts/feedback-report.ts` reads feedback, classifies root causes (e.g., `FALSE_REFUSAL`, `WRONG_SOURCE`, `HALLUCINATION`, `LOW_CONFIDENCE`), and produces an actionable report pointing to specific files to fix.
+1. **UI Widget** -- After each response, users see thumbs up/down/partial buttons. Negative feedback expands to show issue type (false refusal, wrong data, missing info, wrong source, hallucination, other) and an optional comment.
+2. **API** -- `POST /api/feedback` stores the query, response, sources, confidence scores, rating, issue type, and comment in Supabase.
+3. **Diagnostic Script** -- `scripts/feedback-report.ts` reads feedback, classifies root causes (e.g., `FALSE_REFUSAL`, `WRONG_SOURCE`, `HALLUCINATION`, `LOW_CONFIDENCE`), and produces an actionable report pointing to specific files to fix.
 
-This closes the feedback loop: users flag problems → diagnostic script identifies root cause → developer fixes the pipeline → re-tests with `scripts/mvp-10-query-test.ts`.
+This closes the feedback loop: users flag problems -> diagnostic script identifies root cause -> developer fixes the pipeline -> re-tests with `scripts/mvp-10-query-test.ts`.
 
 ---
 
@@ -270,5 +270,121 @@ This closes the feedback loop: users flag problems → diagnostic script identif
 
 The same specification can be uploaded multiple times, creating duplicate documents with identical chunks. This causes search noise (same content returned from multiple document IDs) and inflated result counts.
 
-- `scripts/dedup-documents.ts` — Groups documents by normalized filename, keeps the copy with the most chunks (tie-break: newest), reports duplicates. Supports `--apply` for deletion.
-- `supabase/dedup-migration.sql` — Direct SQL for Supabase SQL Editor (bypasses RLS restrictions on anonymous DELETE).
+- `scripts/dedup-documents.ts` -- Groups documents by normalized filename, keeps the copy with the most chunks (tie-break: newest), reports duplicates. Supports `--apply` for deletion.
+- `supabase/dedup-migration.sql` -- Direct SQL for Supabase SQL Editor (bypasses RLS restrictions on anonymous DELETE).
+
+---
+
+## Recommended Improvements
+
+### 1. Vercel AI SDK (`ai` package)
+
+**Priority: High** | **Effort: Medium** | **Impact: High**
+
+Replace the custom SSE streaming implementation in `app/api/chat/route.ts` with the Vercel AI SDK. Benefits:
+- Native Next.js integration (useChat hook, streaming, tool use)
+- Built-in provider switching (replaces parts of `model-fallback.ts`)
+- Structured output with Zod validation
+- Streaming text, objects, and tool calls out of the box
+- Active maintenance by Vercel team
+
+**Why now:** The current custom SSE implementation works but is fragile (3s heartbeat hack for Vercel timeout). The Vercel AI SDK handles this natively and is free.
+
+### 2. Human-in-the-Loop Queue
+
+**Priority: High** | **Effort: Medium** | **Impact: Critical for Enterprise**
+
+Confidence-gated routing to a human review queue. Implementation:
+- New Supabase table: `human_review_queue` (query, response, confidence, status, reviewer_id, reviewed_at)
+- Confidence < 55% -> auto-queue, notify user via UI + email (Resend)
+- Confidence 55-70% -> deliver with "low confidence" warning, suggest review
+- Enterprise customers assign their own reviewer (materials engineer)
+- Every review logged in `audit_logs` for compliance
+
+**Why:** Materials compliance is safety-critical. Enterprise customers need assurance that low-confidence answers are caught. This is a key differentiator from generic AI tools.
+
+### 3. Conversation Memory
+
+**Priority: Medium** | **Effort: Medium** | **Impact: High UX**
+
+Multi-turn context for follow-up questions. Example:
+```
+User: "What is the yield strength for S32205 per A790?"
+AI: "65 ksi (450 MPa)"
+User: "What about S32750?"  <-- currently fails (no context)
+```
+
+Implementation:
+- Store last 3-5 turns in Supabase per session
+- Inject conversation history into generation prompt
+- Query analysis should reference previous spec codes
+- Clear context on new session or explicit reset
+
+### 4. Adaptive Pipeline Routing
+
+**Priority: Medium** | **Effort: Low** | **Impact: 40% latency reduction for simple queries**
+
+Skip expensive stages for simple queries:
+- Single-spec property lookup -> skip decomposition, use topK=3 instead of 5
+- Complex multi-spec comparison -> full 7-stage pipeline
+- Follow-up question -> use conversation context + targeted search
+
+Implementation: Classify query complexity in Stage 1 (regex + heuristics, no LLM).
+
+### 5. Structured Output Validation
+
+**Priority: Medium** | **Effort: Low** | **Impact: Reliability**
+
+Use Zod schemas to validate LLM outputs before returning to the user:
+```typescript
+const ResponseSchema = z.object({
+  answer: z.string().min(10),
+  citations: z.array(z.object({
+    source: z.string(),
+    page: z.number().optional(),
+    quote: z.string()
+  })).min(1),
+  confidence: z.number().min(0).max(100)
+});
+```
+
+Catch formatting errors, missing citations, and malformed responses before they reach the user.
+
+### 6. OpenTelemetry Migration
+
+**Priority: Low** | **Effort: Medium** | **Impact: Enterprise compliance**
+
+Replace Langfuse with OpenTelemetry for vendor-neutral observability:
+- Free tier on Grafana Cloud (50GB/month)
+- Standard traces/spans compatible with any backend
+- Better for enterprise customers who mandate specific observability tools
+- Cost tracking per query (token usage x model pricing)
+
+### 7. Semantic Query Cache
+
+**Priority: Low** | **Effort: Medium** | **Impact: Cost reduction**
+
+Cache query results based on semantic similarity:
+- Embed incoming query, compare against cached queries
+- If similarity > 95%, return cached result
+- TTL: 24 hours (specs don't change frequently)
+- Cache invalidation on document re-upload
+- Reduces LLM costs by 30-50% for repeated/similar queries
+
+---
+
+## Framework Comparison
+
+The current pipeline is built in custom TypeScript. Here's how it compares to popular frameworks:
+
+| Framework | Language | Good For | SteelAgent Fit | Recommendation |
+|-----------|----------|----------|---------------|----------------|
+| **Current (custom TS)** | TypeScript | Full control, domain-specific optimizations | Already built, 91.3% accuracy | **Keep it** |
+| **Vercel AI SDK** | TypeScript | Streaming, tool use, provider switching | High -- natural Next.js fit | **Best addition** for SSE/streaming |
+| **LangGraph** | Python | Complex agent state machines, cycles, branching | Medium -- pipeline is already well-orchestrated | Consider for v2 if adding conversation memory + adaptive routing |
+| **Pydantic AI** | Python | Structured LLM outputs, type-safe validation | Low -- already have `structured-output.ts` + `claim-verification.ts` | Not worth migrating |
+| **LlamaIndex** | Python/TS | Quick RAG prototyping, out-of-box retrievers | Low -- custom pipeline outperforms defaults | Already surpassed |
+| **LangChain** | Python/TS | General LLM application framework | Low -- too abstracted for domain-specific needs | Not recommended |
+| **Haystack** | Python | Production RAG pipelines | Medium -- good pipeline abstraction | Consider only for Python rewrite |
+
+**Bottom line:** The custom TypeScript pipeline achieves 91.3% accuracy with full control over every stage. Switching to LangGraph or Pydantic AI would require a Python migration and likely regress accuracy during the transition. The best move is to add the **Vercel AI SDK** for streaming/tool use while keeping the custom pipeline for RAG logic.

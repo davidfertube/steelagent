@@ -207,7 +207,7 @@ describe('PDF Highlighting Support', () => {
       char_offset_end: 1450,
     };
 
-    const result = validateCitation(source);
+    validateCitation(source);
 
     // Check that offsets are present and valid
     expect(source.char_offset_start).toBeDefined();

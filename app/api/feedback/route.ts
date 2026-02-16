@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { timingSafeEqual } from "crypto";
 import { supabase } from "@/lib/supabase";
 
 const MAX_QUERY_LENGTH = 2000;
@@ -85,12 +86,20 @@ export async function POST(request: NextRequest) {
 export async function GET(request: NextRequest) {
   const adminKey = process.env.FEEDBACK_ADMIN_KEY;
   const providedKey = request.headers.get("x-admin-key");
-  if (!adminKey || providedKey !== adminKey) {
+
+  // SECURITY: Use constant-time comparison to prevent timing attacks
+  if (!adminKey || !providedKey) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+  const adminBuf = Buffer.from(adminKey, "utf-8");
+  const providedBuf = Buffer.from(providedKey, "utf-8");
+  if (adminBuf.length !== providedBuf.length || !timingSafeEqual(adminBuf, providedBuf)) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
   const { searchParams } = new URL(request.url);
-  const limit = Math.min(parseInt(searchParams.get("limit") || "50"), 200);
+  const rawLimit = parseInt(searchParams.get("limit") || "50", 10);
+  const limit = Math.max(1, Math.min(Number.isNaN(rawLimit) ? 50 : rawLimit, 200));
   const rating = searchParams.get("rating");
   const issueType = searchParams.get("issue_type");
 

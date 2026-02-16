@@ -2,12 +2,19 @@ import { NextRequest, NextResponse } from "next/server";
 import { supabase } from "@/lib/supabase";
 import { MAX_PDF_SIZE } from "@/lib/validation";
 import { handleApiError, createValidationError, getErrorStatusCode } from "@/lib/errors";
+import { serverAuth, createServiceAuthClient } from "@/lib/auth";
+import { trackAnonymousDocument, getAnonymousDocCount, ANONYMOUS_DOC_LIMIT } from "@/lib/rate-limit";
+import { randomUUID } from "crypto";
 
 /**
  * Document Upload URL Generation API Route
  *
  * This endpoint generates pre-signed upload URLs for client-side uploads.
  * This bypasses Vercel's 4.5MB serverless function body size limit.
+ *
+ * Supports both authenticated and anonymous users:
+ * - Authenticated: uses workspace context, enforces document quota
+ * - Anonymous: limited to 1 document, tracked via session cookie
  *
  * Flow:
  * 1. Client requests signed URL with file metadata
@@ -31,6 +38,30 @@ interface UploadUrlRequest {
 
 export async function POST(request: NextRequest) {
   try {
+    // ========================================
+    // Step 0: Check auth (optional for anonymous)
+    // ========================================
+    const user = await serverAuth.getCurrentUser();
+    let anonymousSessionId: string | null = null;
+
+    if (!user) {
+      // Anonymous upload — check/create session cookie
+      anonymousSessionId = request.cookies.get('anon_session')?.value || randomUUID();
+
+      // Limit anonymous uploads to 1 document
+      const docCount = await getAnonymousDocCount(anonymousSessionId);
+      if (docCount >= ANONYMOUS_DOC_LIMIT) {
+        return NextResponse.json(
+          {
+            error: "Anonymous users can upload 1 document. Sign up for more.",
+            code: "ANONYMOUS_DOC_LIMIT",
+            signupUrl: "/auth/signup",
+          },
+          { status: 429 }
+        );
+      }
+    }
+
     // ========================================
     // Step 1: Parse and Validate Request Body
     // ========================================
@@ -85,16 +116,23 @@ export async function POST(request: NextRequest) {
     // ========================================
     // Step 4: Create Database Record
     // ========================================
-    // Create record with 'uploading' status BEFORE generating signed URL
-    // This ensures we have an audit trail even if upload fails
-    const { data: docData, error: docError } = await supabase
+    // Use service client for anonymous uploads (bypasses RLS)
+    const db = anonymousSessionId ? createServiceAuthClient() : supabase;
+
+    const insertData: Record<string, unknown> = {
+      filename: filename,
+      storage_path: storagePath,
+      file_size: fileSize,
+      status: "uploading",
+    };
+
+    if (anonymousSessionId) {
+      insertData.anonymous_session_id = anonymousSessionId;
+    }
+
+    const { data: docData, error: docError } = await db
       .from("documents")
-      .insert({
-        filename: filename, // Store original filename for display
-        storage_path: storagePath,
-        file_size: fileSize,
-        status: "uploading", // Will be updated to "pending" after upload confirmation
-      })
+      .insert(insertData)
       .select("id")
       .single();
 
@@ -104,12 +142,17 @@ export async function POST(request: NextRequest) {
       return NextResponse.json(response, { status });
     }
 
+    // Track anonymous document ownership
+    if (anonymousSessionId) {
+      await trackAnonymousDocument(anonymousSessionId, docData.id);
+    }
+
     // ========================================
     // Step 5: Generate Signed Upload URL
     // ========================================
-    // Supabase signed upload URL allows client to upload directly
-    // Token expires after 5 minutes (300 seconds)
-    const { data: signedUrlData, error: signedUrlError } = await supabase.storage
+    // Use service client for storage too (anonymous has no auth context)
+    const storageClient = anonymousSessionId ? createServiceAuthClient() : supabase;
+    const { data: signedUrlData, error: signedUrlError } = await storageClient.storage
       .from("documents")
       .createSignedUploadUrl(storagePath);
 
@@ -118,7 +161,7 @@ export async function POST(request: NextRequest) {
 
       // Clean up the database record since we couldn't generate URL
       try {
-        await supabase.from("documents").delete().eq("id", docData.id);
+        await db.from("documents").delete().eq("id", docData.id);
       } catch (cleanupError) {
         console.error("[Upload URL API] Failed to clean up database record:", cleanupError);
       }
@@ -133,13 +176,26 @@ export async function POST(request: NextRequest) {
     // ========================================
     // Step 6: Return Success Response
     // ========================================
-    return NextResponse.json({
+    const jsonResponse = NextResponse.json({
       success: true,
       documentId: docData.id,
       uploadUrl: signedUrlData.signedUrl,
       path: storagePath,
       token: signedUrlData.token,
     });
+
+    // Set anonymous session cookie if new
+    if (anonymousSessionId && !request.cookies.get('anon_session')) {
+      jsonResponse.cookies.set('anon_session', anonymousSessionId, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'lax',
+        maxAge: 30 * 24 * 60 * 60, // 30 days
+        path: '/',
+      });
+    }
+
+    return jsonResponse;
 
   } catch (error) {
     // Use safe error handler - never leaks internal details

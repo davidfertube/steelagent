@@ -6,6 +6,7 @@
  */
 
 import { useEffect, useState } from 'react';
+import Link from 'next/link';
 import { createAuthClient } from '@/lib/auth';
 
 interface Document {
@@ -16,7 +17,7 @@ interface Document {
   status: string;
 }
 
-export function DocumentList({ workspaceId, userId }: { workspaceId: string; userId: string }) {
+export function DocumentList({ workspaceId }: { workspaceId: string }) {
   const [documents, setDocuments] = useState<Document[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -70,12 +71,12 @@ export function DocumentList({ workspaceId, userId }: { workspaceId: string; use
       <div className="bg-[#16213e]/50 backdrop-blur-sm border border-gray-800 rounded-lg overflow-hidden">
         <div className="p-8 text-center">
           <p className="text-gray-400 mb-4">No documents uploaded yet</p>
-          <a
+          <Link
             href="/"
             className="inline-block px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white rounded-lg transition-colors"
           >
             Upload Your First Document
-          </a>
+          </Link>
         </div>
       </div>
     );

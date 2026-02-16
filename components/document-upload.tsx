@@ -2,7 +2,7 @@
 
 import { useState, useCallback, useEffect } from "react";
 import { Upload, FileText, X, CheckCircle, Loader2 } from "lucide-react";
-import { Button } from "@/components/ui/button";
+
 import { Card, CardContent } from "@/components/ui/card";
 
 // Maximum file size (50MB) - must match server-side limit
@@ -250,11 +250,9 @@ export function DocumentUpload({ onUploadComplete }: DocumentUploadProps) {
               className="hidden"
               id="file-upload"
             />
-            <Button variant="outline" size="lg" className="touch-target" asChild>
-              <label htmlFor="file-upload" className="cursor-pointer">
+            <label htmlFor="file-upload" className="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium border border-input bg-background hover:bg-accent hover:text-accent-foreground h-11 px-8 cursor-pointer touch-target">
                 Select File
-              </label>
-            </Button>
+            </label>
           </div>
         )}
 

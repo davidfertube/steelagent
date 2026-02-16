@@ -8,13 +8,13 @@ import { serverAuth, apiKeyAuth } from '@/lib/auth';
 
 export async function DELETE(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     // Require authentication
     const user = await serverAuth.requireAuth();
 
-    const keyId = params.id;
+    const { id: keyId } = await params;
 
     if (!keyId) {
       return NextResponse.json(
@@ -33,7 +33,7 @@ export async function DELETE(
   } catch (error) {
     console.error('API key revocation error:', error);
     return NextResponse.json(
-      { error: error instanceof Error ? error.message : 'Failed to revoke API key' },
+      { error: 'Failed to revoke API key' },
       { status: 500 }
     );
   }

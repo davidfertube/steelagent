@@ -135,7 +135,7 @@ function extractPropertyKeywords(query: string): string[] {
   const lowerQuery = query.toLowerCase();
   const properties: string[] = [];
 
-  for (const [property, _expansions] of Object.entries(PROPERTY_EXPANSIONS)) {
+  for (const [property] of Object.entries(PROPERTY_EXPANSIONS)) {
     if (lowerQuery.includes(property)) {
       properties.push(property);
     }

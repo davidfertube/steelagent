@@ -1,6 +1,6 @@
 ---
 name: Feature Request
-about: Suggest a new feature for SpecVault
+about: Suggest a new feature for SteelAgent
 title: '[FEATURE] '
 labels: 'enhancement'
 assignees: ''

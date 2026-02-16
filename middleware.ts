@@ -3,11 +3,27 @@ import type { NextRequest } from 'next/server';
 import { checkRateLimit, getRateLimitHeaders, getClientIp } from './lib/rate-limit';
 import { createServerClient } from '@supabase/ssr';
 
+/**
+ * Add security headers to all responses
+ */
+function addSecurityHeaders(response: NextResponse): NextResponse {
+  response.headers.set('X-Content-Type-Options', 'nosniff');
+  response.headers.set('X-Frame-Options', 'DENY');
+  response.headers.set('X-XSS-Protection', '1; mode=block');
+  response.headers.set('Referrer-Policy', 'strict-origin-when-cross-origin');
+  response.headers.set('Permissions-Policy', 'camera=(), microphone=(), geolocation=()');
+  response.headers.set(
+    'Strict-Transport-Security',
+    'max-age=31536000; includeSubDomains'
+  );
+  return response;
+}
+
 // Allowed origins for CSRF protection
 const ALLOWED_ORIGINS = [
   'http://localhost:3000',
   'http://localhost:3001',
-  'https://specvault.app',
+  'https://steelagent.app',
   process.env.NEXT_PUBLIC_APP_URL,
   process.env.PRODUCTION_URL,
 ].filter(Boolean) as string[];
@@ -19,15 +35,7 @@ const RATE_LIMITED_ROUTES = [
   '/api/documents/upload-url',
   '/api/documents/process',
   '/api/leads',
-];
-
-// API routes that require CSRF protection (POST/PUT/DELETE)
-const CSRF_PROTECTED_ROUTES = [
-  '/api/chat',
-  '/api/documents/upload',
-  '/api/documents/upload-url',
-  '/api/documents/process',
-  '/api/leads',
+  '/api/feedback',
 ];
 
 // Public routes that don't require authentication
@@ -42,13 +50,16 @@ const PUBLIC_ROUTES = [
   '/terms',
   '/api/health',
   '/api/leads', // Waitlist signup
+  '/pricing',
+  '/api/webhooks/stripe', // Stripe webhook (has its own signature verification)
 ];
 
-// API routes that require authentication
-const PROTECTED_API_ROUTES = [
+// Routes that allow anonymous access (auth handled in route handlers)
+const ANONYMOUS_ALLOWED_ROUTES = [
   '/api/chat',
-  '/api/documents',
-  '/api/feedback',
+  '/api/documents/upload-url',
+  '/api/documents/upload',
+  '/api/documents/process',
 ];
 
 export async function middleware(request: NextRequest) {
@@ -57,7 +68,7 @@ export async function middleware(request: NextRequest) {
 
   // Skip health check
   if (pathname === '/api/health') {
-    return NextResponse.next();
+    return addSecurityHeaders(NextResponse.next());
   }
 
   // Authentication check for protected routes
@@ -65,7 +76,12 @@ export async function middleware(request: NextRequest) {
     pathname === route || pathname.startsWith(route)
   );
 
-  if (isProtectedRoute) {
+  // Allow anonymous access to specific API routes (auth checked in route handlers)
+  const isAnonymousAllowed = ANONYMOUS_ALLOWED_ROUTES.some(route =>
+    pathname === route || pathname.startsWith(route + '/')
+  );
+
+  if (isProtectedRoute && !isAnonymousAllowed) {
     // Check for API key in header (for programmatic access)
     const apiKey = request.headers.get('x-api-key');
 
@@ -81,10 +97,10 @@ export async function middleware(request: NextRequest) {
             get(name: string) {
               return request.cookies.get(name)?.value;
             },
-            set(name: string, value: string, options: any) {
+            set(name: string, value: string, options: Record<string, unknown>) {
               response.cookies.set(name, value, options);
             },
-            remove(name: string, options: any) {
+            remove(name: string) {
               response.cookies.delete(name);
             },
           },
@@ -111,13 +127,13 @@ export async function middleware(request: NextRequest) {
         return NextResponse.redirect(loginUrl);
       }
 
-      return response;
+      return addSecurityHeaders(response);
     }
   }
 
   // Skip further middleware for non-API routes
   if (!pathname.startsWith('/api/')) {
-    return NextResponse.next();
+    return addSecurityHeaders(NextResponse.next());
   }
 
   const startTime = Date.now();
@@ -132,7 +148,7 @@ export async function middleware(request: NextRequest) {
     if (origin) {
       const isAllowedOrigin = ALLOWED_ORIGINS.some(allowed => {
         if (!allowed) return false;
-        return origin === allowed || origin.startsWith(allowed);
+        return origin === allowed;
       });
 
       if (!isAllowedOrigin) {
@@ -171,6 +187,18 @@ export async function middleware(request: NextRequest) {
         );
       }
     }
+
+    // Reject requests with neither Origin nor Referer (CSRF protection)
+    if (!origin && !referer) {
+      console.warn(`[Middleware] CSRF blocked - No origin or referer, IP: ${clientIp}, Path: ${pathname}`);
+      return new NextResponse(
+        JSON.stringify({ error: 'Forbidden - Missing origin' }),
+        {
+          status: 403,
+          headers: { 'Content-Type': 'application/json' },
+        }
+      );
+    }
   }
 
   // Rate limiting for API routes
@@ -207,10 +235,10 @@ export async function middleware(request: NextRequest) {
     const duration = Date.now() - startTime;
     console.log(`[Middleware] ${method} ${pathname} - IP: ${clientIp}, Duration: ${duration}ms, Remaining: ${rateLimitResult.remaining}`);
 
-    return response;
+    return addSecurityHeaders(response);
   }
 
-  return NextResponse.next();
+  return addSecurityHeaders(NextResponse.next());
 }
 
 export const config = {

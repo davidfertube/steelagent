@@ -237,7 +237,7 @@ describe('Citation Stress Test', () => {
             errors.push(`[${query}] ${validation.errors.join(', ')}`);
           }
         }
-      } catch (e) {
+      } catch {
         errors.push(`Query failed: ${query}`);
       }
 

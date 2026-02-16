@@ -3,13 +3,13 @@
  * ===================================
  *
  * Provides reliable LLM access by falling back across multiple providers:
- * 1. Anthropic Claude Sonnet 4.5 - Primary (best accuracy for technical RAG)
+ * 1. Anthropic Claude Opus 4.6 - Primary (best accuracy for technical RAG)
  * 2. Groq - Llama 3.3 70B (free tier fallback, ultra-fast)
  * 3. Cerebras - Llama 3.3 70B (free tier fallback)
  * 4. OpenRouter - Free models (last resort)
  *
  * Best models for steel specification RAG:
- * - Claude Sonnet 4.5: Best accuracy for technical documents, low hallucination
+ * - Claude Opus 4.6: Best accuracy for technical documents, low hallucination
  * - Claude Haiku 4.5: Fast fallback for simpler queries
  * - Llama 3.3 70B: Best free option for technical accuracy
  */
@@ -39,7 +39,7 @@ const PROVIDERS: ProviderConfig[] = [
     name: "Anthropic",
     baseUrl: "https://api.anthropic.com/v1",
     envKey: "ANTHROPIC_API_KEY",
-    models: ["claude-sonnet-4-5-20250929", "claude-haiku-4-5-20251001"],
+    models: ["claude-opus-4-6", "claude-haiku-4-5-20251001"],
     maxInputTokens: 100000, // 200K context window
   },
   // Fallback providers (free tiers — low TPM limits)
@@ -276,7 +276,6 @@ export class ModelFallbackClient {
 
   async generateContent(
     prompt: string,
-    _preferredModel?: string
   ): Promise<{ text: string; modelUsed: string }> {
     let lastError: Error | null = null;
     const estimatedTokens = Math.ceil(prompt.length / 4);
@@ -397,9 +396,8 @@ export class ModelFallbackClient {
 
   async generateContentWithRetry(
     prompt: string,
-    modelName?: string
   ): Promise<string> {
-    const result = await this.generateContent(prompt, modelName);
+    const result = await this.generateContent(prompt);
     return result.text;
   }
 }

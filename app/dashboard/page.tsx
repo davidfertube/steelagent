@@ -11,7 +11,7 @@ import { UserMenu } from '@/components/layout/user-menu';
 import Link from 'next/link';
 
 export const metadata = {
-  title: 'Dashboard | SpecVault',
+  title: 'Dashboard | SteelAgent',
   description: 'Manage your documents and queries',
 };
 
@@ -34,7 +34,7 @@ export default async function DashboardPage() {
       <header className="border-b border-gray-800 bg-[#16213e]/50 backdrop-blur-sm">
         <div className="max-w-7xl mx-auto px-4 py-4 flex items-center justify-between">
           <Link href="/dashboard" className="text-2xl font-bold text-white">
-            SpecVault
+            SteelAgent
           </Link>
 
           <nav className="flex items-center gap-6">
@@ -49,7 +49,7 @@ export default async function DashboardPage() {
                 Workspace
               </Link>
             ) : null}
-            <UserMenu user={user} profile={profile} />
+            <UserMenu profile={profile} />
           </nav>
         </div>
       </header>
@@ -82,7 +82,7 @@ export default async function DashboardPage() {
               Upload Document
             </Link>
           </div>
-          <DocumentList workspaceId={profile.workspace_id!} userId={user.id} />
+          <DocumentList workspaceId={profile.workspace_id!} />
         </div>
 
         {/* Quick Actions */}

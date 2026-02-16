@@ -160,7 +160,7 @@ interface Result {
 
 async function runExtendedTest(): Promise<void> {
   console.log("=".repeat(70));
-  console.log("  SpecVault Extended Smoke Test");
+  console.log("  SteelAgent Extended Smoke Test");
   console.log("  10 complex material engineer queries");
   console.log("=".repeat(70));
   console.log();

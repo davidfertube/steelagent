@@ -68,13 +68,11 @@ describe('Bottleneck Analysis', () => {
     ];
 
     const breakdown: Record<string, number> = {};
-    let accountedTime = 0;
 
     for (const component of components) {
       const stats = perf.getStats(component);
       if (stats.count > 0) {
         breakdown[component] = stats.avg;
-        accountedTime += stats.avg;
 
         const percent = ((stats.avg / totalTime) * 100).toFixed(1);
         const label = component.replace('rag_', '').padEnd(15);

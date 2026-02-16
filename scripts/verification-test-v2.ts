@@ -211,7 +211,7 @@ async function queryRAG(query: string): Promise<{ data: RAGResponse; latencyMs: 
 
 async function runVerification(): Promise<void> {
   console.log("=".repeat(70));
-  console.log("  SpecVault Verification Test v2 — Post D7/D8 Implementation");
+  console.log("  SteelAgent Verification Test v2 — Post D7/D8 Implementation");
   console.log("  5 complex queries targeting D1–D8 improvements");
   console.log("=".repeat(70));
   console.log();

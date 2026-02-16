@@ -8,12 +8,14 @@ import { describe, it, expect, beforeAll } from 'vitest';
 import { perf } from '@/lib/instrumentation';
 
 // Mock implementations for testing (replace with actual imports in production)
-const mockGenerateEmbedding = async (text: string) => {
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+const mockGenerateEmbedding = async (_text: string) => {
   await new Promise((resolve) => setTimeout(resolve, 500)); // Simulate API call
   return new Array(1024).fill(0).map(() => Math.random());
 };
 
-const mockVectorSearch = async (embedding: number[]) => {
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+const mockVectorSearch = async (_embedding: number[]) => {
   await new Promise((resolve) => setTimeout(resolve, 300)); // Simulate DB query
   return [
     { id: 1, content: 'Test chunk 1', score: 0.95 },
@@ -21,7 +23,8 @@ const mockVectorSearch = async (embedding: number[]) => {
   ];
 };
 
-const mockLLMGeneration = async (prompt: string) => {
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+const mockLLMGeneration = async (_prompt: string) => {
   await new Promise((resolve) => setTimeout(resolve, 2000)); // Simulate LLM call
   return 'Test response';
 };

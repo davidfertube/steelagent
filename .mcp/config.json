@@ -4,7 +4,7 @@
     "filesystem": {
       "command": "npx",
       "args": ["-y", "@anthropic/mcp-server-filesystem", "."],
-      "description": "File system access for SteelIntel project"
+      "description": "File system access for SteelAgent project"
     },
     "github": {
       "command": "npx",

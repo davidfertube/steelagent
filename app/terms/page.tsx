@@ -10,7 +10,7 @@ export default function TermsPage() {
         <div className="container-center">
           <div className="flex h-16 items-center justify-between">
             <Link href="/" className="text-lg font-semibold tracking-tight text-black dark:text-white hover:text-black/80 dark:text-white/80 dark:hover:text-white/80 transition-colors">
-              SpecVault
+              SteelAgent
             </Link>
           </div>
         </div>
@@ -25,7 +25,7 @@ export default function TermsPage() {
             <section>
               <h2 className="text-xl font-semibold mb-4">1. Acceptance of Terms</h2>
               <p className="text-black/70 dark:text-white/70 leading-relaxed">
-                By accessing or using SpecVault (&quot;the Service&quot;), operated by Antigravity, you agree to be bound by these Terms of Service.
+                By accessing or using SteelAgent (&quot;the Service&quot;), operated by Antigravity, you agree to be bound by these Terms of Service.
                 If you do not agree to these terms, do not use the Service.
               </p>
             </section>
@@ -33,7 +33,7 @@ export default function TermsPage() {
             <section>
               <h2 className="text-xl font-semibold mb-4">2. Description of Service</h2>
               <p className="text-black/70 dark:text-white/70 leading-relaxed">
-                SpecVault is an AI-powered document retrieval and analysis tool designed for engineering
+                SteelAgent is an AI-powered document retrieval and analysis tool designed for engineering
                 specifications and technical documentation. The Service uses artificial intelligence to search,
                 retrieve, and summarize information from indexed engineering standards (ASTM, API, NACE, and similar).
               </p>
@@ -79,7 +79,7 @@ export default function TermsPage() {
             <section>
               <h2 className="text-xl font-semibold mb-4">6. Limitation of Liability</h2>
               <p className="text-black/70 dark:text-white/70 leading-relaxed">
-                TO THE MAXIMUM EXTENT PERMITTED BY LAW, SPECVAULT, ANTIGRAVITY, AND THEIR AFFILIATES SHALL NOT BE LIABLE
+                TO THE MAXIMUM EXTENT PERMITTED BY LAW, STEELAGENT, ANTIGRAVITY, AND THEIR AFFILIATES SHALL NOT BE LIABLE
                 FOR ANY INDIRECT, INCIDENTAL, SPECIAL, CONSEQUENTIAL, OR PUNITIVE DAMAGES, INCLUDING BUT NOT
                 LIMITED TO LOSS OF PROFITS, DATA, USE, OR GOODWILL, ARISING FROM YOUR USE OF THE SERVICE.
               </p>
@@ -92,7 +92,7 @@ export default function TermsPage() {
             <section>
               <h2 className="text-xl font-semibold mb-4">7. Indemnification</h2>
               <p className="text-black/70 dark:text-white/70 leading-relaxed">
-                You agree to indemnify and hold harmless SpecVault and Antigravity from any claims, damages, or expenses
+                You agree to indemnify and hold harmless SteelAgent and Antigravity from any claims, damages, or expenses
                 arising from your use of the Service, your violation of these Terms, or your violation of
                 any rights of a third party.
               </p>
@@ -108,7 +108,28 @@ export default function TermsPage() {
             </section>
 
             <section>
-              <h2 className="text-xl font-semibold mb-4">9. Termination</h2>
+              <h2 className="text-xl font-semibold mb-4">9. Subscriptions and Billing</h2>
+              <p className="text-black/70 dark:text-white/70 leading-relaxed mb-4">
+                SteelAgent offers free and paid subscription plans. By subscribing to a paid plan, you agree to the following:
+              </p>
+              <ul className="list-disc list-inside space-y-2 text-black/70 dark:text-white/70">
+                <li><strong>Auto-Renewal:</strong> Subscriptions automatically renew at the end of each billing cycle unless cancelled</li>
+                <li><strong>Billing Cycle:</strong> Subscriptions are billed monthly. You will be charged on the same date each month</li>
+                <li><strong>Price Changes:</strong> We will provide at least 30 days&apos; notice before any price increases take effect</li>
+                <li><strong>Cancellation:</strong> You may cancel your subscription at any time. Access continues until the end of the current billing period. No partial refunds are issued for unused time</li>
+                <li><strong>Refund Policy:</strong> We offer a 14-day money-back guarantee on your first subscription. After 14 days, all charges are non-refundable</li>
+                <li><strong>Free Tier:</strong> The free tier may be modified or discontinued with 30 days&apos; notice</li>
+              </ul>
+              <p className="text-black/70 dark:text-white/70 leading-relaxed mt-4">
+                Payment processing is handled by Stripe, Inc. By subscribing, you also agree to{' '}
+                <a href="https://stripe.com/legal" className="text-blue-600 dark:text-blue-400 underline" target="_blank" rel="noopener noreferrer">
+                  Stripe&apos;s Terms of Service
+                </a>.
+              </p>
+            </section>
+
+            <section>
+              <h2 className="text-xl font-semibold mb-4">10. Termination</h2>
               <p className="text-black/70 dark:text-white/70 leading-relaxed">
                 We reserve the right to suspend or terminate your access to the Service at any time,
                 with or without cause. Upon termination, your right to use the Service will immediately cease.
@@ -116,7 +137,7 @@ export default function TermsPage() {
             </section>
 
             <section>
-              <h2 className="text-xl font-semibold mb-4">10. Changes to Terms</h2>
+              <h2 className="text-xl font-semibold mb-4">11. Changes to Terms</h2>
               <p className="text-black/70 dark:text-white/70 leading-relaxed">
                 We may modify these Terms at any time. We will notify you of material changes by posting
                 the updated Terms on our website. Your continued use of the Service after changes constitutes
@@ -125,9 +146,9 @@ export default function TermsPage() {
             </section>
 
             <section>
-              <h2 className="text-xl font-semibold mb-4">11. Contact</h2>
+              <h2 className="text-xl font-semibold mb-4">12. Contact</h2>
               <p className="text-black/70 dark:text-white/70 leading-relaxed">
-                For questions about these Terms, please contact us at legal@specvault.io
+                For questions about these Terms, please contact us at legal@steelagent.io
               </p>
             </section>
           </div>

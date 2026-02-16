@@ -10,7 +10,7 @@ export default function PrivacyPage() {
         <div className="container-center">
           <div className="flex h-16 items-center justify-between">
             <Link href="/" className="text-lg font-semibold tracking-tight text-black dark:text-white hover:text-black/80 dark:hover:text-white/80 transition-colors">
-              SpecVault
+              SteelAgent
             </Link>
           </div>
         </div>
@@ -67,17 +67,36 @@ export default function PrivacyPage() {
             </section>
 
             <section>
-              <h2 className="text-xl font-semibold mb-4">5. Data Sharing</h2>
+              <h2 className="text-xl font-semibold mb-4">5. Payment Processing</h2>
+              <p className="text-black/70 dark:text-white/70 leading-relaxed mb-4">
+                Payment information is processed by Stripe, Inc. We do not store credit card numbers or
+                full payment details on our servers. When you subscribe to a paid plan:
+              </p>
+              <ul className="list-disc list-inside space-y-2 text-black/70 dark:text-white/70">
+                <li>Your payment information is collected and processed directly by Stripe</li>
+                <li>We store only a Stripe customer identifier to manage your subscription</li>
+                <li>Stripe may collect additional information as described in their privacy policy</li>
+              </ul>
+              <p className="text-black/70 dark:text-white/70 leading-relaxed mt-4">
+                For more information, see{' '}
+                <a href="https://stripe.com/privacy" className="text-blue-600 dark:text-blue-400 underline" target="_blank" rel="noopener noreferrer">
+                  Stripe&apos;s Privacy Policy
+                </a>.
+              </p>
+            </section>
+
+            <section>
+              <h2 className="text-xl font-semibold mb-4">6. Data Sharing</h2>
               <p className="text-black/70 dark:text-white/70 leading-relaxed mb-4">We do not sell your personal information. We may share data with:</p>
               <ul className="list-disc list-inside space-y-2 text-black/70 dark:text-white/70">
-                <li><strong>Service Providers:</strong> Cloud hosting (Vercel), AI processing (Voyage AI, Groq)</li>
+                <li><strong>Service Providers:</strong> Cloud hosting (Vercel), AI processing (Voyage AI), payment processing (Stripe)</li>
                 <li><strong>Legal Requirements:</strong> When required by law or to protect our rights</li>
                 <li><strong>Business Transfers:</strong> In connection with a merger or acquisition</li>
               </ul>
             </section>
 
             <section>
-              <h2 className="text-xl font-semibold mb-4">6. Your Rights</h2>
+              <h2 className="text-xl font-semibold mb-4">7. Your Rights</h2>
               <p className="text-black/70 dark:text-white/70 leading-relaxed mb-4">You have the right to:</p>
               <ul className="list-disc list-inside space-y-2 text-black/70 dark:text-white/70">
                 <li>Access your personal information</li>
@@ -89,7 +108,7 @@ export default function PrivacyPage() {
             </section>
 
             <section>
-              <h2 className="text-xl font-semibold mb-4">7. Cookies</h2>
+              <h2 className="text-xl font-semibold mb-4">8. Cookies</h2>
               <p className="text-black/70 dark:text-white/70 leading-relaxed">
                 We use essential cookies to operate the Service and analytics cookies to understand usage.
                 You can control cookies through your browser settings.
@@ -97,7 +116,7 @@ export default function PrivacyPage() {
             </section>
 
             <section>
-              <h2 className="text-xl font-semibold mb-4">8. International Transfers</h2>
+              <h2 className="text-xl font-semibold mb-4">9. International Transfers</h2>
               <p className="text-black/70 dark:text-white/70 leading-relaxed">
                 Your data may be processed in the United States or other countries where our service
                 providers operate. We ensure appropriate safeguards are in place for international transfers.
@@ -105,7 +124,7 @@ export default function PrivacyPage() {
             </section>
 
             <section>
-              <h2 className="text-xl font-semibold mb-4">9. Children&apos;s Privacy</h2>
+              <h2 className="text-xl font-semibold mb-4">10. Children&apos;s Privacy</h2>
               <p className="text-black/70 dark:text-white/70 leading-relaxed">
                 The Service is not intended for users under 18 years of age. We do not knowingly collect
                 information from children.
@@ -113,7 +132,7 @@ export default function PrivacyPage() {
             </section>
 
             <section>
-              <h2 className="text-xl font-semibold mb-4">10. Changes to This Policy</h2>
+              <h2 className="text-xl font-semibold mb-4">11. Changes to This Policy</h2>
               <p className="text-black/70 dark:text-white/70 leading-relaxed">
                 We may update this Privacy Policy from time to time. We will notify you of material changes
                 by posting the updated policy on our website.
@@ -121,9 +140,9 @@ export default function PrivacyPage() {
             </section>
 
             <section>
-              <h2 className="text-xl font-semibold mb-4">11. Contact Us</h2>
+              <h2 className="text-xl font-semibold mb-4">12. Contact Us</h2>
               <p className="text-black/70 dark:text-white/70 leading-relaxed">
-                For privacy-related questions, please contact us at privacy@specvault.io
+                For privacy-related questions, please contact us at privacy@steelagent.io
               </p>
             </section>
           </div>

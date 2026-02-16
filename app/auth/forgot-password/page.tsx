@@ -37,7 +37,7 @@ export default function ForgotPasswordPage() {
         {/* Logo */}
         <div className="text-center mb-8">
           <Link href="/" className="inline-block">
-            <h1 className="text-3xl font-bold text-white">SpecVault</h1>
+            <h1 className="text-3xl font-bold text-white">SteelAgent</h1>
           </Link>
           <p className="text-gray-400 mt-2">Reset your password</p>
         </div>
@@ -67,7 +67,7 @@ export default function ForgotPasswordPage() {
 
               <div>
                 <p className="text-gray-300 text-sm mb-4">
-                  Enter your email address and we'll send you a link to reset your password.
+                  Enter your email address and we&apos;ll send you a link to reset your password.
                 </p>
                 <label htmlFor="email" className="block text-sm font-medium text-gray-200 mb-2">
                   Email

@@ -1,17 +1,18 @@
 /**
  * Supabase Auth Integration
- * Provides authentication client and helper functions for SpecVault
+ * Provides authentication client and helper functions for SteelAgent
  *
  * Features:
  * - Email/password authentication
+ * - OAuth authentication (Google, Microsoft, GitHub)
  * - Session management
  * - User profile CRUD
  * - Workspace context
  */
 
-import { createClientComponentClient, createServerComponentClient } from '@supabase/ssr';
+import { createBrowserClient, createServerClient } from '@supabase/ssr';
 import { createClient } from '@supabase/supabase-js';
-import { cookies } from 'next/headers';
+// cookies imported dynamically inside server functions to avoid client component errors
 
 export type UserRole = 'user' | 'admin' | 'enterprise';
 
@@ -33,6 +34,7 @@ export interface Workspace {
   slug: string;
   owner_id: string;
   plan: 'free' | 'pro' | 'enterprise';
+  stripe_customer_id: string | null;
   created_at: string;
   updated_at: string;
   settings: Record<string, unknown>;
@@ -41,18 +43,36 @@ export interface Workspace {
 
 // Client-side auth client (for use in Client Components)
 export function createAuthClient() {
-  return createClientComponentClient({
-    supabaseUrl: process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    supabaseKey: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-  });
+  return createBrowserClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+  );
 }
 
-// Server-side auth client (for use in Server Components)
+// Server-side auth client (for use in Server Components and API routes)
 export async function createServerAuthClient() {
+  const { cookies } = await import('next/headers');
   const cookieStore = await cookies();
-  return createServerComponentClient({
-    cookies: () => cookieStore,
-  });
+  return createServerClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    {
+      cookies: {
+        getAll() {
+          return cookieStore.getAll();
+        },
+        setAll(cookiesToSet) {
+          cookiesToSet.forEach(({ name, value, options }) => {
+            try {
+              cookieStore.set(name, value, options);
+            } catch {
+              // setAll is called from Server Components where cookies can't be set
+            }
+          });
+        },
+      },
+    }
+  );
 }
 
 // Service client for admin operations (backend only, uses service key)
@@ -117,6 +137,22 @@ export const auth = {
         .eq('id', data.user.id);
     }
 
+    return data;
+  },
+
+  /**
+   * Sign in with OAuth provider (Google, Microsoft/Azure, GitHub)
+   */
+  async signInWithOAuth(provider: 'google' | 'github' | 'azure') {
+    const supabase = createAuthClient();
+    const { data, error } = await supabase.auth.signInWithOAuth({
+      provider,
+      options: {
+        redirectTo: `${window.location.origin}/auth/callback`,
+      },
+    });
+
+    if (error) throw error;
     return data;
   },
 

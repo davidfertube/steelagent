@@ -11,7 +11,7 @@
  * - Loading states
  */
 
-import { createContext, useContext, useEffect, useState } from 'react';
+import { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { User, Session } from '@supabase/supabase-js';
 import { createAuthClient, UserProfile, Workspace } from '@/lib/auth';
 
@@ -35,10 +35,27 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
 
-  const supabase = createAuthClient();
+  const supabase = useMemo(() => createAuthClient(), []);
+
+  // Fetch workspace
+  const fetchWorkspace = useCallback(async (workspaceId: string) => {
+    try {
+      const { data, error } = await supabase
+        .from('workspaces')
+        .select('*')
+        .eq('id', workspaceId)
+        .single();
+
+      if (error) throw error;
+      setWorkspace(data);
+    } catch (error) {
+      console.error('Error fetching workspace:', error);
+      setWorkspace(null);
+    }
+  }, [supabase]);
 
   // Fetch user profile
-  const fetchProfile = async (userId: string) => {
+  const fetchProfile = useCallback(async (userId: string) => {
     try {
       const { data, error } = await supabase
         .from('users')
@@ -57,24 +74,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       console.error('Error fetching profile:', error);
       setProfile(null);
     }
-  };
-
-  // Fetch workspace
-  const fetchWorkspace = async (workspaceId: string) => {
-    try {
-      const { data, error } = await supabase
-        .from('workspaces')
-        .select('*')
-        .eq('id', workspaceId)
-        .single();
-
-      if (error) throw error;
-      setWorkspace(data);
-    } catch (error) {
-      console.error('Error fetching workspace:', error);
-      setWorkspace(null);
-    }
-  };
+  }, [supabase, fetchWorkspace]);
 
   // Initialize auth state
   useEffect(() => {
@@ -100,7 +100,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     // Listen for auth changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, newSession) => {
-        console.log('Auth state change:', event);
         setSession(newSession);
         setUser(newSession?.user ?? null);
 
@@ -118,7 +117,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     return () => {
       subscription.unsubscribe();
     };
-  }, []);
+  }, [fetchProfile, supabase.auth]);
 
   // Refresh profile
   const refreshProfile = async () => {
