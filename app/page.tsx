@@ -1268,20 +1268,6 @@ export default function Home() {
             >
               {/* Section Header */}
               <div className="text-center space-y-2">
-                <motion.div
-                  initial={{ opacity: 0, scale: 0.9 }}
-                  whileInView={{ opacity: 1, scale: 1 }}
-                  viewport={{ once: true }}
-                  transition={{ duration: 0.4 }}
-                  className="inline-flex items-center gap-2 px-3 py-1 border border-black/10 dark:border-white/10 rounded-full text-xs font-medium text-black/70 dark:text-white/70"
-                >
-                  <motion.span
-                    className="w-2 h-2 bg-green-500 rounded-full"
-                    animate={{ scale: [1, 1.2, 1], opacity: [1, 0.7, 1] }}
-                    transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
-                  />
-                  TRY IT NOW
-                </motion.div>
                 <motion.h2
                   initial={{ opacity: 0, y: 10 }}
                   whileInView={{ opacity: 1, y: 0 }}
@@ -1459,20 +1445,6 @@ export default function Home() {
               className="w-full max-w-xl"
             >
               <div className="text-center space-y-6 mb-8">
-                <motion.div
-                  initial={{ opacity: 0, scale: 0.9 }}
-                  whileInView={{ opacity: 1, scale: 1 }}
-                  viewport={{ once: true }}
-                  transition={{ duration: 0.4 }}
-                  className="inline-flex items-center gap-2 px-3 py-1 border border-black/10 dark:border-white/10 rounded-full text-xs font-medium text-black/70 dark:text-white/70"
-                >
-                  <motion.span
-                    className="w-2 h-2 bg-amber-500 rounded-full"
-                    animate={{ scale: [1, 1.2, 1], opacity: [1, 0.7, 1] }}
-                    transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
-                  />
-                  EARLY ACCESS
-                </motion.div>
                 <h2 className="text-4xl sm:text-5xl font-bold tracking-tight text-black dark:text-white">
                   Get Priority Access
                 </h2>
