@@ -61,7 +61,7 @@ function ProductPreview() {
             <div className="w-3 h-3 rounded-full bg-amber-400" />
             <div className="w-3 h-3 rounded-full bg-green-400" />
           </div>
-          <span className="text-xs text-neutral-400 ml-2 font-medium">SteelAgent</span>
+          <span className="text-xs text-neutral-400 ml-2 font-medium">SpecVault</span>
         </div>
 
         <div className="p-5 space-y-4">
@@ -198,7 +198,7 @@ function LeadForm() {
             </svg>
           </div>
           <h3 className="text-xl font-semibold text-black dark:text-white mb-2">You&apos;re on the list!</h3>
-          <p className="text-black/70 dark:text-white/70">We&apos;ll contact you when SteelAgent is ready.</p>
+          <p className="text-black/70 dark:text-white/70">We&apos;ll contact you when SpecVault is ready.</p>
         </CardContent>
       </Card>
     );
@@ -298,7 +298,7 @@ function LeadForm() {
         </form>
 
         <p className="text-xs text-black/50 dark:text-white/50 text-center mt-4">
-          We&apos;ll contact you when SteelAgent is ready. No spam, ever.
+          We&apos;ll contact you when SpecVault is ready. No spam, ever.
         </p>
       </CardContent>
     </Card>
@@ -394,7 +394,7 @@ export default function Home() {
             {/* Logo */}
             <Link href="/" className="flex items-center gap-2 text-lg font-semibold tracking-tight text-black dark:text-white">
               <Logo size={28} />
-              SteelAgent
+              SpecVault
             </Link>
 
             {/* Desktop Navigation */}
@@ -589,10 +589,9 @@ export default function Home() {
                     transition={{ duration: 0.6, delay: 0.1 }}
                     className="text-4xl sm:text-5xl md:text-6xl font-bold tracking-tight leading-[1.08] text-black dark:text-white"
                   >
-                    Specification Intelligence<br />
-                    for{" "}
+                    The Steel Hub for{" "}<br />
                     <span className="relative inline-block">
-                      Steel & Materials
+                      Oil &amp; Gas Engineers
                       <motion.span
                         className="absolute -bottom-1.5 left-0 right-0 h-[3px] bg-green-500"
                         initial={{ scaleX: 0 }}
@@ -693,7 +692,7 @@ export default function Home() {
               <div className="text-center space-y-3">
                 <span className="text-xs font-semibold tracking-widest text-black/40 dark:text-white/40 uppercase">Built for your team</span>
                 <h2 className="text-3xl sm:text-4xl font-bold tracking-tight text-black dark:text-white">
-                  Who Uses SteelAgent
+                  Who Uses SpecVault
                 </h2>
               </div>
 
@@ -742,7 +741,7 @@ export default function Home() {
           </div>
         </section>
 
-        {/* Why SteelAgent vs Generic LLMs Section */}
+        {/* Why SpecVault vs Generic LLMs Section */}
         <section id="why" className="relative min-h-screen flex items-center py-12 sm:py-16 md:py-20 border-t border-black/5 dark:border-white/10 bg-black/[0.02] dark:bg-white/[0.02]">
           <div className="container-center">
             <motion.div
@@ -761,7 +760,7 @@ export default function Home() {
                   transition={{ duration: 0.5, delay: 0.1 }}
                   className="text-4xl sm:text-5xl md:text-6xl font-bold tracking-tight text-black dark:text-white"
                 >
-                  Why SteelAgent?
+                  Why SpecVault?
                 </motion.h2>
                 <motion.p
                   initial={{ opacity: 0, y: 10 }}
@@ -771,13 +770,13 @@ export default function Home() {
                   className="text-xl text-black/60 dark:text-white/60 max-w-3xl mx-auto leading-relaxed"
                 >
                   Generic LLMs (ChatGPT, Claude, Gemini) hallucinate specs. <br className="hidden sm:block" />
-                  SteelAgent only answers from <span className="text-black dark:text-white font-semibold">your documents</span>.
+                  SpecVault only answers from <span className="text-black dark:text-white font-semibold">your documents</span>.
                 </motion.p>
               </div>
 
               {/* Comparison Grid */}
               <div className="grid md:grid-cols-2 gap-8 max-w-5xl mx-auto px-4">
-                {/* SteelAgent Card */}
+                {/* SpecVault Card */}
                 <motion.div
                   initial={{ opacity: 0, x: -20 }}
                   whileInView={{ opacity: 1, x: 0 }}
@@ -792,7 +791,7 @@ export default function Home() {
                       </svg>
                     </div>
                     <div>
-                      <h3 className="text-2xl font-bold text-green-700 dark:text-green-400">SteelAgent</h3>
+                      <h3 className="text-2xl font-bold text-green-700 dark:text-green-400">SpecVault</h3>
                       <p className="text-sm text-green-600/80 dark:text-green-400/80 font-medium mt-1">Trustworthy & Traceable</p>
                     </div>
                   </div>
@@ -895,7 +894,7 @@ export default function Home() {
               </div>
 
               <div className="grid md:grid-cols-2 gap-8">
-                {/* SteelAgent Response */}
+                {/* SpecVault Response */}
                 <div className="space-y-4">
                   <div className="flex items-center justify-center gap-2">
                     <div className="w-6 h-6 rounded-full bg-green-500 flex items-center justify-center">
@@ -903,7 +902,7 @@ export default function Home() {
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                       </svg>
                     </div>
-                    <span className="font-bold text-green-700 dark:text-green-400">SteelAgent</span>
+                    <span className="font-bold text-green-700 dark:text-green-400">SpecVault</span>
                   </div>
                   <div className="bg-green-50 dark:bg-green-950/30 rounded-xl p-5 border border-green-100 dark:border-green-800 relative">
                     <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 w-3 h-3 bg-green-50 dark:bg-green-950/30 border-t border-l border-green-100 dark:border-green-800 rotate-45 transform"></div>
@@ -1204,7 +1203,7 @@ export default function Home() {
             <div className="col-span-2 sm:col-span-1 space-y-3">
               <div className="flex items-center gap-2 text-lg font-semibold text-black dark:text-white">
                 <Logo size={24} />
-                SteelAgent
+                SpecVault
               </div>
               <p className="text-sm text-black/50 dark:text-white/50 leading-relaxed">
                 Specification intelligence for steel &amp; materials engineering.
@@ -1216,7 +1215,7 @@ export default function Home() {
               <h4 className="text-xs font-semibold tracking-widest text-black/40 dark:text-white/40 uppercase">Product</h4>
               <ul className="space-y-2 text-sm">
                 <li><a href="#features" className="text-black/60 dark:text-white/60 hover:text-black dark:hover:text-white transition-colors">Features</a></li>
-                <li><a href="#why" className="text-black/60 dark:text-white/60 hover:text-black dark:hover:text-white transition-colors">Why SteelAgent</a></li>
+                <li><a href="#why" className="text-black/60 dark:text-white/60 hover:text-black dark:hover:text-white transition-colors">Why SpecVault</a></li>
                 <li><a href="#compare" className="text-black/60 dark:text-white/60 hover:text-black dark:hover:text-white transition-colors">Compare</a></li>
                 <li><a href="#demo" className="text-black/60 dark:text-white/60 hover:text-black dark:hover:text-white transition-colors">Demo</a></li>
                 <li><Link href="/pricing" className="text-black/60 dark:text-white/60 hover:text-black dark:hover:text-white transition-colors">Pricing</Link></li>
@@ -1248,11 +1247,11 @@ export default function Home() {
 
           <div className="mt-8 space-y-4">
             <p className="text-center text-xs text-black/40 dark:text-white/40 max-w-2xl mx-auto">
-              <strong>Disclaimer:</strong> SteelAgent provides AI-generated responses for reference only.
+              <strong>Disclaimer:</strong> SpecVault provides AI-generated responses for reference only.
               Always verify specifications against original source documents. Not intended for safety-critical
               decisions without professional engineering review. Users are responsible for their own document licenses.
             </p>
-            <p className="text-center text-xs text-black/40 dark:text-white/40">&copy; {new Date().getFullYear()} SteelAgent. All rights reserved.</p>
+            <p className="text-center text-xs text-black/40 dark:text-white/40">&copy; {new Date().getFullYear()} SpecVault. All rights reserved.</p>
           </div>
         </div>
       </footer>

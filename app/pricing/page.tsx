@@ -3,17 +3,22 @@
 /**
  * Pricing Page
  * Public page showing 3 subscription tiers: Free, Pro, Enterprise
+ * Matches landing page design system (light/dark mode, green accents)
  */
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
+import { useTheme } from 'next-themes';
+import { toast } from 'sonner';
+import { Sun, Moon } from 'lucide-react';
+import { Logo } from '@/components/ui/logo';
 
 const tiers = [
   {
     name: 'Free',
     price: '$0',
     period: '',
-    description: 'Get started with basic access to SteelAgent.',
+    description: 'Search steel specs instantly. No credit card required.',
     features: [
       '10 queries per month',
       '1 document',
@@ -28,7 +33,7 @@ const tiers = [
     name: 'Pro',
     price: '$49',
     period: '/mo',
-    description: 'For professionals who need reliable spec analysis.',
+    description: 'For materials engineers who need fast, reliable spec lookups daily.',
     features: [
       '500 queries per month',
       '50 documents',
@@ -45,7 +50,7 @@ const tiers = [
     name: 'Enterprise',
     price: '$199',
     period: '/mo',
-    description: 'For teams with high-volume specification needs.',
+    description: 'For O&G teams running high-volume compliance and procurement checks.',
     features: [
       '5,000 queries per month',
       '500 documents',
@@ -65,6 +70,10 @@ const tiers = [
 export default function PricingPage() {
   const [loading, setLoading] = useState<string | null>(null);
   const [currentPlan, setCurrentPlan] = useState<string | null>(null);
+  const { theme, setTheme } = useTheme();
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => setMounted(true), []);
 
   useEffect(() => {
     async function fetchPlan() {
@@ -90,7 +99,7 @@ export default function PricingPage() {
           : process.env.NEXT_PUBLIC_STRIPE_ENTERPRISE_PRICE_ID;
 
       if (!priceId) {
-        alert('Stripe price ID is not configured. Please contact support.');
+        toast.error('Stripe price ID is not configured. Please contact support.');
         return;
       }
 
@@ -107,7 +116,7 @@ export default function PricingPage() {
           window.location.href = '/auth/login?redirect=/pricing';
           return;
         }
-        alert(data.error || 'Failed to create checkout session');
+        toast.error(data.error || 'Failed to create checkout session');
         return;
       }
 
@@ -116,157 +125,184 @@ export default function PricingPage() {
       }
     } catch (err) {
       console.error('Checkout error:', err);
-      alert('Something went wrong. Please try again.');
+      toast.error('Something went wrong. Please try again.');
     } finally {
       setLoading(null);
     }
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-[#0f0f1e] via-[#1a1a2e] to-[#0f0f1e]">
-      {/* Header */}
-      <header className="border-b border-gray-800 bg-[#16213e]/50 backdrop-blur-sm">
-        <div className="max-w-7xl mx-auto px-4 py-4 flex items-center justify-between">
-          <Link href="/" className="text-2xl font-bold text-white">
-            SteelAgent
-          </Link>
+    <div className="flex min-h-screen flex-col bg-white dark:bg-neutral-950 text-black dark:text-white">
+      {/* Header — matches landing page */}
+      <header className="fixed top-0 left-0 right-0 z-50 bg-white/90 dark:bg-neutral-950/90 backdrop-blur-md border-b border-black/5 dark:border-white/5">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6">
+          <div className="flex h-16 items-center justify-between">
+            <Link href="/" className="flex items-center gap-2 text-lg font-semibold tracking-tight text-black dark:text-white hover:opacity-80 transition-opacity">
+              <Logo size={24} />
+              SpecVault
+            </Link>
 
-          <nav className="flex items-center gap-6">
-            <Link href="/dashboard" className="text-gray-400 hover:text-white transition-colors">
-              Dashboard
-            </Link>
-            <Link href="/pricing" className="text-white hover:text-blue-400 transition-colors">
-              Pricing
-            </Link>
-            <Link
-              href="/auth/login"
-              className="px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white rounded-lg transition-colors text-sm"
-            >
-              Sign In
-            </Link>
-          </nav>
+            <nav className="flex items-center gap-4 sm:gap-6">
+              <Link href="/dashboard" className="text-sm text-black/60 dark:text-white/60 hover:text-black dark:hover:text-white transition-colors">
+                Dashboard
+              </Link>
+              <Link href="/pricing" className="text-sm font-medium text-black dark:text-white">
+                Pricing
+              </Link>
+              <Link
+                href="/auth/login"
+                className="px-4 py-2 bg-black dark:bg-white text-white dark:text-black text-sm font-medium rounded-md hover:bg-black/90 dark:hover:bg-white/90 transition-colors"
+              >
+                Sign In
+              </Link>
+              {mounted && (
+                <button
+                  onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
+                  className="p-2 rounded-md hover:bg-black/5 dark:hover:bg-white/10 transition-colors"
+                  aria-label="Toggle theme"
+                >
+                  {theme === 'dark' ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
+                </button>
+              )}
+            </nav>
+          </div>
         </div>
       </header>
 
       {/* Main Content */}
-      <main className="max-w-7xl mx-auto px-4 py-16">
-        <div className="text-center mb-12">
-          <h1 className="text-4xl font-bold text-white mb-4">
-            Simple, transparent pricing
-          </h1>
-          <p className="text-gray-400 text-lg max-w-2xl mx-auto">
-            Choose the plan that fits your specification analysis needs. Upgrade or downgrade at any time.
-          </p>
-        </div>
+      <main className="flex-1 pt-28 pb-16">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6">
+          <div className="text-center mb-14">
+            <h1 className="text-4xl sm:text-5xl font-bold tracking-tight text-black dark:text-white mb-4">
+              Plans for every team size
+            </h1>
+            <p className="text-black/60 dark:text-white/60 text-lg max-w-2xl mx-auto">
+              From solo materials engineers to enterprise procurement teams. Cancel anytime.
+            </p>
+          </div>
 
-        {/* Pricing Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-5xl mx-auto">
-          {tiers.map((tier) => (
-            <div
-              key={tier.name}
-              className={`relative rounded-2xl p-8 ${
-                tier.highlight
-                  ? 'bg-blue-600/10 border-2 border-blue-500'
-                  : 'bg-[#16213e]/50 border border-gray-800'
-              } backdrop-blur-sm flex flex-col`}
-            >
-              {/* Most Popular Badge */}
-              {tier.highlight && (
-                <div className="absolute -top-4 left-1/2 -translate-x-1/2">
-                  <span className="bg-blue-600 text-white text-sm font-semibold px-4 py-1 rounded-full">
-                    Most Popular
-                  </span>
+          {/* Pricing Grid */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-5xl mx-auto">
+            {tiers.map((tier) => (
+              <div
+                key={tier.name}
+                className={`relative rounded-2xl p-8 flex flex-col transition-shadow duration-300 hover:shadow-lg ${
+                  tier.highlight
+                    ? 'bg-green-50/50 dark:bg-green-950/20 border-2 border-green-500 dark:border-green-600 shadow-lg shadow-green-500/10'
+                    : 'bg-white dark:bg-neutral-900 border border-black/5 dark:border-white/10'
+                }`}
+              >
+                {/* Most Popular Badge */}
+                {tier.highlight && (
+                  <div className="absolute -top-4 left-1/2 -translate-x-1/2">
+                    <span className="bg-green-500 text-white text-sm font-semibold px-4 py-1 rounded-full shadow-sm">
+                      Most Popular
+                    </span>
+                  </div>
+                )}
+
+                {/* Current Plan Badge */}
+                {currentPlan === tier.name.toLowerCase() && (
+                  <div className="absolute -top-4 right-4">
+                    <span className="bg-green-600 text-white text-xs font-semibold px-3 py-1 rounded-full">
+                      Current Plan
+                    </span>
+                  </div>
+                )}
+
+                {/* Tier Header */}
+                <div className="mb-6">
+                  <h2 className="text-xl font-bold text-black dark:text-white mb-2">{tier.name}</h2>
+                  <div className="flex items-baseline gap-1">
+                    <span className="text-4xl font-bold text-black dark:text-white">{tier.price}</span>
+                    {tier.period && (
+                      <span className="text-black/40 dark:text-white/40 text-lg">{tier.period}</span>
+                    )}
+                  </div>
+                  <p className="text-black/60 dark:text-white/60 text-sm mt-2">{tier.description}</p>
                 </div>
-              )}
 
-              {/* Current Plan Badge */}
-              {currentPlan === tier.name.toLowerCase() && (
-                <div className="absolute -top-4 right-4">
-                  <span className="bg-green-600 text-white text-xs font-semibold px-3 py-1 rounded-full">
+                {/* Features List */}
+                <ul className="space-y-3 mb-8 flex-1">
+                  {tier.features.map((feature) => (
+                    <li key={feature} className="flex items-start gap-3">
+                      <svg
+                        className="w-5 h-5 text-green-500 mt-0.5 flex-shrink-0"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                        strokeWidth={2}
+                      >
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                      </svg>
+                      <span className="text-black/70 dark:text-white/70 text-sm">{feature}</span>
+                    </li>
+                  ))}
+                </ul>
+
+                {/* CTA Button */}
+                {currentPlan === tier.name.toLowerCase() ? (
+                  <button
+                    disabled
+                    className="w-full py-3 rounded-lg font-semibold bg-black/5 dark:bg-white/5 text-black/40 dark:text-white/40 cursor-not-allowed"
+                  >
                     Current Plan
-                  </span>
-                </div>
-              )}
-
-              {/* Tier Header */}
-              <div className="mb-6">
-                <h2 className="text-xl font-bold text-white mb-2">{tier.name}</h2>
-                <div className="flex items-baseline gap-1">
-                  <span className="text-4xl font-bold text-white">{tier.price}</span>
-                  {tier.period && (
-                    <span className="text-gray-400 text-lg">{tier.period}</span>
-                  )}
-                </div>
-                <p className="text-gray-400 text-sm mt-2">{tier.description}</p>
+                  </button>
+                ) : tier.href ? (
+                  <Link
+                    href={tier.href}
+                    className={`block w-full text-center py-3 rounded-lg font-semibold transition-all duration-200 ${
+                      tier.highlight
+                        ? 'bg-green-500 hover:bg-green-600 text-white shadow-sm'
+                        : 'bg-black dark:bg-white text-white dark:text-black hover:bg-black/90 dark:hover:bg-white/90'
+                    }`}
+                  >
+                    {currentPlan ? 'Upgrade' : tier.cta}
+                  </Link>
+                ) : (
+                  <button
+                    onClick={() => handleSubscribe(tier.priceEnvKey!)}
+                    disabled={loading === tier.priceEnvKey}
+                    className={`w-full py-3 rounded-lg font-semibold transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed ${
+                      tier.highlight
+                        ? 'bg-green-500 hover:bg-green-600 text-white shadow-sm'
+                        : 'bg-black dark:bg-white text-white dark:text-black hover:bg-black/90 dark:hover:bg-white/90'
+                    }`}
+                  >
+                    {loading === tier.priceEnvKey ? 'Redirecting...' : tier.cta}
+                  </button>
+                )}
               </div>
+            ))}
+          </div>
 
-              {/* Features List */}
-              <ul className="space-y-3 mb-8 flex-1">
-                {tier.features.map((feature) => (
-                  <li key={feature} className="flex items-start gap-3">
-                    <svg
-                      className="w-5 h-5 text-blue-400 mt-0.5 flex-shrink-0"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      stroke="currentColor"
-                      strokeWidth={2}
-                    >
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-                    </svg>
-                    <span className="text-gray-300 text-sm">{feature}</span>
-                  </li>
-                ))}
-              </ul>
-
-              {/* CTA Button */}
-              {currentPlan === tier.name.toLowerCase() ? (
-                <button
-                  disabled
-                  className="w-full py-3 rounded-lg font-semibold bg-gray-600 text-gray-400 cursor-not-allowed"
-                >
-                  Current Plan
-                </button>
-              ) : tier.href ? (
-                <Link
-                  href={tier.href}
-                  className={`block w-full text-center py-3 rounded-lg font-semibold transition-colors ${
-                    tier.highlight
-                      ? 'bg-blue-600 hover:bg-blue-500 text-white'
-                      : 'bg-gray-700 hover:bg-gray-600 text-white'
-                  }`}
-                >
-                  {currentPlan ? 'Upgrade' : tier.cta}
-                </Link>
-              ) : (
-                <button
-                  onClick={() => handleSubscribe(tier.priceEnvKey!)}
-                  disabled={loading === tier.priceEnvKey}
-                  className={`w-full py-3 rounded-lg font-semibold transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${
-                    tier.highlight
-                      ? 'bg-blue-600 hover:bg-blue-500 text-white'
-                      : 'bg-gray-700 hover:bg-gray-600 text-white'
-                  }`}
-                >
-                  {loading === tier.priceEnvKey ? 'Redirecting...' : tier.cta}
-                </button>
-              )}
-            </div>
-          ))}
-        </div>
-
-        {/* FAQ / Trust Section */}
-        <div className="mt-16 text-center">
-          <p className="text-gray-500 text-sm">
-            All plans include end-to-end encryption, 99.9% uptime SLA, and SOC 2 compliant infrastructure.
-          </p>
-          <p className="text-gray-500 text-sm mt-2">
-            Questions? Contact us at{' '}
-            <a href="mailto:support@steelagent.com" className="text-blue-400 hover:underline">
-              support@steelagent.com
-            </a>
-          </p>
+          {/* Trust Section */}
+          <div className="mt-16 text-center">
+            <p className="text-black/40 dark:text-white/40 text-sm">
+              All plans include encryption in transit, built on enterprise-grade infrastructure (Supabase, Vercel, Stripe).
+            </p>
+            <p className="text-black/40 dark:text-white/40 text-sm mt-2">
+              Questions? Contact us at{' '}
+              <a href="mailto:support@specvault.app" className="text-green-600 dark:text-green-400 hover:underline">
+                support@specvault.app
+              </a>
+            </p>
+          </div>
         </div>
       </main>
+
+      {/* Footer — matches landing page */}
+      <footer className="border-t border-black/5 dark:border-white/5 py-8 bg-white dark:bg-neutral-950">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 text-center">
+          <div className="flex justify-center gap-4 text-xs text-black/40 dark:text-white/40">
+            <Link href="/" className="hover:text-black/60 dark:hover:text-white/60 transition-colors">Home</Link>
+            <span>&middot;</span>
+            <Link href="/terms" className="hover:text-black/60 dark:hover:text-white/60 transition-colors">Terms</Link>
+            <span>&middot;</span>
+            <Link href="/privacy" className="hover:text-black/60 dark:hover:text-white/60 transition-colors">Privacy</Link>
+          </div>
+        </div>
+      </footer>
     </div>
   );
 }

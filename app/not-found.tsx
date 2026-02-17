@@ -1,6 +1,6 @@
 /**
  * Custom 404 Page
- * Branded not-found page for SteelAgent
+ * Branded not-found page for SpecVault
  */
 
 import Link from 'next/link';

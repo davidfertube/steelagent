@@ -1,12 +1,12 @@
 # SteelAgent
 
 [![Tests](https://github.com/davidfertube/steelagent/actions/workflows/test.yml/badge.svg)](https://github.com/davidfertube/steelagent/actions/workflows/test.yml)
-[![Enterprise](https://img.shields.io/badge/Grade-Enterprise-blue)](https://steelagent.app)
+[![Enterprise](https://img.shields.io/badge/Grade-Enterprise-blue)](https://steelagent.ai)
 [![Stripe](https://img.shields.io/badge/Payments-Stripe-635BFF)](https://stripe.com)
 
 **Enterprise AI for materials compliance.** Upload steel specifications (ASTM, API, NACE), ask technical questions, get cited answers with zero hallucinations. Self-correcting agentic pipeline with answer grounding, false refusal detection, and confidence scoring.
 
-[Live Demo](https://steelagent.app) | [Agentic Pipeline](AGENTS.md) | [Developer Docs](CLAUDE.md) | [Security](SECURITY.md)
+[Live Demo](https://steelagent.ai) | [Agentic Pipeline](AGENTS.md) | [Developer Docs](CLAUDE.md) | [Security](SECURITY.md)
 
 ---
 
@@ -471,7 +471,7 @@ Solo build over 3 months (Nov 2025 - Feb 2026). ~25,000 lines of TypeScript acro
 
 **Test Infrastructure**: 113 unit tests, 80-query golden dataset, 8 production smoke tests, 10 post-improvement validation queries, RAGAS evaluation, A789/A790 confusion matrix, performance profiling.
 
-**Production-Ready**: Live at [steelagent.app](https://steelagent.app). SSE streaming, multi-provider failover, feedback loop, observability, zero-downtime deployments.
+**Production-Ready**: Live at [steelagent.ai](https://steelagent.ai). SSE streaming, multi-provider failover, feedback loop, observability, zero-downtime deployments.
 
 ---
 

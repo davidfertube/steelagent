@@ -7,8 +7,8 @@ import { SignupForm } from '@/components/auth/signup-form';
 import Link from 'next/link';
 
 export const metadata = {
-  title: 'Sign Up | SteelAgent',
-  description: 'Create your SteelAgent account',
+  title: 'Sign Up | SpecVault',
+  description: 'Create your SpecVault account',
 };
 
 export default function SignupPage() {
@@ -18,7 +18,7 @@ export default function SignupPage() {
         {/* Logo */}
         <div className="text-center mb-8">
           <Link href="/" className="inline-block">
-            <h1 className="text-3xl font-bold text-white">SteelAgent</h1>
+            <h1 className="text-3xl font-bold text-white">SpecVault</h1>
           </Link>
           <p className="text-gray-400 mt-2">Create your account</p>
         </div>

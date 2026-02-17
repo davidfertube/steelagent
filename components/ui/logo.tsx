@@ -12,41 +12,33 @@ export function Logo({ size = 32, className }: LogoProps) {
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
       className={className}
-      aria-label="SteelAgent logo"
+      aria-label="SpecVault logo"
       role="img"
     >
-      {/* Hexagon — materials science / molecular structure */}
+      {/* Hexagonal bolt shape — industrial steel */}
       <polygon
-        points="32,3 57,17.5 57,46.5 32,61 7,46.5 7,17.5"
-        fill="#22c55e"
+        points="32,2 56,17 56,47 32,62 8,47 8,17"
+        fill="#0f172a"
       />
-      {/* Inner hexagon border for depth */}
       <polygon
-        points="32,7 54,19.5 54,44.5 32,57 10,44.5 10,19.5"
-        fill="none"
-        stroke="rgba(255,255,255,0.15)"
-        strokeWidth="0.5"
+        points="32,5 53.5,18.5 53.5,45.5 32,59 10.5,45.5 10.5,18.5"
+        fill="#1e293b"
+        stroke="#22c55e"
+        strokeWidth="1.5"
       />
-      {/* Document body */}
-      <rect x="21" y="17" width="18" height="24" rx="1.5" fill="white" />
-      {/* Document corner fold */}
-      <path d="M33 17 L39 23 L33 23 Z" fill="#d1d5db" />
-      {/* Document lines (spec text) */}
-      <rect x="25" y="26" width="10" height="1.5" rx="0.75" fill="#d1d5db" />
-      <rect x="25" y="30" width="8" height="1.5" rx="0.75" fill="#d1d5db" />
-      <rect x="25" y="34" width="11" height="1.5" rx="0.75" fill="#d1d5db" />
-      {/* Verification checkmark circle */}
-      <circle cx="38" cy="40" r="8" fill="#16a34a" />
-      <circle cx="38" cy="40" r="7" fill="none" stroke="white" strokeWidth="0.5" opacity="0.3" />
-      {/* Checkmark */}
-      <polyline
-        points="33.5,40 36.5,43 42.5,37"
-        fill="none"
-        stroke="white"
-        strokeWidth="2.5"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
+      {/* Steel I-beam cross section */}
+      <rect x="16" y="20" width="32" height="5" rx="0.5" fill="#22c55e" />
+      <rect x="16" y="39" width="32" height="5" rx="0.5" fill="#22c55e" />
+      <rect x="28" y="25" width="8" height="14" rx="0.5" fill="#22c55e" />
+      {/* Subtle highlights on I-beam */}
+      <rect x="17" y="21" width="30" height="1" rx="0.5" fill="#4ade80" opacity="0.4" />
+      <rect x="17" y="40" width="30" height="1" rx="0.5" fill="#4ade80" opacity="0.4" />
+      <rect x="29" y="26" width="6" height="1" rx="0.5" fill="#4ade80" opacity="0.3" />
+      {/* Corner accent marks — engineering/technical */}
+      <line x1="14" y1="15" x2="20" y2="15" stroke="#22c55e" strokeWidth="0.75" opacity="0.5" />
+      <line x1="14" y1="15" x2="14" y2="21" stroke="#22c55e" strokeWidth="0.75" opacity="0.5" />
+      <line x1="50" y1="49" x2="44" y2="49" stroke="#22c55e" strokeWidth="0.75" opacity="0.5" />
+      <line x1="50" y1="49" x2="50" y2="43" stroke="#22c55e" strokeWidth="0.75" opacity="0.5" />
     </svg>
   );
 }

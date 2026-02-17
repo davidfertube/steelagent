@@ -38,7 +38,7 @@ These security measures are live in production:
 | Feature | Implementation | File |
 |---------|---------------|------|
 | **CSRF Protection** | Origin/Referer validation on state-changing requests; rejects requests missing both headers | `middleware.ts` |
-| **CORS Whitelist** | Exact-match origin validation: `localhost:3000`, `localhost:3001`, `steelagent.app`, `NEXT_PUBLIC_APP_URL` | `middleware.ts` |
+| **CORS Whitelist** | Exact-match origin validation: `localhost:3000`, `localhost:3001`, `steelagent.ai`, `NEXT_PUBLIC_APP_URL` | `middleware.ts` |
 | **Stripe Webhook Verification** | HMAC-SHA256 signature verification on all Stripe webhook events via `stripe.webhooks.constructEvent()` | `api/webhooks/stripe/route.ts` |
 | **Error Sanitization** | Server errors return generic messages, no stack traces | API route handlers |
 | **HTTPS** | Enforced by Vercel (auto SSL) | Vercel configuration |

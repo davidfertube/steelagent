@@ -10,7 +10,7 @@ export default function PrivacyPage() {
         <div className="container-center">
           <div className="flex h-16 items-center justify-between">
             <Link href="/" className="text-lg font-semibold tracking-tight text-black dark:text-white hover:text-black/80 dark:hover:text-white/80 transition-colors">
-              SteelAgent
+              SpecVault
             </Link>
           </div>
         </div>
@@ -142,7 +142,7 @@ export default function PrivacyPage() {
             <section>
               <h2 className="text-xl font-semibold mb-4">12. Contact Us</h2>
               <p className="text-black/70 dark:text-white/70 leading-relaxed">
-                For privacy-related questions, please contact us at privacy@steelagent.io
+                For privacy-related questions, contact us at privacy@specvault.app
               </p>
             </section>
           </div>

@@ -11,9 +11,10 @@ import { UserMenu } from '@/components/layout/user-menu';
 import BillingSection from '@/components/account/billing-section';
 import Link from 'next/link';
 import { Suspense } from 'react';
+import { DeleteAccountButton } from '@/components/account/delete-account-button';
 
 export const metadata = {
-  title: 'Account Settings | SteelAgent',
+  title: 'Account Settings | SpecVault',
   description: 'Manage your account and API keys',
 };
 
@@ -36,7 +37,7 @@ export default async function AccountPage() {
       <header className="border-b border-gray-800 bg-[#16213e]/50 backdrop-blur-sm">
         <div className="max-w-7xl mx-auto px-4 py-4 flex items-center justify-between">
           <Link href="/dashboard" className="text-2xl font-bold text-white">
-            SteelAgent
+            SpecVault
           </Link>
 
           <nav className="flex items-center gap-6">
@@ -88,9 +89,7 @@ export default async function AccountPage() {
               <p className="text-gray-400 text-sm mb-4">
                 Once you delete your account, there is no going back. All your documents and data will be permanently removed.
               </p>
-              <button className="px-4 py-2 bg-red-600 hover:bg-red-500 text-white rounded-lg transition-colors">
-                Delete Account
-              </button>
+              <DeleteAccountButton />
             </div>
           </section>
         </div>

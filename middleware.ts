@@ -23,7 +23,7 @@ function addSecurityHeaders(response: NextResponse): NextResponse {
 const ALLOWED_ORIGINS = [
   'http://localhost:3000',
   'http://localhost:3001',
-  'https://steelagent.app',
+  'https://specvault.app',
   process.env.NEXT_PUBLIC_APP_URL,
   process.env.PRODUCTION_URL,
 ].filter(Boolean) as string[];
@@ -139,8 +139,11 @@ export async function middleware(request: NextRequest) {
   const startTime = Date.now();
   const clientIp = getClientIp(request);
 
+  // Skip CSRF for webhook endpoints (they use their own signature verification)
+  const isWebhookRoute = pathname.startsWith('/api/webhooks/');
+
   // CSRF Protection for state-changing methods
-  if (['POST', 'PUT', 'DELETE', 'PATCH'].includes(method)) {
+  if (['POST', 'PUT', 'DELETE', 'PATCH'].includes(method) && !isWebhookRoute) {
     const origin = request.headers.get('origin');
     const referer = request.headers.get('referer');
 

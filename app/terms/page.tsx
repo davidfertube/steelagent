@@ -10,7 +10,7 @@ export default function TermsPage() {
         <div className="container-center">
           <div className="flex h-16 items-center justify-between">
             <Link href="/" className="text-lg font-semibold tracking-tight text-black dark:text-white hover:text-black/80 dark:text-white/80 dark:hover:text-white/80 transition-colors">
-              SteelAgent
+              SpecVault
             </Link>
           </div>
         </div>
@@ -25,7 +25,7 @@ export default function TermsPage() {
             <section>
               <h2 className="text-xl font-semibold mb-4">1. Acceptance of Terms</h2>
               <p className="text-black/70 dark:text-white/70 leading-relaxed">
-                By accessing or using SteelAgent (&quot;the Service&quot;), operated by Antigravity, you agree to be bound by these Terms of Service.
+                By accessing or using SpecVault (&quot;the Service&quot;), operated by SpecVault, you agree to be bound by these Terms of Service.
                 If you do not agree to these terms, do not use the Service.
               </p>
             </section>
@@ -33,7 +33,7 @@ export default function TermsPage() {
             <section>
               <h2 className="text-xl font-semibold mb-4">2. Description of Service</h2>
               <p className="text-black/70 dark:text-white/70 leading-relaxed">
-                SteelAgent is an AI-powered document retrieval and analysis tool designed for engineering
+                SpecVault is an AI-powered document retrieval and analysis tool designed for engineering
                 specifications and technical documentation. The Service uses artificial intelligence to search,
                 retrieve, and summarize information from indexed engineering standards (ASTM, API, NACE, and similar).
               </p>
@@ -79,7 +79,7 @@ export default function TermsPage() {
             <section>
               <h2 className="text-xl font-semibold mb-4">6. Limitation of Liability</h2>
               <p className="text-black/70 dark:text-white/70 leading-relaxed">
-                TO THE MAXIMUM EXTENT PERMITTED BY LAW, STEELAGENT, ANTIGRAVITY, AND THEIR AFFILIATES SHALL NOT BE LIABLE
+                TO THE MAXIMUM EXTENT PERMITTED BY LAW, STEELAGENT AND ITS AFFILIATES SHALL NOT BE LIABLE
                 FOR ANY INDIRECT, INCIDENTAL, SPECIAL, CONSEQUENTIAL, OR PUNITIVE DAMAGES, INCLUDING BUT NOT
                 LIMITED TO LOSS OF PROFITS, DATA, USE, OR GOODWILL, ARISING FROM YOUR USE OF THE SERVICE.
               </p>
@@ -92,7 +92,7 @@ export default function TermsPage() {
             <section>
               <h2 className="text-xl font-semibold mb-4">7. Indemnification</h2>
               <p className="text-black/70 dark:text-white/70 leading-relaxed">
-                You agree to indemnify and hold harmless SteelAgent and Antigravity from any claims, damages, or expenses
+                You agree to indemnify and hold harmless SpecVault from any claims, damages, or expenses
                 arising from your use of the Service, your violation of these Terms, or your violation of
                 any rights of a third party.
               </p>
@@ -110,7 +110,7 @@ export default function TermsPage() {
             <section>
               <h2 className="text-xl font-semibold mb-4">9. Subscriptions and Billing</h2>
               <p className="text-black/70 dark:text-white/70 leading-relaxed mb-4">
-                SteelAgent offers free and paid subscription plans. By subscribing to a paid plan, you agree to the following:
+                SpecVault offers free and paid subscription plans. By subscribing to a paid plan, you agree to the following:
               </p>
               <ul className="list-disc list-inside space-y-2 text-black/70 dark:text-white/70">
                 <li><strong>Auto-Renewal:</strong> Subscriptions automatically renew at the end of each billing cycle unless cancelled</li>
@@ -148,7 +148,7 @@ export default function TermsPage() {
             <section>
               <h2 className="text-xl font-semibold mb-4">12. Contact</h2>
               <p className="text-black/70 dark:text-white/70 leading-relaxed">
-                For questions about these Terms, please contact us at legal@steelagent.io
+                For questions about these Terms, contact us at legal@specvault.app
               </p>
             </section>
           </div>

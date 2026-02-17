@@ -5,7 +5,7 @@ This document describes the environment setup for SteelAgent's deployment infras
 ## Architecture
 
 ```
-main branch  ->  Vercel (auto-deploy)  ->  steelagent.app  ->  Supabase (prod)
+main branch  ->  Vercel (auto-deploy)  ->  steelagent.ai  ->  Supabase (prod)
 ```
 
 All infrastructure runs on **free-tier services** except the Anthropic API (pay-as-you-go).
@@ -74,7 +74,7 @@ NEXT_PUBLIC_SUPABASE_ANON_KEY=your-prod-anon-key
 SUPABASE_SERVICE_KEY=your-prod-service-key
 ANTHROPIC_API_KEY=sk-ant-...
 VOYAGE_API_KEY=pa-...
-NEXT_PUBLIC_APP_URL=https://steelagent.app
+NEXT_PUBLIC_APP_URL=https://steelagent.ai
 UPSTASH_REDIS_REST_URL=https://...upstash.io
 UPSTASH_REDIS_REST_TOKEN=...
 ```
@@ -165,7 +165,7 @@ Go to Settings -> Environment Variables and add all variables from the Productio
 ### 3. Configure Custom Domain
 
 1. Go to Settings -> Domains
-2. Add `steelagent.app` (or your custom domain)
+2. Add `steelagent.ai` (or your custom domain)
 3. Configure DNS records per Vercel instructions
 
 ---

@@ -9,7 +9,7 @@ import { UserMenu } from '@/components/layout/user-menu';
 import Link from 'next/link';
 
 export const metadata = {
-  title: 'Workspace Settings | SteelAgent',
+  title: 'Workspace Settings | SpecVault',
   description: 'Manage your workspace and team members',
 };
 
@@ -59,7 +59,7 @@ export default async function WorkspacePage() {
       <header className="border-b border-gray-800 bg-[#16213e]/50 backdrop-blur-sm">
         <div className="max-w-7xl mx-auto px-4 py-4 flex items-center justify-between">
           <Link href="/dashboard" className="text-2xl font-bold text-white">
-            SteelAgent
+            SpecVault
           </Link>
 
           <nav className="flex items-center gap-6">

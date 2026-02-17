@@ -1,7 +1,23 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getStripeClient, isStripeConfigured, PLANS, type PlanTier } from '@/lib/stripe';
 import { createServiceAuthClient } from '@/lib/auth';
+import { sendSubscriptionConfirmation, sendPaymentFailedEmail } from '@/lib/email';
 import type Stripe from 'stripe';
+
+async function getWorkspaceOwnerEmail(supabase: ReturnType<typeof createServiceAuthClient>, workspaceId: string): Promise<string | null> {
+  const { data } = await supabase
+    .from('workspaces')
+    .select('owner_id')
+    .eq('id', workspaceId)
+    .single();
+  if (!data?.owner_id) return null;
+  const { data: user } = await supabase
+    .from('users')
+    .select('email')
+    .eq('id', data.owner_id)
+    .single();
+  return user?.email || null;
+}
 
 function getPlanFromPriceId(priceId: string): PlanTier {
   if (priceId === process.env.STRIPE_ENTERPRISE_PRICE_ID) return 'enterprise';
@@ -94,6 +110,12 @@ export async function POST(request: NextRequest) {
           }).eq('workspace_id', workspaceId);
 
           console.log(`[Stripe Webhook] Checkout completed: workspace=${workspaceId}, plan=${resolvedPlan}`);
+
+          // Send subscription confirmation email
+          const ownerEmail = await getWorkspaceOwnerEmail(supabase, workspaceId);
+          if (ownerEmail) {
+            sendSubscriptionConfirmation(ownerEmail, resolvedPlan).catch(() => {});
+          }
         }
         break;
       }
@@ -201,6 +223,45 @@ export async function POST(request: NextRequest) {
           await supabase.from('stripe_customers').update({
             status: 'past_due',
           }).eq('workspace_id', workspace.id);
+
+          // Send payment failed email
+          const ownerEmail = await getWorkspaceOwnerEmail(supabase, workspace.id);
+          if (ownerEmail) {
+            sendPaymentFailedEmail(ownerEmail).catch(() => {});
+          }
+        }
+        break;
+      }
+
+      case 'invoice.paid': {
+        const invoice = event.data.object as Stripe.Invoice;
+        const customerId = invoice.customer as string;
+
+        const { data: workspace } = await supabase
+          .from('workspaces')
+          .select('id')
+          .eq('stripe_customer_id', customerId)
+          .single();
+
+        if (workspace) {
+          eventWorkspaceId = workspace.id;
+
+          // Mirror invoice to database
+          await supabase.from('invoices').upsert({
+            workspace_id: workspace.id,
+            stripe_invoice_id: invoice.id,
+            stripe_customer_id: customerId,
+            amount_due: invoice.amount_due,
+            amount_paid: invoice.amount_paid,
+            currency: invoice.currency,
+            status: invoice.status,
+            invoice_pdf: invoice.invoice_pdf,
+            hosted_invoice_url: invoice.hosted_invoice_url,
+            billing_reason: invoice.billing_reason,
+            paid_at: new Date().toISOString(),
+          }, { onConflict: 'stripe_invoice_id' });
+
+          console.log(`[Stripe Webhook] Invoice paid: workspace=${workspace.id}, amount=${invoice.amount_paid}`);
         }
         break;
       }

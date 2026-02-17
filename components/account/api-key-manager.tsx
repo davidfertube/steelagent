@@ -214,7 +214,7 @@ export function ApiKeyManager({ userId, workspaceId }: { userId: string; workspa
         <div className="p-6 border-b border-gray-800 flex items-center justify-between">
           <div>
             <h3 className="text-white font-semibold">Your API Keys</h3>
-            <p className="text-gray-400 text-sm mt-1">Use these keys to access SteelAgent API</p>
+            <p className="text-gray-400 text-sm mt-1">Use these keys to access SpecVault API</p>
           </div>
           {!showCreateForm && (
             <button
