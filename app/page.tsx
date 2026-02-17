@@ -401,7 +401,7 @@ export default function Home() {
             <nav className="hidden md:flex items-center gap-3 lg:gap-6">
               {[
                 { label: "Who", href: "#features" },
-                { label: "What", href: "#why" },
+                { label: "Why", href: "#why" },
                 { label: "Demo", href: "#solutions" },
                 { label: "Contact", href: "#contact" },
               ].map((item) => (
@@ -461,7 +461,7 @@ export default function Home() {
             <div className="flex flex-col items-center justify-center h-full gap-6">
               {[
                 { label: "Who", href: "#features" },
-                { label: "What", href: "#why" },
+                { label: "Why", href: "#why" },
                 { label: "Demo", href: "#solutions" },
                 { label: "Contact", href: "#contact" },
               ].map((item, i) => (
@@ -618,42 +618,42 @@ export default function Home() {
         </section>
 
         {/* Who This Is For - Persona Section */}
-        <section id="features" className="relative min-h-screen flex items-center py-12 sm:py-16 md:py-20 scroll-mt-16 border-t border-black/5 dark:border-white/10 bg-black/[0.02] dark:bg-white/[0.02]">
+        <section id="features" className="relative h-screen flex items-center py-4 sm:py-6 md:py-8 pb-8 sm:pb-10 md:pb-12 scroll-mt-16 border-t border-black/5 dark:border-white/10 bg-black/[0.02] dark:bg-white/[0.02]">
           <div className="container-center">
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.6 }}
-              className="space-y-12"
+              className="space-y-5"
             >
-              <div className="text-center space-y-3">
+              <div className="text-center space-y-2">
                 <span className="text-xs font-semibold tracking-widest text-black/40 dark:text-white/40 uppercase">Built for your team</span>
                 <h2 className="text-3xl sm:text-4xl font-bold tracking-tight text-black dark:text-white">
                   Who Uses SpecVault
                 </h2>
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 lg:gap-8">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 lg:gap-5">
                 {/* Materials Engineers */}
                 <motion.div
                   initial={{ opacity: 0, y: 20 }}
                   whileInView={{ opacity: 1, y: 0 }}
                   viewport={{ once: true }}
                   transition={{ duration: 0.5, delay: 0 }}
-                  className="group rounded-2xl border border-black/5 dark:border-white/10 bg-white dark:bg-neutral-900 p-6 space-y-5 hover:shadow-xl hover:border-green-200 dark:hover:border-green-800 transition-all duration-300"
+                  className="group rounded-2xl border border-black/5 dark:border-white/10 bg-white dark:bg-neutral-900 p-4 space-y-3 hover:shadow-xl hover:border-green-200 dark:hover:border-green-800 transition-all duration-300"
                 >
-                  <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-lg bg-green-50 dark:bg-green-950/40 border border-green-200 dark:border-green-800 flex items-center justify-center">
-                      <Microscope className="w-5 h-5 text-green-600 dark:text-green-400" />
+                  <div className="flex items-center gap-2.5">
+                    <div className="w-8 h-8 rounded-lg bg-green-50 dark:bg-green-950/40 border border-green-200 dark:border-green-800 flex items-center justify-center">
+                      <Microscope className="w-4 h-4 text-green-600 dark:text-green-400" />
                     </div>
                     <div>
-                      <h3 className="font-semibold text-black dark:text-white">Materials Engineers</h3>
-                      <p className="text-xs text-black/50 dark:text-white/50">Find mechanical properties across specs in seconds</p>
+                      <h3 className="font-semibold text-sm text-black dark:text-white">Materials Engineers</h3>
+                      <p className="text-[11px] text-black/50 dark:text-white/50">Find mechanical properties across specs in seconds</p>
                     </div>
                   </div>
                   {/* Mini Dashboard: Property Lookup */}
-                  <div className="rounded-xl bg-neutral-50 dark:bg-neutral-800/50 border border-black/5 dark:border-white/5 p-4 space-y-3 overflow-hidden relative">
+                  <div className="rounded-xl bg-neutral-50 dark:bg-neutral-800/50 border border-black/5 dark:border-white/5 p-3 space-y-2 overflow-hidden relative">
                     {/* Scanning line animation */}
                     <motion.div
                       className="absolute left-0 right-0 h-px bg-gradient-to-r from-transparent via-green-500/40 to-transparent"
@@ -717,19 +717,19 @@ export default function Home() {
                   whileInView={{ opacity: 1, y: 0 }}
                   viewport={{ once: true }}
                   transition={{ duration: 0.5, delay: 0.1 }}
-                  className="group rounded-2xl border border-black/5 dark:border-white/10 bg-white dark:bg-neutral-900 p-6 space-y-5 hover:shadow-xl hover:border-green-200 dark:hover:border-green-800 transition-all duration-300"
+                  className="group rounded-2xl border border-black/5 dark:border-white/10 bg-white dark:bg-neutral-900 p-4 space-y-3 hover:shadow-xl hover:border-green-200 dark:hover:border-green-800 transition-all duration-300"
                 >
-                  <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-lg bg-blue-50 dark:bg-blue-950/40 border border-blue-200 dark:border-blue-800 flex items-center justify-center">
-                      <ClipboardCheck className="w-5 h-5 text-blue-600 dark:text-blue-400" />
+                  <div className="flex items-center gap-2.5">
+                    <div className="w-8 h-8 rounded-lg bg-blue-50 dark:bg-blue-950/40 border border-blue-200 dark:border-blue-800 flex items-center justify-center">
+                      <ClipboardCheck className="w-4 h-4 text-blue-600 dark:text-blue-400" />
                     </div>
                     <div>
-                      <h3 className="font-semibold text-black dark:text-white">QA/QC Inspectors</h3>
-                      <p className="text-xs text-black/50 dark:text-white/50">Verify MTR data against specification requirements</p>
+                      <h3 className="font-semibold text-sm text-black dark:text-white">QA/QC Inspectors</h3>
+                      <p className="text-[11px] text-black/50 dark:text-white/50">Verify MTR data against specification requirements</p>
                     </div>
                   </div>
                   {/* Mini Dashboard: Verification Checklist */}
-                  <div className="rounded-xl bg-neutral-50 dark:bg-neutral-800/50 border border-black/5 dark:border-white/5 p-4 space-y-3 overflow-hidden relative">
+                  <div className="rounded-xl bg-neutral-50 dark:bg-neutral-800/50 border border-black/5 dark:border-white/5 p-3 space-y-2 overflow-hidden relative">
                     {/* Scanning line */}
                     <motion.div
                       className="absolute left-0 right-0 h-px bg-gradient-to-r from-transparent via-blue-500/40 to-transparent"
@@ -796,19 +796,19 @@ export default function Home() {
                   whileInView={{ opacity: 1, y: 0 }}
                   viewport={{ once: true }}
                   transition={{ duration: 0.5, delay: 0.2 }}
-                  className="group rounded-2xl border border-black/5 dark:border-white/10 bg-white dark:bg-neutral-900 p-6 space-y-5 hover:shadow-xl hover:border-green-200 dark:hover:border-green-800 transition-all duration-300"
+                  className="group rounded-2xl border border-black/5 dark:border-white/10 bg-white dark:bg-neutral-900 p-4 space-y-3 hover:shadow-xl hover:border-green-200 dark:hover:border-green-800 transition-all duration-300"
                 >
-                  <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-lg bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-800 flex items-center justify-center">
-                      <Package className="w-5 h-5 text-amber-600 dark:text-amber-400" />
+                  <div className="flex items-center gap-2.5">
+                    <div className="w-8 h-8 rounded-lg bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-800 flex items-center justify-center">
+                      <Package className="w-4 h-4 text-amber-600 dark:text-amber-400" />
                     </div>
                     <div>
-                      <h3 className="font-semibold text-black dark:text-white">Procurement Teams</h3>
-                      <p className="text-xs text-black/50 dark:text-white/50">Compare material grades across standards</p>
+                      <h3 className="font-semibold text-sm text-black dark:text-white">Procurement Teams</h3>
+                      <p className="text-[11px] text-black/50 dark:text-white/50">Compare material grades across standards</p>
                     </div>
                   </div>
                   {/* Mini Dashboard: Grade Comparison Table */}
-                  <div className="rounded-xl bg-neutral-50 dark:bg-neutral-800/50 border border-black/5 dark:border-white/5 p-4 space-y-3 overflow-hidden relative">
+                  <div className="rounded-xl bg-neutral-50 dark:bg-neutral-800/50 border border-black/5 dark:border-white/5 p-3 space-y-2 overflow-hidden relative">
                     {/* Scanning line */}
                     <motion.div
                       className="absolute left-0 right-0 h-px bg-gradient-to-r from-transparent via-amber-500/40 to-transparent"
@@ -871,19 +871,19 @@ export default function Home() {
                   whileInView={{ opacity: 1, y: 0 }}
                   viewport={{ once: true }}
                   transition={{ duration: 0.5, delay: 0.3 }}
-                  className="group rounded-2xl border border-black/5 dark:border-white/10 bg-white dark:bg-neutral-900 p-6 space-y-5 hover:shadow-xl hover:border-green-200 dark:hover:border-green-800 transition-all duration-300"
+                  className="group rounded-2xl border border-black/5 dark:border-white/10 bg-white dark:bg-neutral-900 p-4 space-y-3 hover:shadow-xl hover:border-green-200 dark:hover:border-green-800 transition-all duration-300"
                 >
-                  <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-lg bg-purple-50 dark:bg-purple-950/40 border border-purple-200 dark:border-purple-800 flex items-center justify-center">
-                      <Scale className="w-5 h-5 text-purple-600 dark:text-purple-400" />
+                  <div className="flex items-center gap-2.5">
+                    <div className="w-8 h-8 rounded-lg bg-purple-50 dark:bg-purple-950/40 border border-purple-200 dark:border-purple-800 flex items-center justify-center">
+                      <Scale className="w-4 h-4 text-purple-600 dark:text-purple-400" />
                     </div>
                     <div>
-                      <h3 className="font-semibold text-black dark:text-white">Compliance Officers</h3>
-                      <p className="text-xs text-black/50 dark:text-white/50">Generate audit-ready documentation with citations</p>
+                      <h3 className="font-semibold text-sm text-black dark:text-white">Compliance Officers</h3>
+                      <p className="text-[11px] text-black/50 dark:text-white/50">Generate audit-ready documentation with citations</p>
                     </div>
                   </div>
                   {/* Mini Dashboard: Audit Pipeline */}
-                  <div className="rounded-xl bg-neutral-50 dark:bg-neutral-800/50 border border-black/5 dark:border-white/5 p-4 space-y-3 overflow-hidden relative">
+                  <div className="rounded-xl bg-neutral-50 dark:bg-neutral-800/50 border border-black/5 dark:border-white/5 p-3 space-y-2 overflow-hidden relative">
                     {/* Scanning line */}
                     <motion.div
                       className="absolute left-0 right-0 h-px bg-gradient-to-r from-transparent via-purple-500/40 to-transparent"
@@ -979,23 +979,23 @@ export default function Home() {
         </section>
 
         {/* Why SpecVault vs Generic LLMs Section */}
-        <section id="why" className="relative min-h-screen flex items-center py-12 sm:py-16 md:py-20 scroll-mt-16 border-t border-black/5 dark:border-white/10 bg-black/[0.02] dark:bg-white/[0.02]">
+        <section id="why" className="relative h-screen flex items-center py-4 sm:py-6 md:py-8 pb-8 sm:pb-10 md:pb-12 scroll-mt-16 border-t border-black/5 dark:border-white/10 bg-black/[0.02] dark:bg-white/[0.02]">
           <div className="container-center">
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.6 }}
-              className="space-y-12"
+              className="space-y-6"
             >
               {/* Section Header */}
-              <div className="text-center space-y-6">
+              <div className="text-center space-y-4">
                 <motion.h2
                   initial={{ opacity: 0, y: 10 }}
                   whileInView={{ opacity: 1, y: 0 }}
                   viewport={{ once: true }}
                   transition={{ duration: 0.5, delay: 0.1 }}
-                  className="text-4xl sm:text-5xl md:text-6xl font-bold tracking-tight text-black dark:text-white"
+                  className="text-3xl sm:text-4xl md:text-5xl font-bold tracking-tight text-black dark:text-white"
                 >
                   Why SpecVault?
                 </motion.h2>
@@ -1004,7 +1004,7 @@ export default function Home() {
                   whileInView={{ opacity: 1, y: 0 }}
                   viewport={{ once: true }}
                   transition={{ duration: 0.5, delay: 0.2 }}
-                  className="text-xl text-black/60 dark:text-white/60 max-w-3xl mx-auto leading-relaxed"
+                  className="text-lg text-black/60 dark:text-white/60 max-w-3xl mx-auto leading-relaxed"
                 >
                   Same question, two very different answers. <br className="hidden sm:block" />
                   See what <span className="text-black dark:text-white font-semibold">your documents</span> make possible.
@@ -1028,14 +1028,14 @@ export default function Home() {
               </motion.div>
 
               {/* Comparison Dashboard Grid */}
-              <div className="grid md:grid-cols-2 gap-6 lg:gap-8 max-w-5xl mx-auto">
+              <div className="grid md:grid-cols-2 gap-4 lg:gap-6 max-w-5xl mx-auto">
                 {/* SpecVault Dashboard */}
                 <motion.div
                   initial={{ opacity: 0, x: -20 }}
                   whileInView={{ opacity: 1, x: 0 }}
                   viewport={{ once: true }}
                   transition={{ duration: 0.5, delay: 0.3 }}
-                  className="group rounded-2xl border border-green-200 dark:border-green-800 bg-white dark:bg-neutral-900 p-6 space-y-5 hover:shadow-xl hover:border-green-300 dark:hover:border-green-700 transition-all duration-300"
+                  className="group rounded-2xl border border-green-200 dark:border-green-800 bg-white dark:bg-neutral-900 p-4 space-y-3 hover:shadow-xl hover:border-green-300 dark:hover:border-green-700 transition-all duration-300"
                 >
                   {/* Header */}
                   <div className="flex items-center gap-3">
@@ -1049,7 +1049,7 @@ export default function Home() {
                   </div>
 
                   {/* Response Panel */}
-                  <div className="rounded-xl bg-green-50/50 dark:bg-green-950/20 border border-green-100 dark:border-green-800/50 p-4 space-y-3 overflow-hidden relative">
+                  <div className="rounded-xl bg-green-50/50 dark:bg-green-950/20 border border-green-100 dark:border-green-800/50 p-3 space-y-2 overflow-hidden relative">
                     <motion.div
                       className="absolute left-0 right-0 h-px bg-gradient-to-r from-transparent via-green-500/30 to-transparent"
                       animate={{ top: ["0%", "100%", "0%"] }}
@@ -1069,7 +1069,7 @@ export default function Home() {
                   </div>
 
                   {/* Source Citation */}
-                  <div className="rounded-xl bg-neutral-50 dark:bg-neutral-800/50 border border-black/5 dark:border-white/5 p-4 space-y-3 overflow-hidden relative">
+                  <div className="rounded-xl bg-neutral-50 dark:bg-neutral-800/50 border border-black/5 dark:border-white/5 p-3 space-y-2 overflow-hidden relative">
                     <div className="flex items-center gap-2 text-[10px] font-semibold text-black/40 dark:text-white/40 uppercase tracking-wider">
                       <motion.div
                         className="w-1.5 h-1.5 rounded-full bg-green-500"
@@ -1162,7 +1162,7 @@ export default function Home() {
                   whileInView={{ opacity: 1, x: 0 }}
                   viewport={{ once: true }}
                   transition={{ duration: 0.5, delay: 0.4 }}
-                  className="group rounded-2xl border border-red-200 dark:border-red-800 bg-white dark:bg-neutral-900 p-6 space-y-5 hover:shadow-xl hover:border-red-300 dark:hover:border-red-700 transition-all duration-300"
+                  className="group rounded-2xl border border-red-200 dark:border-red-800 bg-white dark:bg-neutral-900 p-4 space-y-3 hover:shadow-xl hover:border-red-300 dark:hover:border-red-700 transition-all duration-300"
                 >
                   {/* Header */}
                   <div className="flex items-center gap-3">
@@ -1178,7 +1178,7 @@ export default function Home() {
                   </div>
 
                   {/* Response Panel */}
-                  <div className="rounded-xl bg-red-50/30 dark:bg-red-950/10 border border-red-100 dark:border-red-800/50 p-4 space-y-3 overflow-hidden relative">
+                  <div className="rounded-xl bg-red-50/30 dark:bg-red-950/10 border border-red-100 dark:border-red-800/50 p-3 space-y-2 overflow-hidden relative">
                     <div className="flex items-center gap-2 text-[10px] font-semibold text-red-500/60 dark:text-red-400/60 uppercase tracking-wider">
                       <div className="w-1.5 h-1.5 rounded-full bg-red-400" />
                       Response
@@ -1189,7 +1189,7 @@ export default function Home() {
                   </div>
 
                   {/* No Source */}
-                  <div className="rounded-xl bg-neutral-50 dark:bg-neutral-800/50 border border-black/5 dark:border-white/5 p-4 space-y-3 overflow-hidden relative">
+                  <div className="rounded-xl bg-neutral-50 dark:bg-neutral-800/50 border border-black/5 dark:border-white/5 p-3 space-y-2 overflow-hidden relative">
                     <div className="flex items-center gap-2 text-[10px] font-semibold text-black/40 dark:text-white/40 uppercase tracking-wider">
                       <div className="w-1.5 h-1.5 rounded-full bg-red-400" />
                       Source &amp; Verification
@@ -1532,7 +1532,7 @@ export default function Home() {
               <h4 className="text-xs font-semibold tracking-widest text-black/40 dark:text-white/40 uppercase">Product</h4>
               <ul className="space-y-2 text-sm">
                 <li><a href="#features" className="text-black/60 dark:text-white/60 hover:text-black dark:hover:text-white transition-colors">Who It&apos;s For</a></li>
-                <li><a href="#why" className="text-black/60 dark:text-white/60 hover:text-black dark:hover:text-white transition-colors">What It Does</a></li>
+                <li><a href="#why" className="text-black/60 dark:text-white/60 hover:text-black dark:hover:text-white transition-colors">Why SpecVault</a></li>
                 <li><a href="#solutions" className="text-black/60 dark:text-white/60 hover:text-black dark:hover:text-white transition-colors">Demo</a></li>
               </ul>
             </div>
