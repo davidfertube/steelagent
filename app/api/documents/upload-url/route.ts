@@ -38,15 +38,19 @@ interface UploadUrlRequest {
 
 export async function POST(request: NextRequest) {
   try {
+    console.log("[Upload URL API] Request received");
+
     // ========================================
     // Step 0: Check auth (optional for anonymous)
     // ========================================
     const user = await serverAuth.getCurrentUser();
+    console.log("[Upload URL API] Auth check done, user:", user ? user.id : "anonymous");
     let anonymousSessionId: string | null = null;
 
     if (!user) {
       // Anonymous upload — check/create session cookie
       anonymousSessionId = request.cookies.get('anon_session')?.value || randomUUID();
+      console.log("[Upload URL API] Anonymous session:", anonymousSessionId?.substring(0, 8) + "...");
 
       // Limit anonymous uploads to 1 document
       const docCount = await getAnonymousDocCount(anonymousSessionId);
@@ -117,7 +121,17 @@ export async function POST(request: NextRequest) {
     // Step 4: Create Database Record
     // ========================================
     // Use service client for anonymous uploads (bypasses RLS)
-    const db = anonymousSessionId ? createServiceAuthClient() : supabase;
+    console.log("[Upload URL API] Creating DB client, anonymous:", !!anonymousSessionId, "serviceKey present:", !!process.env.SUPABASE_SERVICE_KEY);
+    let db;
+    try {
+      db = anonymousSessionId ? createServiceAuthClient() : supabase;
+    } catch (error) {
+      console.error("[Upload URL API] Service client creation failed:", error);
+      return NextResponse.json(
+        { error: "Upload service is not configured. Please contact support.", code: "SERVICE_UNAVAILABLE" },
+        { status: 503 }
+      );
+    }
 
     const insertData: Record<string, unknown> = {
       filename: filename,
@@ -151,7 +165,7 @@ export async function POST(request: NextRequest) {
     // Step 5: Generate Signed Upload URL
     // ========================================
     // Use service client for storage too (anonymous has no auth context)
-    const storageClient = anonymousSessionId ? createServiceAuthClient() : supabase;
+    const storageClient = db;
     const { data: signedUrlData, error: signedUrlError } = await storageClient.storage
       .from("documents")
       .createSignedUploadUrl(storagePath);

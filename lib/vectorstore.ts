@@ -1,5 +1,6 @@
 import { supabase } from "./supabase";
 import { getCachedQueryEmbedding } from "./embedding-cache";
+import type { SupabaseClient } from "@supabase/supabase-js";
 
 export interface Chunk {
   id?: number;
@@ -41,8 +42,9 @@ export interface HybridSearchResult extends SearchResult {
 // Re-export hybrid search types for convenience
 export type { HybridSearchResult as HybridResult } from "./hybrid-search";
 
-export async function storeChunks(chunks: Chunk[]): Promise<void> {
-  const { error } = await supabase.from("chunks").insert(chunks);
+export async function storeChunks(chunks: Chunk[], client?: SupabaseClient): Promise<void> {
+  const db = client ?? supabase;
+  const { error } = await db.from("chunks").insert(chunks);
 
   if (error) {
     console.error("Error storing chunks:", error);

@@ -33,7 +33,9 @@ CREATE POLICY "Document owners can delete documents" ON documents
   FOR DELETE USING (user_id = auth.uid());
 
 -- ============================================================
--- CHUNKS TABLE - Workspace Isolation
+-- CHUNKS TABLE - Workspace Isolation (via documents join)
+-- NOTE: chunks table does NOT have workspace_id/user_id columns.
+-- Authorization is derived from the parent document's workspace.
 -- ============================================================
 
 -- Drop existing anonymous policies
@@ -44,23 +46,38 @@ DROP POLICY IF EXISTS "Enable update for all users" ON chunks;
 -- Revoke anonymous access
 REVOKE ALL ON chunks FROM anon;
 
--- Create workspace-scoped policies
+-- Create workspace-scoped policies (join through documents table)
 CREATE POLICY "Workspace members can view chunks" ON chunks
   FOR SELECT USING (
-    workspace_id IN (SELECT workspace_id FROM users WHERE id = auth.uid())
+    document_id IN (
+      SELECT id FROM documents WHERE workspace_id IN (
+        SELECT workspace_id FROM users WHERE id = auth.uid()
+      )
+    )
   );
 
 CREATE POLICY "Workspace members can insert chunks" ON chunks
   FOR INSERT WITH CHECK (
-    workspace_id IN (SELECT workspace_id FROM users WHERE id = auth.uid())
-    AND user_id = auth.uid()
+    document_id IN (
+      SELECT id FROM documents WHERE workspace_id IN (
+        SELECT workspace_id FROM users WHERE id = auth.uid()
+      )
+    )
   );
 
 CREATE POLICY "Chunk owners can update chunks" ON chunks
-  FOR UPDATE USING (user_id = auth.uid());
+  FOR UPDATE USING (
+    document_id IN (
+      SELECT id FROM documents WHERE user_id = auth.uid()
+    )
+  );
 
 CREATE POLICY "Chunk owners can delete chunks" ON chunks
-  FOR DELETE USING (user_id = auth.uid());
+  FOR DELETE USING (
+    document_id IN (
+      SELECT id FROM documents WHERE user_id = auth.uid()
+    )
+  );
 
 -- ============================================================
 -- FEEDBACK TABLE - Workspace Isolation
@@ -190,7 +207,7 @@ BEGIN
     'document.upload',
     'document',
     NEW.id::TEXT,
-    jsonb_build_object('filename', NEW.filename, 'size_bytes', NEW.size_bytes)
+    jsonb_build_object('filename', NEW.filename, 'file_size', NEW.file_size)
   );
   RETURN NEW;
 END;
@@ -302,11 +319,11 @@ CREATE POLICY "Admins can view all workspace documents" ON documents
 
 CREATE POLICY "Admins can view all workspace chunks" ON chunks
   FOR SELECT USING (
-    EXISTS (
-      SELECT 1 FROM users
-      WHERE id = auth.uid()
-        AND workspace_id = chunks.workspace_id
-        AND role IN ('admin', 'enterprise')
+    document_id IN (
+      SELECT d.id FROM documents d
+      JOIN users u ON u.workspace_id = d.workspace_id
+      WHERE u.id = auth.uid()
+        AND u.role IN ('admin', 'enterprise')
     )
   );
 

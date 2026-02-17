@@ -96,7 +96,16 @@ export async function POST(request: NextRequest) {
     // ========================================
     // Step 2: Verify Database Record Exists
     // ========================================
-    const db = isAnonymous ? createServiceAuthClient() : supabase;
+    let db;
+    try {
+      db = isAnonymous ? createServiceAuthClient() : supabase;
+    } catch (error) {
+      console.error("[Upload Confirm API] Service client creation failed:", error);
+      return NextResponse.json(
+        { error: "Upload service is not configured. Please contact support.", code: "SERVICE_UNAVAILABLE" },
+        { status: 503 }
+      );
+    }
 
     // Verify anonymous ownership
     if (isAnonymous) {

@@ -168,8 +168,17 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    // Use service client for anonymous (bypasses RLS)
-    const db = isAnonymous ? createServiceAuthClient() : supabase;
+    // Always use service client for processing (backend operation, bypasses RLS)
+    let db;
+    try {
+      db = createServiceAuthClient();
+    } catch (error) {
+      console.error("[Process API] Service client creation failed:", error);
+      return NextResponse.json(
+        { error: "Processing service is not configured. Please contact support.", code: "SERVICE_UNAVAILABLE" },
+        { status: 503 }
+      );
+    }
 
     // ========================================
     // Step 2: Retrieve Document from Database
@@ -349,7 +358,7 @@ export async function POST(request: NextRequest) {
     }));
 
     try {
-      await storeChunks(chunks);
+      await storeChunks(chunks, db);
     } catch (storageError) {
       // Log full error for debugging (server-side only)
       const errorMessage = storageError instanceof Error ? storageError.message : "Unknown database error";
@@ -404,9 +413,17 @@ async function updateDocumentStatus(
   status: "pending" | "processing" | "indexed" | "error"
 ): Promise<void> {
   // Use service client to ensure updates work for both auth and anonymous docs
-  const serviceClient = createServiceAuthClient();
-  await serviceClient
-    .from("documents")
-    .update({ status })
-    .eq("id", documentId);
+  try {
+    const serviceClient = createServiceAuthClient();
+    await serviceClient
+      .from("documents")
+      .update({ status })
+      .eq("id", documentId);
+  } catch {
+    // If service client unavailable, try anon client as fallback
+    await supabase
+      .from("documents")
+      .update({ status })
+      .eq("id", documentId);
+  }
 }

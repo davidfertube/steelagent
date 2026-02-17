@@ -111,8 +111,9 @@ CREATE INDEX IF NOT EXISTS idx_usage_logs_workspace_id ON usage_logs(workspace_i
 CREATE INDEX IF NOT EXISTS idx_usage_logs_created_at ON usage_logs(created_at);
 CREATE INDEX IF NOT EXISTS idx_documents_user_id ON documents(user_id);
 CREATE INDEX IF NOT EXISTS idx_documents_workspace_id ON documents(workspace_id);
-CREATE INDEX IF NOT EXISTS idx_chunks_user_id ON chunks(user_id);
-CREATE INDEX IF NOT EXISTS idx_chunks_workspace_id ON chunks(workspace_id);
+-- NOTE: chunks table does not have user_id/workspace_id columns.
+-- Authorization is derived from the parent document's workspace via document_id.
+CREATE INDEX IF NOT EXISTS idx_chunks_document_id ON chunks(document_id);
 CREATE INDEX IF NOT EXISTS idx_feedback_user_id ON feedback(user_id);
 CREATE INDEX IF NOT EXISTS idx_feedback_workspace_id ON feedback(workspace_id);
 
@@ -522,7 +523,9 @@ DROP POLICY IF EXISTS "Document owners can delete documents" ON documents;
 CREATE POLICY "Document owners can delete documents" ON documents
   FOR DELETE USING (user_id = auth.uid());
 
--- CHUNKS: Drop old policies, add workspace-scoped
+-- CHUNKS: Drop old policies, add workspace-scoped (via documents join)
+-- NOTE: chunks table does NOT have workspace_id/user_id columns.
+-- Authorization is derived from the parent document's workspace.
 DROP POLICY IF EXISTS "Enable read access for all users" ON chunks;
 DROP POLICY IF EXISTS "Enable insert for all users" ON chunks;
 DROP POLICY IF EXISTS "Enable update for all users" ON chunks;
@@ -532,23 +535,38 @@ REVOKE ALL ON chunks FROM anon;
 DROP POLICY IF EXISTS "Workspace members can view chunks" ON chunks;
 CREATE POLICY "Workspace members can view chunks" ON chunks
   FOR SELECT USING (
-    workspace_id IN (SELECT workspace_id FROM users WHERE id = auth.uid())
+    document_id IN (
+      SELECT id FROM documents WHERE workspace_id IN (
+        SELECT workspace_id FROM users WHERE id = auth.uid()
+      )
+    )
   );
 
 DROP POLICY IF EXISTS "Workspace members can insert chunks" ON chunks;
 CREATE POLICY "Workspace members can insert chunks" ON chunks
   FOR INSERT WITH CHECK (
-    workspace_id IN (SELECT workspace_id FROM users WHERE id = auth.uid())
-    AND user_id = auth.uid()
+    document_id IN (
+      SELECT id FROM documents WHERE workspace_id IN (
+        SELECT workspace_id FROM users WHERE id = auth.uid()
+      )
+    )
   );
 
 DROP POLICY IF EXISTS "Chunk owners can update chunks" ON chunks;
 CREATE POLICY "Chunk owners can update chunks" ON chunks
-  FOR UPDATE USING (user_id = auth.uid());
+  FOR UPDATE USING (
+    document_id IN (
+      SELECT id FROM documents WHERE user_id = auth.uid()
+    )
+  );
 
 DROP POLICY IF EXISTS "Chunk owners can delete chunks" ON chunks;
 CREATE POLICY "Chunk owners can delete chunks" ON chunks
-  FOR DELETE USING (user_id = auth.uid());
+  FOR DELETE USING (
+    document_id IN (
+      SELECT id FROM documents WHERE user_id = auth.uid()
+    )
+  );
 
 -- FEEDBACK: Drop old policies, add workspace-scoped
 DROP POLICY IF EXISTS "Enable insert for all users" ON feedback;
@@ -646,7 +664,7 @@ RETURNS TRIGGER AS $$
 BEGIN
   PERFORM log_audit_event(
     NEW.user_id, NEW.workspace_id, 'document.upload', 'document',
-    NEW.id::TEXT, jsonb_build_object('filename', NEW.filename, 'size_bytes', NEW.size_bytes)
+    NEW.id::TEXT, jsonb_build_object('filename', NEW.filename, 'file_size', NEW.file_size)
   );
   RETURN NEW;
 END;
@@ -740,11 +758,11 @@ CREATE POLICY "Admins can view all workspace documents" ON documents
 DROP POLICY IF EXISTS "Admins can view all workspace chunks" ON chunks;
 CREATE POLICY "Admins can view all workspace chunks" ON chunks
   FOR SELECT USING (
-    EXISTS (
-      SELECT 1 FROM users
-      WHERE id = auth.uid()
-        AND workspace_id = chunks.workspace_id
-        AND role IN ('admin', 'enterprise')
+    document_id IN (
+      SELECT d.id FROM documents d
+      JOIN users u ON u.workspace_id = d.workspace_id
+      WHERE u.id = auth.uid()
+        AND u.role IN ('admin', 'enterprise')
     )
   );
 

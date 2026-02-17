@@ -12,7 +12,7 @@ import { createAuthClient } from '@/lib/auth';
 interface Document {
   id: string;
   filename: string;
-  size_bytes: number;
+  file_size: number;
   upload_date: string;
   status: string;
 }
@@ -27,7 +27,7 @@ export function DocumentList({ workspaceId }: { workspaceId: string }) {
         const supabase = createAuthClient();
         const { data, error } = await supabase
           .from('documents')
-          .select('id, filename, size_bytes, upload_date, status')
+          .select('id, filename, file_size, upload_date, status')
           .eq('workspace_id', workspaceId)
           .order('upload_date', { ascending: false })
           .limit(10);
@@ -98,7 +98,7 @@ export function DocumentList({ workspaceId }: { workspaceId: string }) {
             {documents.map((doc) => (
               <tr key={doc.id} className="border-b border-gray-800 last:border-0 hover:bg-gray-800/20">
                 <td className="p-4 text-white">{doc.filename}</td>
-                <td className="p-4 text-gray-400">{formatFileSize(doc.size_bytes)}</td>
+                <td className="p-4 text-gray-400">{formatFileSize(doc.file_size)}</td>
                 <td className="p-4 text-gray-400">{formatDate(doc.upload_date)}</td>
                 <td className="p-4">
                   <span
