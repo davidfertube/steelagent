@@ -590,16 +590,7 @@ export default function Home() {
                     className="text-4xl sm:text-5xl md:text-6xl font-bold tracking-tight leading-[1.08] text-black dark:text-white"
                   >
                     The Steel Hub for{" "}<br />
-                    <span className="relative inline-block">
-                      Oil &amp; Gas Engineers
-                      <motion.span
-                        className="absolute -bottom-1.5 left-0 right-0 h-[3px] bg-green-500"
-                        initial={{ scaleX: 0 }}
-                        animate={{ scaleX: 1 }}
-                        transition={{ duration: 0.6, delay: 0.7 }}
-                        style={{ transformOrigin: "left" }}
-                      />
-                    </span>
+                    Oil &amp; Gas Engineers
                   </motion.h1>
                   <motion.p
                     initial={{ opacity: 0, y: 10 }}
