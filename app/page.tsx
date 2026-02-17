@@ -1489,128 +1489,166 @@ export default function Home() {
                 </div>
               </motion.div>
 
-              {/* Right Column: Logo + Product Dashboard Preview */}
+              {/* Right Column: Workspace Overview Dashboard */}
               <motion.div
                 initial={{ opacity: 0, x: 20 }}
                 whileInView={{ opacity: 1, x: 0 }}
                 viewport={{ once: true }}
                 transition={{ duration: 0.8, delay: 0.2 }}
-                className="flex-1 w-full hidden lg:flex items-center justify-center"
+                className="flex-1 w-full max-w-2xl hidden lg:block"
               >
-                <div className="relative w-full max-w-md">
-                  {/* Decorative background glow */}
-                  <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[120%] h-[120%] bg-green-50/40 dark:bg-green-950/20 rounded-full blur-3xl -z-10" />
-
-                  <div className="space-y-6">
-                    {/* Logo + Brand */}
-                    <motion.div
-                      initial={{ opacity: 0, scale: 0.9 }}
-                      whileInView={{ opacity: 1, scale: 1 }}
-                      viewport={{ once: true }}
-                      transition={{ duration: 0.6, delay: 0.3 }}
-                      className="flex flex-col items-center gap-3"
-                    >
-                      <Logo size={72} />
-                      <span className="text-2xl font-bold tracking-tight text-black dark:text-white">SpecVault</span>
-                    </motion.div>
-
-                    {/* Mini Dashboard Preview */}
-                    <motion.div
-                      initial={{ opacity: 0, y: 20 }}
-                      whileInView={{ opacity: 1, y: 0 }}
-                      viewport={{ once: true }}
-                      transition={{ duration: 0.6, delay: 0.5 }}
-                      className="bg-neutral-900 dark:bg-neutral-800 rounded-xl border border-neutral-700 dark:border-neutral-600 shadow-2xl shadow-black/20 overflow-hidden"
-                    >
-                      {/* Browser chrome */}
-                      <div className="flex items-center gap-2 px-4 py-2.5 bg-neutral-800 dark:bg-neutral-700 border-b border-neutral-700 dark:border-neutral-600">
-                        <div className="flex gap-1.5">
-                          <div className="w-2.5 h-2.5 rounded-full bg-red-400" />
-                          <div className="w-2.5 h-2.5 rounded-full bg-amber-400" />
-                          <div className="w-2.5 h-2.5 rounded-full bg-green-400" />
-                        </div>
-                        <span className="text-[10px] text-neutral-400 ml-2 font-medium">SpecVault Dashboard</span>
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ duration: 0.6, delay: 0.4 }}
+                  className="bg-neutral-900 dark:bg-neutral-800 rounded-2xl border border-neutral-700 dark:border-neutral-600 shadow-2xl shadow-black/30 overflow-hidden"
+                >
+                  {/* Top bar */}
+                  <div className="flex items-center justify-between px-5 py-3 bg-neutral-800 dark:bg-neutral-700 border-b border-neutral-700 dark:border-neutral-600">
+                    <div className="flex items-center gap-3">
+                      <Logo size={20} />
+                      <span className="text-xs font-semibold text-neutral-200">Workspace</span>
+                      <span className="text-[10px] text-neutral-500">/</span>
+                      <span className="text-xs text-neutral-400">Acme Engineering</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <div className="w-6 h-6 rounded-full bg-green-500/20 border border-green-500/30 flex items-center justify-center">
+                        <span className="text-[9px] font-bold text-green-400">JD</span>
                       </div>
-
-                      <div className="p-4 space-y-3">
-                        {/* Query bar */}
-                        <div className="bg-neutral-800 dark:bg-neutral-900 rounded-lg px-3 py-2 border border-neutral-700 dark:border-neutral-600 flex items-center gap-2">
-                          <div className="w-1.5 h-1.5 rounded-full bg-green-500 shrink-0" />
-                          <span className="text-[11px] text-neutral-400 font-mono truncate">Yield strength of S32205 per ASTM A790?</span>
-                        </div>
-
-                        {/* Answer preview */}
-                        <div className="space-y-2">
-                          <div className="flex items-center gap-1.5">
-                            <div className="w-1.5 h-1.5 rounded-full bg-green-500" />
-                            <span className="text-[9px] font-semibold text-green-400 uppercase tracking-wider">Verified Answer</span>
-                          </div>
-                          <p className="text-[11px] text-neutral-300 leading-relaxed">
-                            Min. yield strength: <strong className="text-green-400">65 ksi (450 MPa)</strong>
-                          </p>
-
-                          {/* Source tag */}
-                          <div className="inline-flex items-center gap-1.5 px-2 py-1 bg-green-500/10 border border-green-500/20 rounded">
-                            <FileText className="w-2.5 h-2.5 text-green-400" />
-                            <span className="text-[9px] font-medium text-green-400">ASTM A790-14, Table 1</span>
-                          </div>
-
-                          {/* Confidence bar */}
-                          <div className="space-y-1">
-                            <div className="flex items-center justify-between">
-                              <span className="text-[9px] text-neutral-500">Confidence</span>
-                              <motion.span
-                                className="text-[9px] font-bold text-green-400"
-                                animate={{ opacity: [1, 0.6, 1] }}
-                                transition={{ duration: 3, repeat: Infinity }}
-                              >94%</motion.span>
-                            </div>
-                            <div className="h-1 bg-neutral-700 rounded-full overflow-hidden">
-                              <motion.div
-                                className="h-full bg-gradient-to-r from-green-500 to-green-400 rounded-full"
-                                initial={{ width: "0%" }}
-                                whileInView={{ width: "94%" }}
-                                viewport={{ once: true }}
-                                transition={{ duration: 1.2, delay: 0.8, ease: "easeOut" }}
-                              />
-                            </div>
-                          </div>
-
-                          {/* Verification checks */}
-                          <div className="space-y-1 pt-1">
-                            {[
-                              { claim: "Yield: 65 ksi", verified: true },
-                              { claim: "Spec: A790-14", verified: true },
-                              { claim: "Grade: S32205", verified: true },
-                            ].map((item, j) => (
-                              <motion.div
-                                key={j}
-                                initial={{ opacity: 0, x: -8 }}
-                                whileInView={{ opacity: 1, x: 0 }}
-                                viewport={{ once: true }}
-                                transition={{ delay: 1 + j * 0.1 }}
-                                className="flex items-center gap-1.5"
-                              >
-                                <CheckCircle className="w-3 h-3 text-green-500" />
-                                <span className="text-[10px] text-neutral-400">{item.claim}</span>
-                                <span className="text-[9px] font-semibold text-green-400 ml-auto">Verified</span>
-                              </motion.div>
-                            ))}
-                          </div>
-                        </div>
-
-                        {/* Bottom status bar */}
-                        <div className="flex items-center justify-between pt-2 border-t border-neutral-700">
-                          <div className="flex items-center gap-1.5">
-                            <Shield className="w-3 h-3 text-green-400" />
-                            <span className="text-[9px] font-semibold text-green-400">Audit-ready</span>
-                          </div>
-                          <span className="text-[9px] text-neutral-500">3 claims verified</span>
-                        </div>
-                      </div>
-                    </motion.div>
+                    </div>
                   </div>
-                </div>
+
+                  <div className="p-5 space-y-4">
+                    {/* Stats row */}
+                    <div className="grid grid-cols-4 gap-3">
+                      {[
+                        { label: "Documents", value: "24", icon: FileText, change: "+3 this week" },
+                        { label: "Queries", value: "156", icon: Shield, change: "+18 today" },
+                        { label: "Avg. Confidence", value: "92%", icon: CheckCircle, change: "+2% vs last mo." },
+                        { label: "Team Members", value: "6", icon: Shield, change: "2 active now" },
+                      ].map((stat, i) => (
+                        <motion.div
+                          key={i}
+                          initial={{ opacity: 0, y: 10 }}
+                          whileInView={{ opacity: 1, y: 0 }}
+                          viewport={{ once: true }}
+                          transition={{ delay: 0.5 + i * 0.08 }}
+                          className="bg-neutral-800 dark:bg-neutral-900 rounded-lg p-3 border border-neutral-700/50"
+                        >
+                          <div className="flex items-center gap-1.5 mb-1">
+                            <stat.icon className="w-3 h-3 text-neutral-500" />
+                            <span className="text-[9px] text-neutral-500 uppercase tracking-wider">{stat.label}</span>
+                          </div>
+                          <p className="text-lg font-bold text-white leading-tight">{stat.value}</p>
+                          <p className="text-[9px] text-green-400 mt-0.5">{stat.change}</p>
+                        </motion.div>
+                      ))}
+                    </div>
+
+                    {/* Two-column: Recent Documents + Activity */}
+                    <div className="grid grid-cols-2 gap-3">
+                      {/* Recent Documents */}
+                      <div className="bg-neutral-800 dark:bg-neutral-900 rounded-lg border border-neutral-700/50 p-3 space-y-2">
+                        <div className="flex items-center justify-between">
+                          <span className="text-[10px] font-semibold text-neutral-400 uppercase tracking-wider">Recent Documents</span>
+                          <span className="text-[9px] text-green-400 cursor-pointer">View all</span>
+                        </div>
+                        <div className="space-y-1.5">
+                          {[
+                            { name: "ASTM A790-14", pages: 12, status: "indexed" },
+                            { name: "ASTM A789-14", pages: 10, status: "indexed" },
+                            { name: "API 5CT-2018", pages: 84, status: "indexed" },
+                            { name: "NACE MR0175", pages: 46, status: "processing" },
+                          ].map((doc, i) => (
+                            <motion.div
+                              key={i}
+                              initial={{ opacity: 0, x: -8 }}
+                              whileInView={{ opacity: 1, x: 0 }}
+                              viewport={{ once: true }}
+                              transition={{ delay: 0.7 + i * 0.08 }}
+                              className="flex items-center gap-2 py-1.5 px-2 rounded-md hover:bg-neutral-700/30 transition-colors"
+                            >
+                              <FileText className="w-3.5 h-3.5 text-neutral-500 shrink-0" />
+                              <div className="flex-1 min-w-0">
+                                <p className="text-[11px] text-neutral-200 font-medium truncate">{doc.name}</p>
+                                <p className="text-[9px] text-neutral-500">{doc.pages} pages</p>
+                              </div>
+                              {doc.status === "indexed" ? (
+                                <span className="text-[8px] px-1.5 py-0.5 rounded bg-green-500/10 text-green-400 font-medium shrink-0">Ready</span>
+                              ) : (
+                                <motion.span
+                                  className="text-[8px] px-1.5 py-0.5 rounded bg-amber-500/10 text-amber-400 font-medium shrink-0"
+                                  animate={{ opacity: [1, 0.5, 1] }}
+                                  transition={{ duration: 2, repeat: Infinity }}
+                                >Processing</motion.span>
+                              )}
+                            </motion.div>
+                          ))}
+                        </div>
+                      </div>
+
+                      {/* Recent Activity */}
+                      <div className="bg-neutral-800 dark:bg-neutral-900 rounded-lg border border-neutral-700/50 p-3 space-y-2">
+                        <div className="flex items-center justify-between">
+                          <span className="text-[10px] font-semibold text-neutral-400 uppercase tracking-wider">Recent Queries</span>
+                          <span className="text-[9px] text-green-400 cursor-pointer">View all</span>
+                        </div>
+                        <div className="space-y-1.5">
+                          {[
+                            { query: "S32205 yield strength per A790", confidence: 94, time: "2m ago" },
+                            { query: "A789 vs A790 differences for duplex", confidence: 91, time: "8m ago" },
+                            { query: "NACE MR0175 hardness limits", confidence: 88, time: "23m ago" },
+                            { query: "API 5CT L80 chemical composition", confidence: 96, time: "1h ago" },
+                          ].map((q, i) => (
+                            <motion.div
+                              key={i}
+                              initial={{ opacity: 0, x: 8 }}
+                              whileInView={{ opacity: 1, x: 0 }}
+                              viewport={{ once: true }}
+                              transition={{ delay: 0.7 + i * 0.08 }}
+                              className="py-1.5 px-2 rounded-md hover:bg-neutral-700/30 transition-colors"
+                            >
+                              <div className="flex items-start justify-between gap-2">
+                                <p className="text-[11px] text-neutral-200 leading-snug flex-1 truncate">{q.query}</p>
+                                <span className="text-[9px] text-neutral-500 shrink-0">{q.time}</span>
+                              </div>
+                              <div className="flex items-center gap-2 mt-1">
+                                <div className="flex-1 h-1 bg-neutral-700 rounded-full overflow-hidden">
+                                  <motion.div
+                                    className="h-full bg-gradient-to-r from-green-500 to-green-400 rounded-full"
+                                    initial={{ width: "0%" }}
+                                    whileInView={{ width: `${q.confidence}%` }}
+                                    viewport={{ once: true }}
+                                    transition={{ duration: 0.8, delay: 0.9 + i * 0.1, ease: "easeOut" }}
+                                  />
+                                </div>
+                                <span className="text-[9px] font-bold text-green-400">{q.confidence}%</span>
+                              </div>
+                            </motion.div>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Bottom bar */}
+                    <div className="flex items-center justify-between pt-2 border-t border-neutral-700/50">
+                      <div className="flex items-center gap-4">
+                        <div className="flex items-center gap-1.5">
+                          <motion.div
+                            className="w-1.5 h-1.5 rounded-full bg-green-500"
+                            animate={{ scale: [1, 1.3, 1], opacity: [1, 0.5, 1] }}
+                            transition={{ duration: 2, repeat: Infinity }}
+                          />
+                          <span className="text-[9px] text-neutral-400">All systems operational</span>
+                        </div>
+                        <span className="text-[9px] text-neutral-600">|</span>
+                        <span className="text-[9px] text-neutral-500">Free tier — 200M tokens/mo</span>
+                      </div>
+                      <span className="text-[9px] text-neutral-600">v1.0.0</span>
+                    </div>
+                  </div>
+                </motion.div>
               </motion.div>
             </div>
           </div>
