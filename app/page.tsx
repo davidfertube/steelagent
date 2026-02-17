@@ -545,7 +545,7 @@ export default function Home() {
                     transition={{ duration: 0.5, delay: 0.3 }}
                     className="text-base sm:text-lg text-black/60 dark:text-white/60 max-w-xl leading-relaxed"
                   >
-                    Upload your ASTM, API, and NACE specs. Ask any question in plain English. Get cited, verified answers in seconds -- not hallucinations.
+                    Upload your ASTM, API, and NACE specs. Ask any question in plain English. Get cited, verified answers in seconds.
                   </motion.p>
                 </div>
 
@@ -1511,51 +1511,14 @@ export default function Home() {
       </main>
 
       {/* Footer */}
-      <footer className="border-t border-black/5 dark:border-white/10 py-12 sm:py-16 bg-white dark:bg-neutral-950">
-        <div className="container-center">
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-8 mb-12">
-            {/* Brand */}
-            <div className="col-span-2 sm:col-span-1 space-y-3">
-              <div className="flex items-center gap-2 text-lg font-semibold text-black dark:text-white">
-                <Logo size={24} />
-                SpecVault
-              </div>
-              <p className="text-sm text-black/50 dark:text-white/50 leading-relaxed">
-                Specification intelligence for steel &amp; materials engineering.
-              </p>
-            </div>
-
-            {/* Product */}
-            <div className="space-y-3">
-              <h4 className="text-xs font-semibold tracking-widest text-black/40 dark:text-white/40 uppercase">Product</h4>
-              <ul className="space-y-2 text-sm">
-                <li><a href="#features" className="text-black/60 dark:text-white/60 hover:text-black dark:hover:text-white transition-colors">Who It&apos;s For</a></li>
-                <li><a href="#why" className="text-black/60 dark:text-white/60 hover:text-black dark:hover:text-white transition-colors">Why SpecVault</a></li>
-                <li><a href="#solutions" className="text-black/60 dark:text-white/60 hover:text-black dark:hover:text-white transition-colors">Demo</a></li>
-              </ul>
-            </div>
-
-            {/* Company */}
-            <div className="space-y-3">
-              <h4 className="text-xs font-semibold tracking-widest text-black/40 dark:text-white/40 uppercase">Company</h4>
-              <ul className="space-y-2 text-sm">
-                <li><a href="#contact" className="text-black/60 dark:text-white/60 hover:text-black dark:hover:text-white transition-colors">Contact</a></li>
-                <li><Link href="/terms" className="text-black/60 dark:text-white/60 hover:text-black dark:hover:text-white transition-colors">Terms of Service</Link></li>
-                <li><Link href="/privacy" className="text-black/60 dark:text-white/60 hover:text-black dark:hover:text-white transition-colors">Privacy Policy</Link></li>
-              </ul>
-            </div>
-          </div>
-
-          <Separator className="bg-black/5 dark:bg-white/10" />
-
-          <div className="mt-8 space-y-4">
-            <p className="text-center text-xs text-black/40 dark:text-white/40 max-w-2xl mx-auto">
-              <strong>Disclaimer:</strong> SpecVault provides AI-generated responses for reference only.
-              Always verify specifications against original source documents. Not intended for safety-critical
-              decisions without professional engineering review. Users are responsible for their own document licenses.
-            </p>
-            <p className="text-center text-xs text-black/40 dark:text-white/40">&copy; {new Date().getFullYear()} SpecVault. All rights reserved.</p>
-          </div>
+      <footer className="border-t border-black/5 dark:border-white/10 py-6 bg-white dark:bg-neutral-950">
+        <div className="container-center space-y-3">
+          <p className="text-center text-xs text-black/40 dark:text-white/40 max-w-2xl mx-auto">
+            <strong>Disclaimer:</strong> SpecVault provides AI-generated responses for reference only.
+            Always verify specifications against original source documents. Not intended for safety-critical
+            decisions without professional engineering review. Users are responsible for their own document licenses.
+          </p>
+          <p className="text-center text-xs text-black/40 dark:text-white/40">&copy; {new Date().getFullYear()} SpecVault. All rights reserved.</p>
         </div>
       </footer>
 
