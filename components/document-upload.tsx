@@ -218,7 +218,7 @@ export function DocumentUpload({ onUploadComplete }: DocumentUploadProps) {
 
   return (
     <Card className="border border-black/10 dark:border-white/10">
-      <CardContent className="p-6">
+      <CardContent className="p-3">
         {/* Show upload area only if no file or file has error */}
         {(!file || file.status === "error") && (
           <div
@@ -229,18 +229,18 @@ export function DocumentUpload({ onUploadComplete }: DocumentUploadProps) {
             onDragLeave={() => setIsDragging(false)}
             onDrop={handleDrop}
             className={`
-              border-2 border-dashed rounded-lg p-6 sm:p-8 text-center transition-colors
+              border-2 border-dashed rounded-lg p-4 text-center transition-colors
               ${isDragging ? "border-black dark:border-white bg-black/5 dark:bg-white/5" : "border-black/20 dark:border-white/20 hover:border-black/40 dark:hover:border-white/40"}
             `}
           >
-            <Upload className="w-12 h-12 sm:w-10 sm:h-10 mx-auto mb-4 text-black/40 dark:text-white/40" />
-            <p className="text-base sm:text-lg font-medium text-black dark:text-white mb-2">
+            <Upload className="w-8 h-8 mx-auto mb-2 text-black/40 dark:text-white/40" />
+            <p className="text-sm font-medium text-black dark:text-white mb-1">
               Drop your PDF here
             </p>
-            <p className="text-sm sm:text-base text-black/60 dark:text-white/60 mb-2">
+            <p className="text-xs text-black/60 dark:text-white/60 mb-1">
               or click to browse your files
             </p>
-            <p className="text-xs sm:text-sm text-black/40 dark:text-white/40 mb-4">
+            <p className="text-[11px] text-black/40 dark:text-white/40 mb-2">
               Up to 50MB • 500+ pages supported
             </p>
             <input
@@ -250,7 +250,7 @@ export function DocumentUpload({ onUploadComplete }: DocumentUploadProps) {
               className="hidden"
               id="file-upload"
             />
-            <label htmlFor="file-upload" className="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium border border-input bg-background hover:bg-accent hover:text-accent-foreground h-11 px-8 cursor-pointer touch-target">
+            <label htmlFor="file-upload" className="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium border border-input bg-background hover:bg-accent hover:text-accent-foreground h-9 px-6 cursor-pointer touch-target">
                 Select File
             </label>
           </div>

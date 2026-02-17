@@ -618,42 +618,42 @@ export default function Home() {
         </section>
 
         {/* Who This Is For - Persona Section */}
-        <section id="features" className="relative h-screen flex items-center py-4 sm:py-6 md:py-8 pb-8 sm:pb-10 md:pb-12 scroll-mt-16 border-t border-black/5 dark:border-white/10 bg-black/[0.02] dark:bg-white/[0.02]">
+        <section id="features" className="relative min-h-screen md:h-screen flex items-center py-8 md:py-4 scroll-mt-16 border-t border-black/5 dark:border-white/10 bg-black/[0.02] dark:bg-white/[0.02]">
           <div className="container-center">
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.6 }}
-              className="space-y-5"
+              className="space-y-3 md:space-y-4"
             >
-              <div className="text-center space-y-2">
+              <div className="text-center space-y-1">
                 <span className="text-xs font-semibold tracking-widest text-black/40 dark:text-white/40 uppercase">Built for your team</span>
                 <h2 className="text-3xl sm:text-4xl font-bold tracking-tight text-black dark:text-white">
                   Who Uses SpecVault
                 </h2>
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 lg:gap-5">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3 lg:gap-4">
                 {/* Materials Engineers */}
                 <motion.div
                   initial={{ opacity: 0, y: 20 }}
                   whileInView={{ opacity: 1, y: 0 }}
                   viewport={{ once: true }}
                   transition={{ duration: 0.5, delay: 0 }}
-                  className="group rounded-2xl border border-black/5 dark:border-white/10 bg-white dark:bg-neutral-900 p-4 space-y-3 hover:shadow-xl hover:border-green-200 dark:hover:border-green-800 transition-all duration-300"
+                  className="group rounded-2xl border border-black/5 dark:border-white/10 bg-white dark:bg-neutral-900 p-3 space-y-2 hover:shadow-xl hover:border-green-200 dark:hover:border-green-800 transition-all duration-300"
                 >
-                  <div className="flex items-center gap-2.5">
-                    <div className="w-8 h-8 rounded-lg bg-green-50 dark:bg-green-950/40 border border-green-200 dark:border-green-800 flex items-center justify-center">
-                      <Microscope className="w-4 h-4 text-green-600 dark:text-green-400" />
+                  <div className="flex items-center gap-2">
+                    <div className="w-7 h-7 rounded-lg bg-green-50 dark:bg-green-950/40 border border-green-200 dark:border-green-800 flex items-center justify-center shrink-0">
+                      <Microscope className="w-3.5 h-3.5 text-green-600 dark:text-green-400" />
                     </div>
                     <div>
-                      <h3 className="font-semibold text-sm text-black dark:text-white">Materials Engineers</h3>
-                      <p className="text-[11px] text-black/50 dark:text-white/50">Find mechanical properties across specs in seconds</p>
+                      <h3 className="font-semibold text-sm text-black dark:text-white leading-tight">Materials Engineers</h3>
+                      <p className="text-[11px] text-black/50 dark:text-white/50 leading-tight">Find mechanical properties across specs in seconds</p>
                     </div>
                   </div>
                   {/* Mini Dashboard: Property Lookup */}
-                  <div className="rounded-xl bg-neutral-50 dark:bg-neutral-800/50 border border-black/5 dark:border-white/5 p-3 space-y-2 overflow-hidden relative">
+                  <div className="rounded-lg bg-neutral-50 dark:bg-neutral-800/50 border border-black/5 dark:border-white/5 p-2 space-y-1 overflow-hidden relative">
                     {/* Scanning line animation */}
                     <motion.div
                       className="absolute left-0 right-0 h-px bg-gradient-to-r from-transparent via-green-500/40 to-transparent"
@@ -668,7 +668,7 @@ export default function Home() {
                       />
                       Property Lookup — S32205
                     </div>
-                    <div className="space-y-2">
+                    <div className="space-y-1">
                       {[
                         { prop: "Yield Strength", val: "65 ksi", spec: "A790", pct: 72 },
                         { prop: "Tensile Strength", val: "90 ksi", spec: "A790", pct: 100 },
@@ -681,10 +681,10 @@ export default function Home() {
                           whileInView={{ opacity: 1, x: 0 }}
                           viewport={{ once: true }}
                           transition={{ delay: 0.3 + j * 0.1 }}
-                          className="flex items-center gap-3"
+                          className="flex items-center gap-2"
                         >
-                          <span className="text-xs text-black/60 dark:text-white/60 w-24 shrink-0">{row.prop}</span>
-                          <div className="flex-1 h-5 bg-black/5 dark:bg-white/5 rounded-full overflow-hidden relative">
+                          <span className="text-[11px] text-black/60 dark:text-white/60 w-24 shrink-0">{row.prop}</span>
+                          <div className="flex-1 h-3.5 bg-black/5 dark:bg-white/5 rounded-full overflow-hidden relative">
                             <motion.div
                               className="h-full bg-gradient-to-r from-green-500 to-green-400 rounded-full"
                               initial={{ width: "0%" }}
@@ -692,7 +692,6 @@ export default function Home() {
                               viewport={{ once: true }}
                               transition={{ duration: 1, delay: 0.5 + j * 0.15, ease: "easeOut" }}
                             />
-                            {/* Shimmer effect on bars */}
                             <motion.div
                               className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent"
                               animate={{ x: ["-100%", "200%"] }}
@@ -700,11 +699,11 @@ export default function Home() {
                             />
                           </div>
                           <motion.span
-                            className="text-xs font-bold text-black dark:text-white w-16 text-right"
+                            className="text-[11px] font-bold text-black dark:text-white w-16 text-right"
                             animate={{ opacity: [1, 0.6, 1] }}
                             transition={{ duration: 3, repeat: Infinity, delay: j * 0.4 }}
                           >{row.val}</motion.span>
-                          <span className="text-[10px] text-green-600 dark:text-green-400 font-medium w-10">{row.spec}</span>
+                          <span className="text-[10px] text-green-600 dark:text-green-400 font-medium w-8">{row.spec}</span>
                         </motion.div>
                       ))}
                     </div>
@@ -717,19 +716,19 @@ export default function Home() {
                   whileInView={{ opacity: 1, y: 0 }}
                   viewport={{ once: true }}
                   transition={{ duration: 0.5, delay: 0.1 }}
-                  className="group rounded-2xl border border-black/5 dark:border-white/10 bg-white dark:bg-neutral-900 p-4 space-y-3 hover:shadow-xl hover:border-green-200 dark:hover:border-green-800 transition-all duration-300"
+                  className="group rounded-2xl border border-black/5 dark:border-white/10 bg-white dark:bg-neutral-900 p-3 space-y-2 hover:shadow-xl hover:border-green-200 dark:hover:border-green-800 transition-all duration-300"
                 >
-                  <div className="flex items-center gap-2.5">
-                    <div className="w-8 h-8 rounded-lg bg-blue-50 dark:bg-blue-950/40 border border-blue-200 dark:border-blue-800 flex items-center justify-center">
-                      <ClipboardCheck className="w-4 h-4 text-blue-600 dark:text-blue-400" />
+                  <div className="flex items-center gap-2">
+                    <div className="w-7 h-7 rounded-lg bg-blue-50 dark:bg-blue-950/40 border border-blue-200 dark:border-blue-800 flex items-center justify-center shrink-0">
+                      <ClipboardCheck className="w-3.5 h-3.5 text-blue-600 dark:text-blue-400" />
                     </div>
                     <div>
-                      <h3 className="font-semibold text-sm text-black dark:text-white">QA/QC Inspectors</h3>
-                      <p className="text-[11px] text-black/50 dark:text-white/50">Verify MTR data against specification requirements</p>
+                      <h3 className="font-semibold text-sm text-black dark:text-white leading-tight">QA/QC Inspectors</h3>
+                      <p className="text-[11px] text-black/50 dark:text-white/50 leading-tight">Verify MTR data against specification requirements</p>
                     </div>
                   </div>
                   {/* Mini Dashboard: Verification Checklist */}
-                  <div className="rounded-xl bg-neutral-50 dark:bg-neutral-800/50 border border-black/5 dark:border-white/5 p-3 space-y-2 overflow-hidden relative">
+                  <div className="rounded-lg bg-neutral-50 dark:bg-neutral-800/50 border border-black/5 dark:border-white/5 p-2 space-y-1 overflow-hidden relative">
                     {/* Scanning line */}
                     <motion.div
                       className="absolute left-0 right-0 h-px bg-gradient-to-r from-transparent via-blue-500/40 to-transparent"
@@ -744,7 +743,7 @@ export default function Home() {
                       />
                       MTR Verification — Heat #2847A
                     </div>
-                    <div className="space-y-1.5">
+                    <div className="space-y-0.5">
                       {[
                         { check: "Yield Strength ≥ 65 ksi", mtr: "71.2 ksi", pass: true },
                         { check: "Tensile Strength ≥ 90 ksi", mtr: "97.5 ksi", pass: true },
@@ -758,17 +757,17 @@ export default function Home() {
                           whileInView={{ opacity: 1, x: 0 }}
                           viewport={{ once: true }}
                           transition={{ delay: 0.3 + j * 0.12 }}
-                          className="flex items-center gap-2 py-1.5 px-2 rounded-lg hover:bg-black/[0.02] dark:hover:bg-white/[0.02]"
+                          className="flex items-center gap-1.5 py-0.5 px-1 rounded"
                         >
                           <motion.div
                             animate={{ scale: [1, 1.2, 1] }}
                             transition={{ duration: 2, repeat: Infinity, delay: j * 0.6 }}
                           >
-                            <CheckCircle className={`w-4 h-4 ${row.pass ? 'text-green-500' : 'text-red-500'}`} />
+                            <CheckCircle className={`w-3.5 h-3.5 ${row.pass ? 'text-green-500' : 'text-red-500'}`} />
                           </motion.div>
-                          <span className="text-xs text-black/70 dark:text-white/70 flex-1">{row.check}</span>
+                          <span className="text-[11px] text-black/70 dark:text-white/70 flex-1">{row.check}</span>
                           <motion.span
-                            className="text-xs font-mono font-bold text-black/80 dark:text-white/80"
+                            className="text-[11px] font-mono font-bold text-black/80 dark:text-white/80"
                             animate={{ opacity: [1, 0.5, 1] }}
                             transition={{ duration: 3, repeat: Infinity, delay: j * 0.3 }}
                           >{row.mtr}</motion.span>
@@ -780,12 +779,12 @@ export default function Home() {
                       whileInView={{ opacity: 1, y: 0 }}
                       viewport={{ once: true }}
                       transition={{ delay: 1.2 }}
-                      className="flex items-center justify-center gap-2 py-2 rounded-lg bg-green-50 dark:bg-green-950/30 border border-green-200 dark:border-green-800"
+                      className="flex items-center justify-center gap-1.5 py-1.5 rounded-lg bg-green-50 dark:bg-green-950/30 border border-green-200 dark:border-green-800"
                     >
                       <motion.div animate={{ rotate: [0, 10, -10, 0] }} transition={{ duration: 3, repeat: Infinity }}>
-                        <Shield className="w-3.5 h-3.5 text-green-600 dark:text-green-400" />
+                        <Shield className="w-3 h-3 text-green-600 dark:text-green-400" />
                       </motion.div>
-                      <span className="text-xs font-semibold text-green-700 dark:text-green-400">All 5 checks passed</span>
+                      <span className="text-[11px] font-semibold text-green-700 dark:text-green-400">All 5 checks passed</span>
                     </motion.div>
                   </div>
                 </motion.div>
@@ -1260,17 +1259,17 @@ export default function Home() {
         </section>
 
         {/* Solutions Section - Combined Upload & Query */}
-        <section id="solutions" className="relative min-h-screen flex items-center py-12 sm:py-16 md:py-20 scroll-mt-16 border-t border-black/5 dark:border-white/10">
+        <section id="solutions" className="relative min-h-screen md:h-screen flex items-center py-6 md:py-4 scroll-mt-16 border-t border-black/5 dark:border-white/10">
           <div className="container-center">
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.6 }}
-              className="space-y-12"
+              className="space-y-4"
             >
               {/* Section Header */}
-              <div className="text-center space-y-4">
+              <div className="text-center space-y-2">
                 <motion.div
                   initial={{ opacity: 0, scale: 0.9 }}
                   whileInView={{ opacity: 1, scale: 1 }}
@@ -1290,7 +1289,7 @@ export default function Home() {
                   whileInView={{ opacity: 1, y: 0 }}
                   viewport={{ once: true }}
                   transition={{ duration: 0.5, delay: 0.1 }}
-                  className="text-3xl sm:text-4xl md:text-5xl font-semibold tracking-tight text-black dark:text-white"
+                  className="text-3xl sm:text-4xl font-semibold tracking-tight text-black dark:text-white"
                 >
                   Upload & Ask
                 </motion.h2>
@@ -1299,7 +1298,7 @@ export default function Home() {
                   whileInView={{ opacity: 1, y: 0 }}
                   viewport={{ once: true }}
                   transition={{ duration: 0.5, delay: 0.2 }}
-                  className="text-lg text-black/70 dark:text-white/70 max-w-2xl mx-auto"
+                  className="text-base text-black/70 dark:text-white/70 max-w-2xl mx-auto"
                 >
                   Upload your steel specification PDF, then ask any question. Get cited answers instantly.
                 </motion.p>
@@ -1307,12 +1306,12 @@ export default function Home() {
 
               {/* Combined Card with Upload + Search */}
               <Card className="border border-black/10 dark:border-white/10 shadow-lg shadow-black/5 dark:shadow-white/5 bg-white dark:bg-neutral-900">
-                <CardContent className="p-6 sm:p-8 lg:p-10 space-y-8">
+                <CardContent className="p-4 sm:p-6 space-y-4">
                   {/* Upload Area */}
-                  <div className="space-y-4">
-                    <div className="flex items-center gap-3">
-                      <span className="flex items-center justify-center w-7 h-7 rounded-full bg-black dark:bg-white text-white dark:text-black text-sm font-medium">1</span>
-                      <h3 className="text-lg font-semibold text-black dark:text-white">Upload PDF</h3>
+                  <div className="space-y-2">
+                    <div className="flex items-center gap-2">
+                      <span className="flex items-center justify-center w-6 h-6 rounded-full bg-black dark:bg-white text-white dark:text-black text-xs font-medium">1</span>
+                      <h3 className="text-base font-semibold text-black dark:text-white">Upload PDF</h3>
                     </div>
                     <DocumentUpload onUploadComplete={handleUploadComplete} />
                   </div>
@@ -1322,16 +1321,16 @@ export default function Home() {
                   {/* Search Area - Animated when upload completes */}
                   <motion.div
                     ref={step2Ref}
-                    className={`space-y-4 p-4 -m-4 rounded-xl transition-all duration-500 ${hasDocumentUploaded ? 'bg-green-50 dark:bg-green-950/30 ring-2 ring-green-500 ring-offset-2 dark:ring-offset-neutral-900' : ''
+                    className={`space-y-3 p-3 -m-3 rounded-xl transition-all duration-500 ${hasDocumentUploaded ? 'bg-green-50 dark:bg-green-950/30 ring-2 ring-green-500 ring-offset-2 dark:ring-offset-neutral-900' : ''
                       }`}
                     animate={hasDocumentUploaded ? {
                       scale: [1, 1.03, 1],
                       transition: { duration: 0.6, ease: "easeOut" }
                     } : {}}
                   >
-                    <div className="flex items-center gap-3">
+                    <div className="flex items-center gap-2">
                       <motion.span
-                        className={`flex items-center justify-center w-8 h-8 rounded-full text-white text-sm font-bold transition-colors duration-300 ${hasDocumentUploaded ? 'bg-green-500' : 'bg-black dark:bg-white dark:text-black'
+                        className={`flex items-center justify-center w-6 h-6 rounded-full text-white text-xs font-bold transition-colors duration-300 ${hasDocumentUploaded ? 'bg-green-500' : 'bg-black dark:bg-white dark:text-black'
                           }`}
                         animate={hasDocumentUploaded ? {
                           scale: [1, 1.3, 1],
@@ -1340,7 +1339,7 @@ export default function Home() {
                       >
                         2
                       </motion.span>
-                      <h3 className={`text-lg font-semibold transition-colors duration-300 ${hasDocumentUploaded ? 'text-green-700 dark:text-green-400' : 'text-black dark:text-white'
+                      <h3 className={`text-base font-semibold transition-colors duration-300 ${hasDocumentUploaded ? 'text-green-700 dark:text-green-400' : 'text-black dark:text-white'
                         }`}>
                         {hasDocumentUploaded ? "Now Ask a Question!" : "Ask a Question"}
                       </h3>
@@ -1403,7 +1402,7 @@ export default function Home() {
                       <Separator className="bg-black/10 dark:bg-white/10" />
                       <motion.div
                         ref={step3Ref}
-                        className="space-y-4"
+                        className="space-y-3"
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ duration: 0.4 }}
