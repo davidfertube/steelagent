@@ -1451,7 +1451,7 @@ export default function Home() {
         {/* Lead Collection Section */}
         <section id="contact" className="relative min-h-screen flex items-center py-12 sm:py-16 md:py-20 scroll-mt-16 border-t border-black/5 dark:border-white/10 overflow-hidden">
           <div className="container-wide">
-            <div className="flex flex-col lg:flex-row gap-12 lg:gap-16 items-center">
+            <div className="flex flex-col lg:flex-row gap-12 lg:gap-16 items-start">
               {/* Left Column: Form & Content */}
               <motion.div
                 initial={{ opacity: 0, x: -20 }}
@@ -1497,6 +1497,29 @@ export default function Home() {
                 transition={{ duration: 0.8, delay: 0.2 }}
                 className="flex-1 w-full max-w-2xl hidden lg:block"
               >
+                <div className="text-left space-y-6 mb-8">
+                  <motion.div
+                    initial={{ opacity: 0, scale: 0.9 }}
+                    whileInView={{ opacity: 1, scale: 1 }}
+                    viewport={{ once: true }}
+                    transition={{ duration: 0.4, delay: 0.1 }}
+                    className="inline-flex items-center gap-2 px-3 py-1 border border-black/10 dark:border-white/10 rounded-full text-xs font-medium text-black/70 dark:text-white/70"
+                  >
+                    <motion.span
+                      className="w-2 h-2 bg-green-500 rounded-full"
+                      animate={{ scale: [1, 1.2, 1], opacity: [1, 0.7, 1] }}
+                      transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+                    />
+                    YOUR DASHBOARD
+                  </motion.div>
+                  <h2 className="text-4xl sm:text-5xl font-bold tracking-tight text-black dark:text-white">
+                    One Place for Everything
+                  </h2>
+                  <p className="text-lg text-black/70 dark:text-white/70 leading-relaxed">
+                    Upload specs, query instantly, and track every answer with full citations. Your entire team, one workspace.
+                  </p>
+                </div>
+
                 <motion.div
                   initial={{ opacity: 0, y: 20 }}
                   whileInView={{ opacity: 1, y: 0 }}
