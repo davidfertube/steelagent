@@ -39,7 +39,7 @@ export async function POST(request: NextRequest) {
       priceId,
       workspaceId: profile.workspace_id,
       successUrl: `${origin}/account?billing=success`,
-      cancelUrl: `${origin}/pricing?billing=cancelled`,
+      cancelUrl: `${origin}/account?billing=cancelled`,
     });
 
     return NextResponse.json({ url: session.url });

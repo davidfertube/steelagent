@@ -35,14 +35,14 @@ export default function UpgradeModal({ isOpen, onClose, variant, used, limit }: 
       title: 'Query limit reached',
       description: `You've used ${used || 10}/${limit || 10} queries this month. Upgrade to Pro for 500 queries/month.`,
       cta: 'Upgrade to Pro — $49/mo',
-      ctaHref: '/pricing',
-      secondary: 'View all plans',
+      ctaHref: '/#contact',
+      secondary: 'Contact us',
     },
     quota: {
       title: 'Quota exceeded',
-      description: `You've used all your queries for this billing period. Upgrade your plan for more capacity.`,
-      cta: 'View Plans',
-      ctaHref: '/pricing',
+      description: `You've used all your queries for this billing period. Contact us to upgrade your plan.`,
+      cta: 'Contact Us',
+      ctaHref: '/#contact',
       secondary: null,
     },
   }[variant];
@@ -78,7 +78,7 @@ export default function UpgradeModal({ isOpen, onClose, variant, used, limit }: 
 
           {content.secondary && (
             <a
-              href="/pricing"
+              href="/#contact"
               className="block mt-3 text-sm text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
             >
               {content.secondary}

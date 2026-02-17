@@ -146,7 +146,7 @@ export default function BillingSection() {
           ) : null}
           {data.plan === 'free' && (
             <a
-              href="/pricing"
+              href="/#contact"
               className="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700"
             >
               Upgrade

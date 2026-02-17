@@ -141,7 +141,7 @@ export function UsageStats({ workspaceId }: { workspaceId: string }) {
         <div className="p-4 bg-blue-500/10 border border-blue-500/50 rounded-lg text-center">
           <p className="text-white mb-2">Running low on quota?</p>
           <Link
-            href="/pricing"
+            href="/#contact"
             className="inline-block px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white rounded-lg transition-colors"
           >
             Upgrade to Pro

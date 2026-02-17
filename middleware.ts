@@ -50,7 +50,6 @@ const PUBLIC_ROUTES = [
   '/terms',
   '/api/health',
   '/api/leads', // Waitlist signup
-  '/pricing',
   '/api/webhooks/stripe', // Stripe webhook (has its own signature verification)
 ];
 
