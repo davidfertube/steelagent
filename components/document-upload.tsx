@@ -201,21 +201,6 @@ export function DocumentUpload({ onUploadComplete }: DocumentUploadProps) {
     return (bytes / (1024 * 1024)).toFixed(1) + " MB";
   };
 
-  // Estimate page count from file size (rough: ~50KB per page average for ASTM specs)
-  const estimatePageCount = (bytes: number) => {
-    return Math.max(1, Math.round(bytes / (50 * 1024)));
-  };
-
-  // Estimate processing time: ~3 seconds per page
-  // Formula: pages × 3s (includes upload, extraction, chunking, embedding)
-  const estimateProcessingTime = (bytes: number) => {
-    const pages = estimatePageCount(bytes);
-    const seconds = Math.max(10, pages * 3); // Minimum 10 seconds
-    if (seconds < 60) return `~${seconds}s`;
-    const minutes = Math.ceil(seconds / 60);
-    return `~${minutes} min`;
-  };
-
   return (
     <Card className="border border-black/10 dark:border-white/10">
       <CardContent className="p-3">
@@ -289,39 +274,20 @@ export function DocumentUpload({ onUploadComplete }: DocumentUploadProps) {
                 </button>
               </div>
               <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2 w-full sm:w-auto">
-                {file.status === "uploading" && (
+                {(file.status === "uploading" || file.status === "processing") && (
                   <div className="flex flex-col gap-2 w-full sm:w-auto sm:min-w-[200px]">
                     <div className="flex items-center gap-2">
                       <Loader2 className="w-5 h-5 animate-spin text-blue-600" />
                       <span className="text-sm sm:text-base font-medium text-blue-600">
-                        Uploading... {uploadProgress}%
+                        In progress...
                       </span>
                     </div>
                     <div className="w-full bg-gray-200 rounded-full h-2 overflow-hidden">
                       <div
                         className="bg-blue-600 h-2 rounded-full transition-all duration-300 ease-out"
-                        style={{ width: `${uploadProgress}%` }}
+                        style={{ width: file.status === "uploading" ? `${uploadProgress}%` : "100%" }}
                       />
                     </div>
-                  </div>
-                )}
-                {file.status === "processing" && (
-                  <div className="flex flex-col gap-2 w-full sm:w-auto sm:min-w-[200px]">
-                    <div className="flex items-center gap-2">
-                      <Loader2 className="w-5 h-5 animate-spin text-amber-600" />
-                      <span className="text-sm sm:text-base font-medium text-amber-600">
-                        Processing...
-                      </span>
-                    </div>
-                    <div className="w-full bg-gray-200 rounded-full h-2 overflow-hidden">
-                      <div
-                        className="bg-amber-600 h-2 rounded-full animate-pulse"
-                        style={{ width: "60%" }}
-                      />
-                    </div>
-                    <span className="text-xs text-amber-600/70">
-                      ~{estimatePageCount(file.size)} pages • {estimateProcessingTime(file.size)} estimated
-                    </span>
                   </div>
                 )}
                 {file.status === "complete" && (
