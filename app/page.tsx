@@ -13,7 +13,6 @@ import { RealtimeComparison } from "@/components/realtime-comparison";
 import { DocumentUpload } from "@/components/document-upload";
 
 import { Source, GenericLLMResponse, ConfidenceScore, AnonymousQueryInfo } from "@/lib/api";
-import { NetworkVisualization } from "@/components/network-visualization";
 import { Logo } from "@/components/ui/logo";
 import AnonymousQuotaBanner from "@/components/anonymous-quota-banner";
 
@@ -1490,7 +1489,7 @@ export default function Home() {
                 </div>
               </motion.div>
 
-              {/* Right Column: Visualization */}
+              {/* Right Column: Logo + Product Dashboard Preview */}
               <motion.div
                 initial={{ opacity: 0, x: 20 }}
                 whileInView={{ opacity: 1, x: 0 }}
@@ -1498,11 +1497,119 @@ export default function Home() {
                 transition={{ duration: 0.8, delay: 0.2 }}
                 className="flex-1 w-full hidden lg:flex items-center justify-center"
               >
-                <div className="relative">
-                  {/* Decorative background element */}
-                  <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[120%] h-[120%] bg-blue-50/50 dark:bg-blue-950/20 rounded-full blur-3xl -z-10" />
-                  {/* Processing Pipeline Animation */}
-                  <NetworkVisualization />
+                <div className="relative w-full max-w-md">
+                  {/* Decorative background glow */}
+                  <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[120%] h-[120%] bg-green-50/40 dark:bg-green-950/20 rounded-full blur-3xl -z-10" />
+
+                  <div className="space-y-6">
+                    {/* Logo + Brand */}
+                    <motion.div
+                      initial={{ opacity: 0, scale: 0.9 }}
+                      whileInView={{ opacity: 1, scale: 1 }}
+                      viewport={{ once: true }}
+                      transition={{ duration: 0.6, delay: 0.3 }}
+                      className="flex flex-col items-center gap-3"
+                    >
+                      <Logo size={72} />
+                      <span className="text-2xl font-bold tracking-tight text-black dark:text-white">SpecVault</span>
+                    </motion.div>
+
+                    {/* Mini Dashboard Preview */}
+                    <motion.div
+                      initial={{ opacity: 0, y: 20 }}
+                      whileInView={{ opacity: 1, y: 0 }}
+                      viewport={{ once: true }}
+                      transition={{ duration: 0.6, delay: 0.5 }}
+                      className="bg-neutral-900 dark:bg-neutral-800 rounded-xl border border-neutral-700 dark:border-neutral-600 shadow-2xl shadow-black/20 overflow-hidden"
+                    >
+                      {/* Browser chrome */}
+                      <div className="flex items-center gap-2 px-4 py-2.5 bg-neutral-800 dark:bg-neutral-700 border-b border-neutral-700 dark:border-neutral-600">
+                        <div className="flex gap-1.5">
+                          <div className="w-2.5 h-2.5 rounded-full bg-red-400" />
+                          <div className="w-2.5 h-2.5 rounded-full bg-amber-400" />
+                          <div className="w-2.5 h-2.5 rounded-full bg-green-400" />
+                        </div>
+                        <span className="text-[10px] text-neutral-400 ml-2 font-medium">SpecVault Dashboard</span>
+                      </div>
+
+                      <div className="p-4 space-y-3">
+                        {/* Query bar */}
+                        <div className="bg-neutral-800 dark:bg-neutral-900 rounded-lg px-3 py-2 border border-neutral-700 dark:border-neutral-600 flex items-center gap-2">
+                          <div className="w-1.5 h-1.5 rounded-full bg-green-500 shrink-0" />
+                          <span className="text-[11px] text-neutral-400 font-mono truncate">Yield strength of S32205 per ASTM A790?</span>
+                        </div>
+
+                        {/* Answer preview */}
+                        <div className="space-y-2">
+                          <div className="flex items-center gap-1.5">
+                            <div className="w-1.5 h-1.5 rounded-full bg-green-500" />
+                            <span className="text-[9px] font-semibold text-green-400 uppercase tracking-wider">Verified Answer</span>
+                          </div>
+                          <p className="text-[11px] text-neutral-300 leading-relaxed">
+                            Min. yield strength: <strong className="text-green-400">65 ksi (450 MPa)</strong>
+                          </p>
+
+                          {/* Source tag */}
+                          <div className="inline-flex items-center gap-1.5 px-2 py-1 bg-green-500/10 border border-green-500/20 rounded">
+                            <FileText className="w-2.5 h-2.5 text-green-400" />
+                            <span className="text-[9px] font-medium text-green-400">ASTM A790-14, Table 1</span>
+                          </div>
+
+                          {/* Confidence bar */}
+                          <div className="space-y-1">
+                            <div className="flex items-center justify-between">
+                              <span className="text-[9px] text-neutral-500">Confidence</span>
+                              <motion.span
+                                className="text-[9px] font-bold text-green-400"
+                                animate={{ opacity: [1, 0.6, 1] }}
+                                transition={{ duration: 3, repeat: Infinity }}
+                              >94%</motion.span>
+                            </div>
+                            <div className="h-1 bg-neutral-700 rounded-full overflow-hidden">
+                              <motion.div
+                                className="h-full bg-gradient-to-r from-green-500 to-green-400 rounded-full"
+                                initial={{ width: "0%" }}
+                                whileInView={{ width: "94%" }}
+                                viewport={{ once: true }}
+                                transition={{ duration: 1.2, delay: 0.8, ease: "easeOut" }}
+                              />
+                            </div>
+                          </div>
+
+                          {/* Verification checks */}
+                          <div className="space-y-1 pt-1">
+                            {[
+                              { claim: "Yield: 65 ksi", verified: true },
+                              { claim: "Spec: A790-14", verified: true },
+                              { claim: "Grade: S32205", verified: true },
+                            ].map((item, j) => (
+                              <motion.div
+                                key={j}
+                                initial={{ opacity: 0, x: -8 }}
+                                whileInView={{ opacity: 1, x: 0 }}
+                                viewport={{ once: true }}
+                                transition={{ delay: 1 + j * 0.1 }}
+                                className="flex items-center gap-1.5"
+                              >
+                                <CheckCircle className="w-3 h-3 text-green-500" />
+                                <span className="text-[10px] text-neutral-400">{item.claim}</span>
+                                <span className="text-[9px] font-semibold text-green-400 ml-auto">Verified</span>
+                              </motion.div>
+                            ))}
+                          </div>
+                        </div>
+
+                        {/* Bottom status bar */}
+                        <div className="flex items-center justify-between pt-2 border-t border-neutral-700">
+                          <div className="flex items-center gap-1.5">
+                            <Shield className="w-3 h-3 text-green-400" />
+                            <span className="text-[9px] font-semibold text-green-400">Audit-ready</span>
+                          </div>
+                          <span className="text-[9px] text-neutral-500">3 claims verified</span>
+                        </div>
+                      </div>
+                    </motion.div>
+                  </div>
                 </div>
               </motion.div>
             </div>
