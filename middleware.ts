@@ -23,6 +23,8 @@ function addSecurityHeaders(response: NextResponse): NextResponse {
 const ALLOWED_ORIGINS = [
   'http://localhost:3000',
   'http://localhost:3001',
+  'https://specvault.app',
+  'https://www.specvault.app',
   'https://steelagent.app',
   'https://www.steelagent.app',
   'https://steelagent.io',
@@ -32,7 +34,7 @@ const ALLOWED_ORIGINS = [
   process.env.NEXT_PUBLIC_APP_URL,
   process.env.PRODUCTION_URL,
   process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : undefined,
-].filter(Boolean) as string[];
+].filter(Boolean).map(url => url.replace(/\/+$/, '')) as string[];
 
 // API routes that require rate limiting
 const RATE_LIMITED_ROUTES = [
