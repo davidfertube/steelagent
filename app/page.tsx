@@ -400,14 +400,10 @@ export default function Home() {
             {/* Desktop Navigation */}
             <nav className="hidden md:flex items-center gap-3 lg:gap-6">
               {[
-                { label: "Features", href: "#features" },
                 { label: "Why", href: "#why" },
-                { label: "Compare", href: "#compare" },
-                { label: "Demo", href: "#demo" },
-                { label: "Pricing", href: "/pricing" },
+                { label: "Solutions", href: "#solutions" },
                 { label: "Contact", href: "#contact" },
-              ].map((item) =>
-                item.href.startsWith("#") ? (
+              ].map((item) => (
                   <a
                     key={item.label}
                     href={item.href}
@@ -416,15 +412,6 @@ export default function Home() {
                     {item.label}
                     <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-green-500 transition-all duration-300 group-hover:w-full" />
                   </a>
-                ) : (
-                  <Link
-                    key={item.label}
-                    href={item.href}
-                    className="relative text-sm text-black/60 dark:text-white/60 hover:text-black dark:hover:text-white transition-colors group"
-                  >
-                    {item.label}
-                    <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-green-500 transition-all duration-300 group-hover:w-full" />
-                  </Link>
                 )
               )}
 
@@ -480,14 +467,10 @@ export default function Home() {
           >
             <div className="flex flex-col items-center justify-center h-full gap-6">
               {[
-                { label: "Features", href: "#features" },
                 { label: "Why", href: "#why" },
-                { label: "Compare", href: "#compare" },
-                { label: "Demo", href: "#demo" },
-                { label: "Pricing", href: "/pricing" },
+                { label: "Solutions", href: "#solutions" },
                 { label: "Contact", href: "#contact" },
-              ].map((item, i) =>
-                item.href.startsWith("#") ? (
+              ].map((item, i) => (
                   <motion.a
                     key={item.label}
                     href={item.href}
@@ -499,21 +482,6 @@ export default function Home() {
                   >
                     {item.label}
                   </motion.a>
-                ) : (
-                  <motion.div
-                    key={item.label}
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: i * 0.08 }}
-                  >
-                    <Link
-                      href={item.href}
-                      className="text-3xl font-semibold text-black/80 dark:text-white/80 hover:text-black dark:hover:text-white transition-colors"
-                      onClick={() => setMobileMenuOpen(false)}
-                    >
-                      {item.label}
-                    </Link>
-                  </motion.div>
                 )
               )}
 
@@ -598,7 +566,7 @@ export default function Home() {
                     transition={{ duration: 0.5, delay: 0.3 }}
                     className="text-base sm:text-lg text-black/60 dark:text-white/60 max-w-xl leading-relaxed"
                   >
-                    Cited answers from your steel specs in seconds. Zero hallucinations.
+                    Upload your ASTM, API, and NACE specs. Ask any question in plain English. Get cited, verified answers in seconds -- not hallucinations.
                   </motion.p>
                 </div>
 
@@ -609,8 +577,8 @@ export default function Home() {
                   transition={{ duration: 0.5, delay: 0.5 }}
                   className="flex flex-wrap gap-3 sm:gap-4 justify-center lg:justify-start"
                 >
-                  <a href="#demo" className="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium bg-black dark:bg-white text-white dark:text-black hover:bg-black/90 dark:hover:bg-white/90 h-12 sm:h-14 px-6 sm:px-8 text-base sm:text-lg touch-target transition-all duration-300 hover:scale-105 hover:shadow-lg">
-                    Try Demo
+                  <a href="#solutions" className="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium bg-black dark:bg-white text-white dark:text-black hover:bg-black/90 dark:hover:bg-white/90 h-12 sm:h-14 px-6 sm:px-8 text-base sm:text-lg touch-target transition-all duration-300 hover:scale-105 hover:shadow-lg">
+                    Try It Now
                     <ArrowRight className="ml-2 h-4 w-4" />
                   </a>
                   <a href="#contact" className="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium border border-black/20 dark:border-white/20 bg-white dark:bg-transparent text-black dark:text-white hover:bg-black/5 dark:hover:bg-white/10 h-12 sm:h-14 px-5 sm:px-6 text-base sm:text-lg touch-target transition-all duration-300 hover:scale-105 hover:shadow-lg">
@@ -678,7 +646,7 @@ export default function Home() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.6 }}
-              className="space-y-10"
+              className="space-y-12"
             >
               <div className="text-center space-y-3">
                 <span className="text-xs font-semibold tracking-widest text-black/40 dark:text-white/40 uppercase">Built for your team</span>
@@ -687,46 +655,289 @@ export default function Home() {
                 </h2>
               </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-                {[
-                  {
-                    icon: Microscope,
-                    role: "Materials Engineers",
-                    description: "Find mechanical properties across specs in seconds",
-                  },
-                  {
-                    icon: ClipboardCheck,
-                    role: "QA/QC Inspectors",
-                    description: "Verify MTR data against specification requirements",
-                  },
-                  {
-                    icon: Package,
-                    role: "Procurement Teams",
-                    description: "Compare material grades across standards",
-                  },
-                  {
-                    icon: Scale,
-                    role: "Compliance Officers",
-                    description: "Generate audit-ready documentation with citations",
-                  },
-                ].map((persona, i) => (
-                  <motion.div
-                    key={i}
-                    initial={{ opacity: 0, y: 15 }}
-                    whileInView={{ opacity: 1, y: 0 }}
-                    viewport={{ once: true }}
-                    transition={{ duration: 0.4, delay: i * 0.1 }}
-                    className="group rounded-xl border border-black/5 dark:border-white/10 bg-white dark:bg-neutral-900 p-6 space-y-4 hover:shadow-lg hover:-translate-y-1 transition-all duration-300"
-                  >
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 lg:gap-8">
+                {/* Materials Engineers */}
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ duration: 0.5, delay: 0 }}
+                  className="group rounded-2xl border border-black/5 dark:border-white/10 bg-white dark:bg-neutral-900 p-6 space-y-5 hover:shadow-xl hover:border-green-200 dark:hover:border-green-800 transition-all duration-300"
+                >
+                  <div className="flex items-center gap-3">
                     <div className="w-10 h-10 rounded-lg bg-green-50 dark:bg-green-950/40 border border-green-200 dark:border-green-800 flex items-center justify-center">
-                      <persona.icon className="w-5 h-5 text-green-600 dark:text-green-400" />
+                      <Microscope className="w-5 h-5 text-green-600 dark:text-green-400" />
+                    </div>
+                    <div>
+                      <h3 className="font-semibold text-black dark:text-white">Materials Engineers</h3>
+                      <p className="text-xs text-black/50 dark:text-white/50">Find mechanical properties across specs in seconds</p>
+                    </div>
+                  </div>
+                  {/* Mini Dashboard: Property Lookup */}
+                  <div className="rounded-xl bg-neutral-50 dark:bg-neutral-800/50 border border-black/5 dark:border-white/5 p-4 space-y-3 overflow-hidden">
+                    <div className="flex items-center gap-2 text-[10px] font-semibold text-black/40 dark:text-white/40 uppercase tracking-wider">
+                      <div className="w-1.5 h-1.5 rounded-full bg-green-500" />
+                      Property Lookup — S32205
+                    </div>
+                    <div className="space-y-2">
+                      {[
+                        { prop: "Yield Strength", val: "65 ksi", spec: "A790", pct: 72 },
+                        { prop: "Tensile Strength", val: "90 ksi", spec: "A790", pct: 100 },
+                        { prop: "Elongation", val: "25%", spec: "A790", pct: 55 },
+                        { prop: "Hardness", val: "293 HBW", spec: "A790", pct: 65 },
+                      ].map((row, j) => (
+                        <motion.div
+                          key={j}
+                          initial={{ opacity: 0, x: -20 }}
+                          whileInView={{ opacity: 1, x: 0 }}
+                          viewport={{ once: true }}
+                          transition={{ delay: 0.3 + j * 0.1 }}
+                          className="flex items-center gap-3"
+                        >
+                          <span className="text-xs text-black/60 dark:text-white/60 w-24 shrink-0">{row.prop}</span>
+                          <div className="flex-1 h-5 bg-black/5 dark:bg-white/5 rounded-full overflow-hidden relative">
+                            <motion.div
+                              className="h-full bg-gradient-to-r from-green-500 to-green-400 rounded-full"
+                              initial={{ width: "0%" }}
+                              whileInView={{ width: `${row.pct}%` }}
+                              viewport={{ once: true }}
+                              transition={{ duration: 1, delay: 0.5 + j * 0.15, ease: "easeOut" }}
+                            />
+                          </div>
+                          <span className="text-xs font-bold text-black dark:text-white w-16 text-right">{row.val}</span>
+                          <span className="text-[10px] text-green-600 dark:text-green-400 font-medium w-10">{row.spec}</span>
+                        </motion.div>
+                      ))}
+                    </div>
+                  </div>
+                </motion.div>
+
+                {/* QA/QC Inspectors */}
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ duration: 0.5, delay: 0.1 }}
+                  className="group rounded-2xl border border-black/5 dark:border-white/10 bg-white dark:bg-neutral-900 p-6 space-y-5 hover:shadow-xl hover:border-green-200 dark:hover:border-green-800 transition-all duration-300"
+                >
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-lg bg-blue-50 dark:bg-blue-950/40 border border-blue-200 dark:border-blue-800 flex items-center justify-center">
+                      <ClipboardCheck className="w-5 h-5 text-blue-600 dark:text-blue-400" />
+                    </div>
+                    <div>
+                      <h3 className="font-semibold text-black dark:text-white">QA/QC Inspectors</h3>
+                      <p className="text-xs text-black/50 dark:text-white/50">Verify MTR data against specification requirements</p>
+                    </div>
+                  </div>
+                  {/* Mini Dashboard: Verification Checklist */}
+                  <div className="rounded-xl bg-neutral-50 dark:bg-neutral-800/50 border border-black/5 dark:border-white/5 p-4 space-y-3 overflow-hidden">
+                    <div className="flex items-center gap-2 text-[10px] font-semibold text-black/40 dark:text-white/40 uppercase tracking-wider">
+                      <div className="w-1.5 h-1.5 rounded-full bg-blue-500" />
+                      MTR Verification — Heat #2847A
                     </div>
                     <div className="space-y-1.5">
-                      <h3 className="font-semibold text-black dark:text-white text-sm">{persona.role}</h3>
-                      <p className="text-sm text-black/60 dark:text-white/60 leading-relaxed">{persona.description}</p>
+                      {[
+                        { check: "Yield Strength ≥ 65 ksi", mtr: "71.2 ksi", pass: true },
+                        { check: "Tensile Strength ≥ 90 ksi", mtr: "97.5 ksi", pass: true },
+                        { check: "Elongation ≥ 25%", mtr: "32%", pass: true },
+                        { check: "Hardness ≤ 293 HBW", mtr: "256 HBW", pass: true },
+                        { check: "NACE MR0175 Compliant", mtr: "Yes", pass: true },
+                      ].map((row, j) => (
+                        <motion.div
+                          key={j}
+                          initial={{ opacity: 0, x: -15 }}
+                          whileInView={{ opacity: 1, x: 0 }}
+                          viewport={{ once: true }}
+                          transition={{ delay: 0.3 + j * 0.12 }}
+                          className="flex items-center gap-2 py-1.5 px-2 rounded-lg hover:bg-black/[0.02] dark:hover:bg-white/[0.02]"
+                        >
+                          <motion.div
+                            initial={{ scale: 0 }}
+                            whileInView={{ scale: 1 }}
+                            viewport={{ once: true }}
+                            transition={{ delay: 0.6 + j * 0.15, type: "spring", stiffness: 500 }}
+                          >
+                            <CheckCircle className={`w-4 h-4 ${row.pass ? 'text-green-500' : 'text-red-500'}`} />
+                          </motion.div>
+                          <span className="text-xs text-black/70 dark:text-white/70 flex-1">{row.check}</span>
+                          <span className="text-xs font-mono font-bold text-black/80 dark:text-white/80">{row.mtr}</span>
+                        </motion.div>
+                      ))}
                     </div>
-                  </motion.div>
-                ))}
+                    <motion.div
+                      initial={{ opacity: 0, y: 5 }}
+                      whileInView={{ opacity: 1, y: 0 }}
+                      viewport={{ once: true }}
+                      transition={{ delay: 1.2 }}
+                      className="flex items-center justify-center gap-2 py-2 rounded-lg bg-green-50 dark:bg-green-950/30 border border-green-200 dark:border-green-800"
+                    >
+                      <Shield className="w-3.5 h-3.5 text-green-600 dark:text-green-400" />
+                      <span className="text-xs font-semibold text-green-700 dark:text-green-400">All 5 checks passed</span>
+                    </motion.div>
+                  </div>
+                </motion.div>
+
+                {/* Procurement Teams */}
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ duration: 0.5, delay: 0.2 }}
+                  className="group rounded-2xl border border-black/5 dark:border-white/10 bg-white dark:bg-neutral-900 p-6 space-y-5 hover:shadow-xl hover:border-green-200 dark:hover:border-green-800 transition-all duration-300"
+                >
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-lg bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-800 flex items-center justify-center">
+                      <Package className="w-5 h-5 text-amber-600 dark:text-amber-400" />
+                    </div>
+                    <div>
+                      <h3 className="font-semibold text-black dark:text-white">Procurement Teams</h3>
+                      <p className="text-xs text-black/50 dark:text-white/50">Compare material grades across standards</p>
+                    </div>
+                  </div>
+                  {/* Mini Dashboard: Grade Comparison Table */}
+                  <div className="rounded-xl bg-neutral-50 dark:bg-neutral-800/50 border border-black/5 dark:border-white/5 p-4 space-y-3 overflow-hidden">
+                    <div className="flex items-center gap-2 text-[10px] font-semibold text-black/40 dark:text-white/40 uppercase tracking-wider">
+                      <div className="w-1.5 h-1.5 rounded-full bg-amber-500" />
+                      Grade Comparison — Duplex SS
+                    </div>
+                    {/* Table header */}
+                    <div className="grid grid-cols-4 gap-2 text-[10px] font-semibold text-black/40 dark:text-white/40 uppercase pb-1 border-b border-black/5 dark:border-white/5">
+                      <span>Grade</span>
+                      <span>Yield</span>
+                      <span>Tensile</span>
+                      <span>Spec</span>
+                    </div>
+                    {/* Table rows */}
+                    {[
+                      { grade: "S32205", yield: "65 ksi", tensile: "90 ksi", spec: "A790", highlight: true },
+                      { grade: "S32205", yield: "70 ksi", tensile: "90 ksi", spec: "A789", highlight: false },
+                      { grade: "S31803", yield: "65 ksi", tensile: "90 ksi", spec: "A790", highlight: false },
+                      { grade: "S32750", yield: "80 ksi", tensile: "116 ksi", spec: "A790", highlight: false },
+                    ].map((row, j) => (
+                      <motion.div
+                        key={j}
+                        initial={{ opacity: 0, y: 10 }}
+                        whileInView={{ opacity: 1, y: 0 }}
+                        viewport={{ once: true }}
+                        transition={{ delay: 0.3 + j * 0.1 }}
+                        className={`grid grid-cols-4 gap-2 py-1.5 px-1.5 rounded-lg text-xs ${row.highlight ? 'bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800' : ''}`}
+                      >
+                        <span className="font-mono font-bold text-black/80 dark:text-white/80">{row.grade}</span>
+                        <span className="text-black/60 dark:text-white/60">{row.yield}</span>
+                        <span className="text-black/60 dark:text-white/60">{row.tensile}</span>
+                        <span className="text-amber-600 dark:text-amber-400 font-medium">{row.spec}</span>
+                      </motion.div>
+                    ))}
+                    <motion.div
+                      initial={{ opacity: 0 }}
+                      whileInView={{ opacity: 1 }}
+                      viewport={{ once: true }}
+                      transition={{ delay: 1 }}
+                      className="text-[10px] text-black/40 dark:text-white/40 text-center pt-1"
+                    >
+                      ⚠ A789 vs A790 yield differs for S32205 — 70 vs 65 ksi
+                    </motion.div>
+                  </div>
+                </motion.div>
+
+                {/* Compliance Officers */}
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ duration: 0.5, delay: 0.3 }}
+                  className="group rounded-2xl border border-black/5 dark:border-white/10 bg-white dark:bg-neutral-900 p-6 space-y-5 hover:shadow-xl hover:border-green-200 dark:hover:border-green-800 transition-all duration-300"
+                >
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-lg bg-purple-50 dark:bg-purple-950/40 border border-purple-200 dark:border-purple-800 flex items-center justify-center">
+                      <Scale className="w-5 h-5 text-purple-600 dark:text-purple-400" />
+                    </div>
+                    <div>
+                      <h3 className="font-semibold text-black dark:text-white">Compliance Officers</h3>
+                      <p className="text-xs text-black/50 dark:text-white/50">Generate audit-ready documentation with citations</p>
+                    </div>
+                  </div>
+                  {/* Mini Dashboard: Audit Pipeline */}
+                  <div className="rounded-xl bg-neutral-50 dark:bg-neutral-800/50 border border-black/5 dark:border-white/5 p-4 space-y-3 overflow-hidden">
+                    <div className="flex items-center gap-2 text-[10px] font-semibold text-black/40 dark:text-white/40 uppercase tracking-wider">
+                      <div className="w-1.5 h-1.5 rounded-full bg-purple-500" />
+                      Audit Pipeline
+                    </div>
+                    {/* Pipeline stages */}
+                    <div className="space-y-2">
+                      {[
+                        { stage: "Document Upload", status: "complete", icon: "📄" },
+                        { stage: "Spec Extraction", status: "complete", icon: "🔍" },
+                        { stage: "Claim Verification", status: "complete", icon: "✓" },
+                        { stage: "Citation Mapping", status: "active", icon: "🔗" },
+                        { stage: "Report Generation", status: "pending", icon: "📋" },
+                      ].map((step, j) => (
+                        <motion.div
+                          key={j}
+                          initial={{ opacity: 0, x: -10 }}
+                          whileInView={{ opacity: 1, x: 0 }}
+                          viewport={{ once: true }}
+                          transition={{ delay: 0.3 + j * 0.12 }}
+                          className="flex items-center gap-3"
+                        >
+                          {/* Connector line */}
+                          <div className="flex flex-col items-center w-5">
+                            <div className={`w-5 h-5 rounded-full flex items-center justify-center text-[10px] ${
+                              step.status === 'complete' ? 'bg-green-500 text-white' :
+                              step.status === 'active' ? 'bg-purple-500 text-white' :
+                              'bg-black/10 dark:bg-white/10 text-black/40 dark:text-white/40'
+                            }`}>
+                              {step.status === 'complete' ? '✓' : step.status === 'active' ? (
+                                <motion.span
+                                  animate={{ opacity: [1, 0.3, 1] }}
+                                  transition={{ duration: 1.5, repeat: Infinity }}
+                                >●</motion.span>
+                              ) : '○'}
+                            </div>
+                            {j < 4 && (
+                              <div className={`w-0.5 h-2 ${
+                                step.status === 'complete' ? 'bg-green-300 dark:bg-green-700' :
+                                'bg-black/10 dark:bg-white/10'
+                              }`} />
+                            )}
+                          </div>
+                          <span className={`text-xs flex-1 ${
+                            step.status === 'complete' ? 'text-black/70 dark:text-white/70' :
+                            step.status === 'active' ? 'text-purple-700 dark:text-purple-400 font-semibold' :
+                            'text-black/30 dark:text-white/30'
+                          }`}>{step.stage}</span>
+                          {step.status === 'active' && (
+                            <motion.span
+                              className="text-[10px] px-2 py-0.5 bg-purple-100 dark:bg-purple-900/50 text-purple-600 dark:text-purple-400 rounded-full font-medium"
+                              animate={{ opacity: [1, 0.5, 1] }}
+                              transition={{ duration: 2, repeat: Infinity }}
+                            >
+                              Processing...
+                            </motion.span>
+                          )}
+                        </motion.div>
+                      ))}
+                    </div>
+                    <motion.div
+                      initial={{ opacity: 0 }}
+                      whileInView={{ opacity: 1 }}
+                      viewport={{ once: true }}
+                      transition={{ delay: 1.2 }}
+                      className="flex items-center justify-between pt-2 border-t border-black/5 dark:border-white/5"
+                    >
+                      <span className="text-[10px] text-black/40 dark:text-white/40">3 of 5 stages complete</span>
+                      <div className="h-1.5 w-20 bg-black/5 dark:bg-white/5 rounded-full overflow-hidden">
+                        <motion.div
+                          className="h-full bg-gradient-to-r from-purple-500 to-green-500 rounded-full"
+                          initial={{ width: "0%" }}
+                          whileInView={{ width: "60%" }}
+                          viewport={{ once: true }}
+                          transition={{ duration: 1.2, delay: 0.8, ease: "easeOut" }}
+                        />
+                      </div>
+                    </motion.div>
+                  </div>
+                </motion.div>
               </div>
             </motion.div>
           </div>
@@ -933,8 +1144,8 @@ export default function Home() {
           </div>
         </section>
 
-        {/* Demo Section - Combined Upload & Query */}
-        <section id="demo" className="relative min-h-screen flex items-center py-12 sm:py-16 md:py-20 scroll-mt-16 border-t border-black/5 dark:border-white/10">
+        {/* Solutions Section - Combined Upload & Query */}
+        <section id="solutions" className="relative min-h-screen flex items-center py-12 sm:py-16 md:py-20 scroll-mt-16 border-t border-black/5 dark:border-white/10">
           <div className="container-center">
             <motion.div
               initial={{ opacity: 0, y: 20 }}
@@ -1205,11 +1416,8 @@ export default function Home() {
             <div className="space-y-3">
               <h4 className="text-xs font-semibold tracking-widest text-black/40 dark:text-white/40 uppercase">Product</h4>
               <ul className="space-y-2 text-sm">
-                <li><a href="#features" className="text-black/60 dark:text-white/60 hover:text-black dark:hover:text-white transition-colors">Features</a></li>
                 <li><a href="#why" className="text-black/60 dark:text-white/60 hover:text-black dark:hover:text-white transition-colors">Why SpecVault</a></li>
-                <li><a href="#compare" className="text-black/60 dark:text-white/60 hover:text-black dark:hover:text-white transition-colors">Compare</a></li>
-                <li><a href="#demo" className="text-black/60 dark:text-white/60 hover:text-black dark:hover:text-white transition-colors">Demo</a></li>
-                <li><Link href="/pricing" className="text-black/60 dark:text-white/60 hover:text-black dark:hover:text-white transition-colors">Pricing</Link></li>
+                <li><a href="#solutions" className="text-black/60 dark:text-white/60 hover:text-black dark:hover:text-white transition-colors">Solutions</a></li>
               </ul>
             </div>
 
