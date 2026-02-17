@@ -225,9 +225,9 @@ export function isUpstashConfigured(): boolean {
 // Anonymous Trial Quota (3 queries per IP per 30 days)
 // ============================================
 
-const ANONYMOUS_QUERY_LIMIT = 3;
+const ANONYMOUS_QUERY_LIMIT = 100;
 const ANONYMOUS_QUERY_WINDOW_MS = 30 * 24 * 60 * 60 * 1000; // 30 days
-export const ANONYMOUS_DOC_LIMIT = 1;
+export const ANONYMOUS_DOC_LIMIT = 100;
 
 export interface AnonymousQuotaResult {
   allowed: boolean;

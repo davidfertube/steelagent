@@ -24,6 +24,7 @@ interface RealtimeComparisonProps {
   isLoading: boolean;
   error: string | null;
   confidence?: ConfidenceScore | null;
+  documentId?: number | null;
   onRetry?: () => void;
 }
 
@@ -127,6 +128,7 @@ export function RealtimeComparison({
   isLoading,
   error,
   confidence,
+  documentId,
   onRetry,
 }: RealtimeComparisonProps) {
   const steelAgent = useTypewriter(steelAgentResponse || "", 12);
@@ -336,6 +338,7 @@ export function RealtimeComparison({
                           response={steelAgentResponse}
                           sources={steelAgentSources}
                           confidence={confidence}
+                          documentId={documentId}
                         />
                       </motion.div>
                     )}

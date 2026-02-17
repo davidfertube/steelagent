@@ -20,9 +20,10 @@ interface ResponseFeedbackProps {
   response: string;
   sources: Source[];
   confidence?: ConfidenceScore | null;
+  documentId?: number | null;
 }
 
-export function ResponseFeedback({ query, response, sources, confidence }: ResponseFeedbackProps) {
+export function ResponseFeedback({ query, response, sources, confidence, documentId }: ResponseFeedbackProps) {
   const [rating, setRating] = useState<"correct" | "incorrect" | "partial" | null>(null);
   const [issueType, setIssueType] = useState<string | null>(null);
   const [comment, setComment] = useState("");
@@ -61,6 +62,7 @@ export function ResponseFeedback({ query, response, sources, confidence }: Respo
           rating: feedbackRating,
           issue_type: feedbackIssueType,
           comment: feedbackComment || null,
+          document_id: documentId || null,
         }),
       });
 

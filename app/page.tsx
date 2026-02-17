@@ -1346,29 +1346,7 @@ export default function Home() {
                         Click a quick prompt below or type your own question
                       </motion.p>
                     )}
-                    {anonymousInfo && (
-                      <div className="mb-4">
-                        <AnonymousQuotaBanner
-                          used={anonymousInfo.used}
-                          remaining={anonymousInfo.remaining}
-                          limit={anonymousInfo.limit}
-                        />
-                      </div>
-                    )}
-                    {anonymousInfo && anonymousInfo.remaining <= 0 ? (
-                      <div className="text-center py-6 space-y-4">
-                        <p className="text-black/70 dark:text-white/70">
-                          Sign up for a free account to continue querying your documents.
-                        </p>
-                        <a
-                          href="/auth/signup"
-                          className="inline-flex items-center justify-center px-6 py-3 bg-black dark:bg-white text-white dark:text-black font-semibold rounded-lg hover:opacity-90 transition-opacity"
-                        >
-                          Sign Up Free
-                        </a>
-                      </div>
-                    ) : (
-                      <SearchForm
+                    <SearchForm
                         onResult={handleResult}
                         onError={handleError}
                         onLoadingChange={handleLoadingChange}
@@ -1377,7 +1355,6 @@ export default function Home() {
                         onAnonymousInfo={setAnonymousInfo}
                         documentId={uploadedDocumentId}
                       />
-                    )}
                   </motion.div>
 
                   {/* Response Display */}
@@ -1423,6 +1400,7 @@ export default function Home() {
                           isLoading={isLoading}
                           error={error}
                           confidence={confidence}
+                          documentId={uploadedDocumentId}
                           onRetry={() => setError(null)}
                         />
                       </motion.div>

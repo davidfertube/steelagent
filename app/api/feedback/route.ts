@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { timingSafeEqual } from "crypto";
 import { supabase } from "@/lib/supabase";
+import { createServiceAuthClient } from "@/lib/auth";
 
 const MAX_QUERY_LENGTH = 2000;
 const MAX_RESPONSE_LENGTH = 10000;
@@ -23,7 +24,7 @@ const VALID_ISSUE_TYPES = [
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { query, response, sources, confidence, rating, issue_type, comment, flagged_by } = body;
+    const { query, response, sources, confidence, rating, issue_type, comment, flagged_by, document_id } = body;
 
     // Validate required fields
     if (!query || typeof query !== "string") {
@@ -53,7 +54,9 @@ export async function POST(request: NextRequest) {
     const sanitizedComment = comment ? String(comment).slice(0, MAX_COMMENT_LENGTH) : null;
     const sanitizedName = flagged_by ? String(flagged_by).slice(0, MAX_NAME_LENGTH) : null;
 
-    const { error } = await supabase.from("feedback").insert([
+    // Use service client to bypass RLS (anonymous users can't insert via anon client)
+    const db = createServiceAuthClient();
+    const { error } = await db.from("feedback").insert([
       {
         query: sanitizedQuery,
         response: sanitizedResponse,
@@ -63,6 +66,7 @@ export async function POST(request: NextRequest) {
         issue_type: issue_type || null,
         comment: sanitizedComment,
         flagged_by: sanitizedName,
+        document_id: document_id ? Number(document_id) : null,
       },
     ]);
 
