@@ -400,7 +400,8 @@ export default function Home() {
             {/* Desktop Navigation */}
             <nav className="hidden md:flex items-center gap-3 lg:gap-6">
               {[
-                { label: "Why", href: "#why" },
+                { label: "Who", href: "#features" },
+                { label: "What", href: "#why" },
                 { label: "Demo", href: "#solutions" },
                 { label: "Contact", href: "#contact" },
               ].map((item) => (
@@ -459,7 +460,8 @@ export default function Home() {
           >
             <div className="flex flex-col items-center justify-center h-full gap-6">
               {[
-                { label: "Why", href: "#why" },
+                { label: "Who", href: "#features" },
+                { label: "What", href: "#why" },
                 { label: "Demo", href: "#solutions" },
                 { label: "Contact", href: "#contact" },
               ].map((item, i) => (
@@ -984,7 +986,7 @@ export default function Home() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.6 }}
-              className="space-y-16"
+              className="space-y-12"
             >
               {/* Section Header */}
               <div className="text-center space-y-6">
@@ -1004,107 +1006,253 @@ export default function Home() {
                   transition={{ duration: 0.5, delay: 0.2 }}
                   className="text-xl text-black/60 dark:text-white/60 max-w-3xl mx-auto leading-relaxed"
                 >
-                  Generic LLMs (ChatGPT, Claude, Gemini) hallucinate specs. <br className="hidden sm:block" />
-                  SpecVault only answers from <span className="text-black dark:text-white font-semibold">your documents</span>.
+                  Same question, two very different answers. <br className="hidden sm:block" />
+                  See what <span className="text-black dark:text-white font-semibold">your documents</span> make possible.
                 </motion.p>
               </div>
 
-              {/* Comparison Grid */}
-              <div className="grid md:grid-cols-2 gap-8 max-w-5xl mx-auto px-4">
-                {/* SpecVault Card */}
+              {/* Shared Query Bar */}
+              <motion.div
+                initial={{ opacity: 0, y: 10 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.5, delay: 0.25 }}
+                className="max-w-3xl mx-auto"
+              >
+                <div className="bg-neutral-900 dark:bg-neutral-800 rounded-xl px-5 py-3.5 border border-neutral-700 dark:border-neutral-600 flex items-center gap-3">
+                  <div className="w-2 h-2 rounded-full bg-green-500 shrink-0" />
+                  <p className="text-sm text-neutral-300 font-mono">
+                    What is the yield strength of S32205 per ASTM A790?
+                  </p>
+                </div>
+              </motion.div>
+
+              {/* Comparison Dashboard Grid */}
+              <div className="grid md:grid-cols-2 gap-6 lg:gap-8 max-w-5xl mx-auto">
+                {/* SpecVault Dashboard */}
                 <motion.div
                   initial={{ opacity: 0, x: -20 }}
                   whileInView={{ opacity: 1, x: 0 }}
                   viewport={{ once: true }}
                   transition={{ duration: 0.5, delay: 0.3 }}
-                  className="rounded-2xl border border-green-200 dark:border-green-800 bg-green-50/50 dark:bg-green-950/30 p-8 space-y-8 hover:shadow-lg transition-shadow duration-300"
+                  className="group rounded-2xl border border-green-200 dark:border-green-800 bg-white dark:bg-neutral-900 p-6 space-y-5 hover:shadow-xl hover:border-green-300 dark:hover:border-green-700 transition-all duration-300"
                 >
-                  <div className="flex flex-col items-center text-center gap-4">
-                    <div className="w-16 h-16 rounded-full bg-green-500 flex items-center justify-center shadow-lg shadow-green-500/20">
-                      <svg className="w-8 h-8 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" />
-                      </svg>
+                  {/* Header */}
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-lg bg-green-50 dark:bg-green-950/40 border border-green-200 dark:border-green-800 flex items-center justify-center">
+                      <Shield className="w-5 h-5 text-green-600 dark:text-green-400" />
                     </div>
                     <div>
-                      <h3 className="text-2xl font-bold text-green-700 dark:text-green-400">SpecVault</h3>
-                      <p className="text-sm text-green-600/80 dark:text-green-400/80 font-medium mt-1">Trustworthy & Traceable</p>
+                      <h3 className="font-semibold text-green-700 dark:text-green-400">SpecVault</h3>
+                      <p className="text-xs text-green-600/70 dark:text-green-400/70">Trustworthy &amp; Traceable</p>
                     </div>
                   </div>
-                  <ul className="space-y-4">
-                    {[
-                      "Every answer traceable to page & document",
-                      "Audit-ready for ISO/API/ASTM compliance",
-                      "Quotes exact values from YOUR specs",
-                      "Current as your latest upload",
-                      "Searches YOUR documents only",
-                      "Liability-safe with traceable sources",
-                    ].map((item, i) => (
-                      <motion.li
-                        key={i}
-                        initial={{ opacity: 0, x: -10 }}
-                        whileInView={{ opacity: 1, x: 0 }}
-                        viewport={{ once: true }}
-                        transition={{ delay: 0.4 + i * 0.05 }}
-                        className="flex items-start gap-3"
-                      >
-                        <div className="mt-1 flex-shrink-0 w-5 h-5 rounded-full bg-green-200 dark:bg-green-800 flex items-center justify-center">
-                          <svg className="w-3.5 h-3.5 text-green-700 dark:text-green-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
-                          </svg>
-                        </div>
-                        <span className="text-base text-black/80 dark:text-white/80 font-medium">{item}</span>
-                      </motion.li>
-                    ))}
-                  </ul>
+
+                  {/* Response Panel */}
+                  <div className="rounded-xl bg-green-50/50 dark:bg-green-950/20 border border-green-100 dark:border-green-800/50 p-4 space-y-3 overflow-hidden relative">
+                    <motion.div
+                      className="absolute left-0 right-0 h-px bg-gradient-to-r from-transparent via-green-500/30 to-transparent"
+                      animate={{ top: ["0%", "100%", "0%"] }}
+                      transition={{ duration: 5, repeat: Infinity, ease: "linear" }}
+                    />
+                    <div className="flex items-center gap-2 text-[10px] font-semibold text-green-600/60 dark:text-green-400/60 uppercase tracking-wider">
+                      <motion.div
+                        className="w-1.5 h-1.5 rounded-full bg-green-500"
+                        animate={{ scale: [1, 1.5, 1], opacity: [1, 0.5, 1] }}
+                        transition={{ duration: 2, repeat: Infinity }}
+                      />
+                      Response
+                    </div>
+                    <p className="text-sm text-black/90 dark:text-white/90 leading-relaxed">
+                      The minimum yield strength for S32205 duplex stainless steel per ASTM A790 is <strong className="text-green-700 dark:text-green-400">65 ksi (450 MPa)</strong>.
+                    </p>
+                  </div>
+
+                  {/* Source Citation */}
+                  <div className="rounded-xl bg-neutral-50 dark:bg-neutral-800/50 border border-black/5 dark:border-white/5 p-4 space-y-3 overflow-hidden relative">
+                    <div className="flex items-center gap-2 text-[10px] font-semibold text-black/40 dark:text-white/40 uppercase tracking-wider">
+                      <motion.div
+                        className="w-1.5 h-1.5 rounded-full bg-green-500"
+                        animate={{ scale: [1, 1.5, 1], opacity: [1, 0.5, 1] }}
+                        transition={{ duration: 2, repeat: Infinity, delay: 0.5 }}
+                      />
+                      Source &amp; Verification
+                    </div>
+                    <motion.div
+                      initial={{ opacity: 0, y: 5 }}
+                      whileInView={{ opacity: 1, y: 0 }}
+                      viewport={{ once: true }}
+                      transition={{ delay: 0.5 }}
+                      className="flex items-center gap-2 px-3 py-2 bg-green-50 dark:bg-green-950/30 border border-green-200 dark:border-green-800 rounded-lg"
+                    >
+                      <FileText className="w-3.5 h-3.5 text-green-600 dark:text-green-400 shrink-0" />
+                      <span className="text-xs font-medium text-green-700 dark:text-green-400">ASTM A790-14, Table 1, Page 3</span>
+                    </motion.div>
+
+                    {/* Confidence Bar */}
+                    <div className="space-y-1.5">
+                      <div className="flex items-center justify-between">
+                        <span className="text-[10px] text-black/40 dark:text-white/40 uppercase tracking-wider font-semibold">Confidence</span>
+                        <motion.span
+                          className="text-xs font-bold text-green-600 dark:text-green-400"
+                          animate={{ opacity: [1, 0.6, 1] }}
+                          transition={{ duration: 3, repeat: Infinity }}
+                        >94%</motion.span>
+                      </div>
+                      <div className="h-2 bg-black/5 dark:bg-white/5 rounded-full overflow-hidden">
+                        <motion.div
+                          className="h-full bg-gradient-to-r from-green-500 to-green-400 rounded-full"
+                          initial={{ width: "0%" }}
+                          whileInView={{ width: "94%" }}
+                          viewport={{ once: true }}
+                          transition={{ duration: 1.2, delay: 0.6, ease: "easeOut" }}
+                        />
+                      </div>
+                    </div>
+
+                    {/* Claim Verification */}
+                    <div className="space-y-1.5 pt-1">
+                      {[
+                        { claim: "Yield: 65 ksi", status: "Verified" },
+                        { claim: "Tensile: 90 ksi", status: "Verified" },
+                        { claim: "Spec: A790", status: "Verified" },
+                      ].map((item, j) => (
+                        <motion.div
+                          key={j}
+                          initial={{ opacity: 0, x: -10 }}
+                          whileInView={{ opacity: 1, x: 0 }}
+                          viewport={{ once: true }}
+                          transition={{ delay: 0.7 + j * 0.1 }}
+                          className="flex items-center gap-2"
+                        >
+                          <motion.div
+                            animate={{ scale: [1, 1.15, 1] }}
+                            transition={{ duration: 2.5, repeat: Infinity, delay: j * 0.4 }}
+                          >
+                            <CheckCircle className="w-3.5 h-3.5 text-green-500" />
+                          </motion.div>
+                          <span className="text-[11px] text-black/60 dark:text-white/60 flex-1">{item.claim}</span>
+                          <span className="text-[10px] font-semibold text-green-600 dark:text-green-400">{item.status}</span>
+                        </motion.div>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Audit Trail */}
+                  <motion.div
+                    initial={{ opacity: 0, y: 5 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true }}
+                    transition={{ delay: 1.1 }}
+                    className="flex items-center justify-between px-3 py-2.5 rounded-lg bg-green-50 dark:bg-green-950/30 border border-green-200 dark:border-green-800"
+                  >
+                    <div className="flex items-center gap-2">
+                      <motion.div animate={{ rotate: [0, 10, -10, 0] }} transition={{ duration: 3, repeat: Infinity }}>
+                        <Shield className="w-3.5 h-3.5 text-green-600 dark:text-green-400" />
+                      </motion.div>
+                      <span className="text-xs font-semibold text-green-700 dark:text-green-400">Audit-ready</span>
+                    </div>
+                    <span className="text-[10px] text-green-600/60 dark:text-green-400/60">3 claims verified against source</span>
+                  </motion.div>
                 </motion.div>
 
-                {/* Generic LLM Card */}
+                {/* Generic LLM Dashboard */}
                 <motion.div
                   initial={{ opacity: 0, x: 20 }}
                   whileInView={{ opacity: 1, x: 0 }}
                   viewport={{ once: true }}
                   transition={{ duration: 0.5, delay: 0.4 }}
-                  className="rounded-2xl border border-red-200 dark:border-red-800 bg-red-50/30 dark:bg-red-950/30 p-8 space-y-8 hover:shadow-lg transition-shadow duration-300"
+                  className="group rounded-2xl border border-red-200 dark:border-red-800 bg-white dark:bg-neutral-900 p-6 space-y-5 hover:shadow-xl hover:border-red-300 dark:hover:border-red-700 transition-all duration-300"
                 >
-                  <div className="flex flex-col items-center text-center gap-4">
-                    <div className="w-16 h-16 rounded-full bg-red-400 flex items-center justify-center shadow-lg shadow-red-400/20">
-                      <svg className="w-8 h-8 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M6 18L18 6M6 6l12 12" />
+                  {/* Header */}
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-lg bg-red-50 dark:bg-red-950/40 border border-red-200 dark:border-red-800 flex items-center justify-center">
+                      <svg className="w-5 h-5 text-red-500 dark:text-red-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
                       </svg>
                     </div>
                     <div>
-                      <h3 className="text-2xl font-bold text-red-600 dark:text-red-400">Generic LLM</h3>
-                      <div className="mt-2 inline-block px-3 py-1 bg-red-100 dark:bg-red-900/50 text-red-600 dark:text-red-400 text-xs font-semibold rounded-full">
-                        ChatGPT / Claude / Gemini
-                      </div>
+                      <h3 className="font-semibold text-red-600 dark:text-red-400">Generic LLM</h3>
+                      <p className="text-xs text-red-500/70 dark:text-red-400/70">ChatGPT / Claude / Gemini</p>
                     </div>
                   </div>
-                  <ul className="space-y-4">
-                    {[
-                      "No source citations",
-                      "Not acceptable for audits",
-                      "May hallucinate numbers",
-                      "Training cutoff: months old",
-                      "Generic internet knowledge",
-                      "No accountability for errors",
-                    ].map((item, i) => (
-                      <motion.li
-                        key={i}
-                        initial={{ opacity: 0, x: 10 }}
-                        whileInView={{ opacity: 1, x: 0 }}
-                        viewport={{ once: true }}
-                        transition={{ delay: 0.5 + i * 0.05 }}
-                        className="flex items-start gap-3"
-                      >
-                        <div className="mt-1 flex-shrink-0 w-5 h-5 rounded-full bg-red-100 dark:bg-red-900/50 flex items-center justify-center">
-                          <svg className="w-3.5 h-3.5 text-red-500 dark:text-red-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M6 18L18 6M6 6l12 12" />
+
+                  {/* Response Panel */}
+                  <div className="rounded-xl bg-red-50/30 dark:bg-red-950/10 border border-red-100 dark:border-red-800/50 p-4 space-y-3 overflow-hidden relative">
+                    <div className="flex items-center gap-2 text-[10px] font-semibold text-red-500/60 dark:text-red-400/60 uppercase tracking-wider">
+                      <div className="w-1.5 h-1.5 rounded-full bg-red-400" />
+                      Response
+                    </div>
+                    <p className="text-sm text-black/60 dark:text-white/60 leading-relaxed italic">
+                      S32205 duplex stainless steel typically has a yield strength of <span className="bg-red-100 dark:bg-red-900/50 text-red-600 dark:text-red-400 px-1 rounded font-medium not-italic">around 60-80 ksi</span>, depending on the heat treatment and product form...
+                    </p>
+                  </div>
+
+                  {/* No Source */}
+                  <div className="rounded-xl bg-neutral-50 dark:bg-neutral-800/50 border border-black/5 dark:border-white/5 p-4 space-y-3 overflow-hidden relative">
+                    <div className="flex items-center gap-2 text-[10px] font-semibold text-black/40 dark:text-white/40 uppercase tracking-wider">
+                      <div className="w-1.5 h-1.5 rounded-full bg-red-400" />
+                      Source &amp; Verification
+                    </div>
+                    <motion.div
+                      initial={{ opacity: 0, y: 5 }}
+                      whileInView={{ opacity: 1, y: 0 }}
+                      viewport={{ once: true }}
+                      transition={{ delay: 0.5 }}
+                      className="flex items-center gap-2 px-3 py-2 bg-red-50 dark:bg-red-950/30 border border-red-200 dark:border-red-800 rounded-lg"
+                    >
+                      <svg className="w-3.5 h-3.5 text-red-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                      </svg>
+                      <span className="text-xs font-medium text-red-500 dark:text-red-400">No source document available</span>
+                    </motion.div>
+
+                    {/* No Confidence */}
+                    <div className="space-y-1.5">
+                      <div className="flex items-center justify-between">
+                        <span className="text-[10px] text-black/40 dark:text-white/40 uppercase tracking-wider font-semibold">Confidence</span>
+                        <span className="text-xs font-bold text-black/20 dark:text-white/20">N/A</span>
+                      </div>
+                      <div className="h-2 bg-black/5 dark:bg-white/5 rounded-full overflow-hidden">
+                        <div className="h-full bg-black/5 dark:bg-white/5 rounded-full" />
+                      </div>
+                    </div>
+
+                    {/* Failed Verification */}
+                    <div className="space-y-1.5 pt-1">
+                      {[
+                        { claim: "Yield: ~60-80 ksi", status: "Unverified" },
+                        { claim: "Source: none", status: "Missing" },
+                        { claim: "Spec version", status: "Unknown" },
+                      ].map((item, j) => (
+                        <motion.div
+                          key={j}
+                          initial={{ opacity: 0, x: 10 }}
+                          whileInView={{ opacity: 1, x: 0 }}
+                          viewport={{ once: true }}
+                          transition={{ delay: 0.7 + j * 0.1 }}
+                          className="flex items-center gap-2"
+                        >
+                          <svg className="w-3.5 h-3.5 text-red-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                           </svg>
-                        </div>
-                        <span className="text-base text-black/60 dark:text-white/60">{item}</span>
-                      </motion.li>
-                    ))}
-                  </ul>
+                          <span className="text-[11px] text-black/40 dark:text-white/40 flex-1">{item.claim}</span>
+                          <span className="text-[10px] font-semibold text-red-500 dark:text-red-400">{item.status}</span>
+                        </motion.div>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Warning Footer */}
+                  <div className="flex items-center justify-between px-3 py-2.5 rounded-lg bg-red-50 dark:bg-red-950/30 border border-red-200 dark:border-red-800">
+                    <div className="flex items-center gap-2">
+                      <svg className="w-3.5 h-3.5 text-red-500 dark:text-red-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                      </svg>
+                      <span className="text-xs font-semibold text-red-600 dark:text-red-400">Not audit-ready</span>
+                    </div>
+                    <span className="text-[10px] text-red-500/60 dark:text-red-400/60">Training cutoff: months old</span>
+                  </div>
                 </motion.div>
               </div>
             </motion.div>
@@ -1433,7 +1581,7 @@ export default function Home() {
       {/* Footer */}
       <footer className="border-t border-black/5 dark:border-white/10 py-12 sm:py-16 bg-white dark:bg-neutral-950">
         <div className="container-center">
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-8 mb-12">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-8 mb-12">
             {/* Brand */}
             <div className="col-span-2 sm:col-span-1 space-y-3">
               <div className="flex items-center gap-2 text-lg font-semibold text-black dark:text-white">
@@ -1449,7 +1597,8 @@ export default function Home() {
             <div className="space-y-3">
               <h4 className="text-xs font-semibold tracking-widest text-black/40 dark:text-white/40 uppercase">Product</h4>
               <ul className="space-y-2 text-sm">
-                <li><a href="#why" className="text-black/60 dark:text-white/60 hover:text-black dark:hover:text-white transition-colors">Why SpecVault</a></li>
+                <li><a href="#features" className="text-black/60 dark:text-white/60 hover:text-black dark:hover:text-white transition-colors">Who It&apos;s For</a></li>
+                <li><a href="#why" className="text-black/60 dark:text-white/60 hover:text-black dark:hover:text-white transition-colors">What It Does</a></li>
                 <li><a href="#solutions" className="text-black/60 dark:text-white/60 hover:text-black dark:hover:text-white transition-colors">Demo</a></li>
               </ul>
             </div>
@@ -1461,15 +1610,6 @@ export default function Home() {
                 <li><a href="#contact" className="text-black/60 dark:text-white/60 hover:text-black dark:hover:text-white transition-colors">Contact</a></li>
                 <li><Link href="/terms" className="text-black/60 dark:text-white/60 hover:text-black dark:hover:text-white transition-colors">Terms of Service</Link></li>
                 <li><Link href="/privacy" className="text-black/60 dark:text-white/60 hover:text-black dark:hover:text-white transition-colors">Privacy Policy</Link></li>
-              </ul>
-            </div>
-
-            {/* Resources */}
-            <div className="space-y-3">
-              <h4 className="text-xs font-semibold tracking-widest text-black/40 dark:text-white/40 uppercase">Resources</h4>
-              <ul className="space-y-2 text-sm">
-                <li><a href="#features" className="text-black/60 dark:text-white/60 hover:text-black dark:hover:text-white transition-colors">Use Cases</a></li>
-                <li><a href="#contact" className="text-black/60 dark:text-white/60 hover:text-black dark:hover:text-white transition-colors">Get Access</a></li>
               </ul>
             </div>
           </div>
