@@ -598,7 +598,7 @@ export default function Home() {
                     transition={{ duration: 0.5, delay: 0.3 }}
                     className="text-base sm:text-lg text-black/60 dark:text-white/60 max-w-xl leading-relaxed"
                   >
-                    Search across ASTM, API, and NACE standards with natural language. Every answer includes source citations, confidence scoring, and numerical verification against the original document.
+                    Cited answers from your steel specs in seconds. Zero hallucinations.
                   </motion.p>
                 </div>
 
@@ -671,7 +671,7 @@ export default function Home() {
         </section>
 
         {/* Who This Is For - Persona Section */}
-        <section id="features" className="relative py-12 sm:py-16 md:py-20 border-t border-black/5 dark:border-white/10 bg-black/[0.02] dark:bg-white/[0.02]">
+        <section id="features" className="relative min-h-screen flex items-center py-12 sm:py-16 md:py-20 scroll-mt-16 border-t border-black/5 dark:border-white/10 bg-black/[0.02] dark:bg-white/[0.02]">
           <div className="container-center">
             <motion.div
               initial={{ opacity: 0, y: 20 }}
@@ -733,7 +733,7 @@ export default function Home() {
         </section>
 
         {/* Why SpecVault vs Generic LLMs Section */}
-        <section id="why" className="relative min-h-screen flex items-center py-12 sm:py-16 md:py-20 border-t border-black/5 dark:border-white/10 bg-black/[0.02] dark:bg-white/[0.02]">
+        <section id="why" className="relative min-h-screen flex items-center py-12 sm:py-16 md:py-20 scroll-mt-16 border-t border-black/5 dark:border-white/10 bg-black/[0.02] dark:bg-white/[0.02]">
           <div className="container-center">
             <motion.div
               initial={{ opacity: 0, y: 20 }}
@@ -868,7 +868,7 @@ export default function Home() {
         </section>
 
         {/* Live Comparison Section */}
-        <section id="compare" className="relative py-12 sm:py-16 md:py-20 bg-black/[0.02] dark:bg-white/[0.02]">
+        <section id="compare" className="relative min-h-screen flex items-center py-12 sm:py-16 md:py-20 scroll-mt-16 bg-black/[0.02] dark:bg-white/[0.02]">
           <div className="container-center">
             <motion.div
               initial={{ opacity: 0, y: 20 }}
@@ -934,7 +934,7 @@ export default function Home() {
         </section>
 
         {/* Demo Section - Combined Upload & Query */}
-        <section id="demo" className="relative py-12 sm:py-16 md:py-20 border-t border-black/5 dark:border-white/10">
+        <section id="demo" className="relative min-h-screen flex items-center py-12 sm:py-16 md:py-20 scroll-mt-16 border-t border-black/5 dark:border-white/10">
           <div className="container-center">
             <motion.div
               initial={{ opacity: 0, y: 20 }}
@@ -1126,7 +1126,7 @@ export default function Home() {
         </section>
 
         {/* Lead Collection Section */}
-        <section id="contact" className="relative py-12 sm:py-16 md:py-20 border-t border-black/5 dark:border-white/10 overflow-hidden">
+        <section id="contact" className="relative min-h-screen flex items-center py-12 sm:py-16 md:py-20 scroll-mt-16 border-t border-black/5 dark:border-white/10 overflow-hidden">
           <div className="container-wide">
             <div className="flex flex-col lg:flex-row gap-12 lg:gap-16 items-center">
               {/* Left Column: Form & Content */}

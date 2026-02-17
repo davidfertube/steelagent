@@ -8,6 +8,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { auth } from '@/lib/auth';
+import { Logo } from '@/components/ui/logo';
 import Link from 'next/link';
 
 export default function ResetPasswordPage() {
@@ -50,35 +51,36 @@ export default function ResetPasswordPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-[#0f0f1e] via-[#1a1a2e] to-[#0f0f1e] flex items-center justify-center px-4">
+    <div className="min-h-screen bg-white dark:bg-neutral-950 flex items-center justify-center px-4">
       <div className="w-full max-w-md">
         {/* Logo */}
         <div className="text-center mb-8">
-          <Link href="/" className="inline-block">
-            <h1 className="text-3xl font-bold text-white">SpecVault</h1>
+          <Link href="/" className="inline-flex items-center gap-2">
+            <Logo size={32} />
+            <h1 className="text-3xl font-bold text-black dark:text-white">SpecVault</h1>
           </Link>
-          <p className="text-gray-400 mt-2">Set your new password</p>
+          <p className="text-black/50 dark:text-white/50 mt-2">Set your new password</p>
         </div>
 
         {/* Form */}
-        <div className="bg-[#16213e]/50 backdrop-blur-sm border border-gray-800 rounded-lg p-8">
+        <div className="bg-white dark:bg-neutral-900 border border-black/10 dark:border-white/10 rounded-xl p-8 shadow-lg shadow-black/5 dark:shadow-white/5">
           {success ? (
-            <div className="p-6 bg-green-500/10 border border-green-500/50 rounded-lg text-center">
-              <h3 className="text-lg font-semibold text-green-500 mb-2">Password Updated!</h3>
-              <p className="text-gray-300">
+            <div className="p-6 bg-green-50 dark:bg-green-950/30 border border-green-200 dark:border-green-800 rounded-lg text-center">
+              <h3 className="text-lg font-semibold text-green-700 dark:text-green-400 mb-2">Password Updated!</h3>
+              <p className="text-black/60 dark:text-white/60">
                 Your password has been reset. Redirecting to login...
               </p>
             </div>
           ) : (
             <form onSubmit={handleSubmit} className="space-y-6">
               {error && (
-                <div className="p-4 bg-red-500/10 border border-red-500/50 rounded-lg text-red-500 text-sm">
+                <div className="p-4 bg-red-50 dark:bg-red-950/30 border border-red-200 dark:border-red-800 rounded-lg text-red-600 dark:text-red-400 text-sm">
                   {error}
                 </div>
               )}
 
               <div>
-                <label htmlFor="password" className="block text-sm font-medium text-gray-200 mb-2">
+                <label htmlFor="password" className="block text-sm font-medium text-black dark:text-white mb-2">
                   New Password
                 </label>
                 <input
@@ -89,14 +91,14 @@ export default function ResetPasswordPage() {
                   required
                   minLength={8}
                   autoComplete="new-password"
-                  className="w-full px-4 py-3 bg-[#1a1a2e] border border-gray-700 rounded-lg text-white placeholder-gray-400 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-colors"
+                  className="w-full px-4 py-3 bg-white dark:bg-neutral-800 border border-black/10 dark:border-white/10 rounded-lg text-black dark:text-white placeholder-black/30 dark:placeholder-white/30 focus:border-green-500 focus:ring-1 focus:ring-green-500 transition-colors"
                   placeholder="Minimum 8 characters"
                   disabled={loading}
                 />
               </div>
 
               <div>
-                <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-200 mb-2">
+                <label htmlFor="confirmPassword" className="block text-sm font-medium text-black dark:text-white mb-2">
                   Confirm Password
                 </label>
                 <input
@@ -107,7 +109,7 @@ export default function ResetPasswordPage() {
                   required
                   minLength={8}
                   autoComplete="new-password"
-                  className="w-full px-4 py-3 bg-[#1a1a2e] border border-gray-700 rounded-lg text-white placeholder-gray-400 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-colors"
+                  className="w-full px-4 py-3 bg-white dark:bg-neutral-800 border border-black/10 dark:border-white/10 rounded-lg text-black dark:text-white placeholder-black/30 dark:placeholder-white/30 focus:border-green-500 focus:ring-1 focus:ring-green-500 transition-colors"
                   placeholder="Confirm your password"
                   disabled={loading}
                 />
@@ -116,7 +118,7 @@ export default function ResetPasswordPage() {
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full px-4 py-3 bg-blue-600 hover:bg-blue-500 disabled:bg-gray-700 disabled:text-gray-400 text-white font-medium rounded-lg transition-colors"
+                className="w-full px-4 py-3 bg-black dark:bg-white text-white dark:text-black hover:bg-black/90 dark:hover:bg-white/90 disabled:opacity-50 font-medium rounded-lg transition-colors"
               >
                 {loading ? 'Updating...' : 'Update Password'}
               </button>

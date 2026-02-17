@@ -42,6 +42,8 @@ function GitHubIcon() {
   );
 }
 
+const inputClassName = "w-full px-4 py-3 bg-white dark:bg-neutral-800 border border-black/10 dark:border-white/10 rounded-lg text-black dark:text-white placeholder-black/30 dark:placeholder-white/30 focus:border-green-500 focus:ring-1 focus:ring-green-500 transition-colors";
+
 export function SignupForm() {
   const router = useRouter();
   const [email, setEmail] = useState('');
@@ -100,9 +102,9 @@ export function SignupForm() {
 
   if (success) {
     return (
-      <div className="p-6 bg-green-500/10 border border-green-500/50 rounded-lg text-center">
-        <h3 className="text-lg font-semibold text-green-500 mb-2">Account Created!</h3>
-        <p className="text-gray-300">
+      <div className="p-6 bg-green-50 dark:bg-green-950/30 border border-green-200 dark:border-green-800 rounded-lg text-center">
+        <h3 className="text-lg font-semibold text-green-700 dark:text-green-400 mb-2">Account Created!</h3>
+        <p className="text-black/60 dark:text-white/60">
           Check your email to verify your account. Redirecting to login...
         </p>
       </div>
@@ -112,7 +114,7 @@ export function SignupForm() {
   return (
     <div className="space-y-6">
       {error && (
-        <div className="p-4 bg-red-500/10 border border-red-500/50 rounded-lg text-red-500 text-sm">
+        <div className="p-4 bg-red-50 dark:bg-red-950/30 border border-red-200 dark:border-red-800 rounded-lg text-red-600 dark:text-red-400 text-sm">
           {error}
         </div>
       )}
@@ -123,7 +125,7 @@ export function SignupForm() {
           type="button"
           onClick={() => handleOAuthSignIn('google')}
           disabled={isDisabled}
-          className="w-full flex items-center justify-center gap-3 px-4 py-3 bg-white hover:bg-gray-100 disabled:bg-gray-300 disabled:text-gray-500 text-gray-800 font-medium rounded-lg transition-colors"
+          className="w-full flex items-center justify-center gap-3 px-4 py-3 bg-white dark:bg-neutral-800 border border-black/10 dark:border-white/10 hover:bg-black/5 dark:hover:bg-white/5 disabled:opacity-50 text-black dark:text-white font-medium rounded-lg transition-colors"
         >
           <GoogleIcon />
           {oauthLoading === 'google' ? 'Redirecting...' : 'Continue with Google'}
@@ -133,7 +135,7 @@ export function SignupForm() {
           type="button"
           onClick={() => handleOAuthSignIn('azure')}
           disabled={isDisabled}
-          className="w-full flex items-center justify-center gap-3 px-4 py-3 bg-[#2F2F2F] hover:bg-[#3b3b3b] disabled:bg-gray-700 disabled:text-gray-400 text-white font-medium rounded-lg transition-colors"
+          className="w-full flex items-center justify-center gap-3 px-4 py-3 bg-white dark:bg-neutral-800 border border-black/10 dark:border-white/10 hover:bg-black/5 dark:hover:bg-white/5 disabled:opacity-50 text-black dark:text-white font-medium rounded-lg transition-colors"
         >
           <MicrosoftIcon />
           {oauthLoading === 'azure' ? 'Redirecting...' : 'Continue with Microsoft'}
@@ -143,7 +145,7 @@ export function SignupForm() {
           type="button"
           onClick={() => handleOAuthSignIn('github')}
           disabled={isDisabled}
-          className="w-full flex items-center justify-center gap-3 px-4 py-3 bg-[#24292e] hover:bg-[#2f363d] disabled:bg-gray-700 disabled:text-gray-400 text-white font-medium rounded-lg transition-colors"
+          className="w-full flex items-center justify-center gap-3 px-4 py-3 bg-white dark:bg-neutral-800 border border-black/10 dark:border-white/10 hover:bg-black/5 dark:hover:bg-white/5 disabled:opacity-50 text-black dark:text-white font-medium rounded-lg transition-colors"
         >
           <GitHubIcon />
           {oauthLoading === 'github' ? 'Redirecting...' : 'Continue with GitHub'}
@@ -153,17 +155,17 @@ export function SignupForm() {
       {/* Divider */}
       <div className="relative">
         <div className="absolute inset-0 flex items-center">
-          <div className="w-full border-t border-gray-700" />
+          <div className="w-full border-t border-black/10 dark:border-white/10" />
         </div>
         <div className="relative flex justify-center text-sm">
-          <span className="bg-[#16213e] px-4 text-gray-400">or sign up with email</span>
+          <span className="bg-white dark:bg-neutral-900 px-4 text-black/40 dark:text-white/40">or sign up with email</span>
         </div>
       </div>
 
       {/* Email/Password Form */}
       <form onSubmit={handleSubmit} className="space-y-6">
         <div>
-          <label htmlFor="fullName" className="block text-sm font-medium text-gray-200 mb-2">
+          <label htmlFor="fullName" className="block text-sm font-medium text-black dark:text-white mb-2">
             Full Name
           </label>
           <input
@@ -172,14 +174,14 @@ export function SignupForm() {
             value={fullName}
             onChange={(e) => setFullName(e.target.value)}
             autoComplete="name"
-            className="w-full px-4 py-3 bg-[#1a1a2e] border border-gray-700 rounded-lg text-white placeholder-gray-400 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-colors"
+            className={inputClassName}
             placeholder="John Doe"
             disabled={isDisabled}
           />
         </div>
 
         <div>
-          <label htmlFor="email" className="block text-sm font-medium text-gray-200 mb-2">
+          <label htmlFor="email" className="block text-sm font-medium text-black dark:text-white mb-2">
             Email
           </label>
           <input
@@ -189,14 +191,14 @@ export function SignupForm() {
             onChange={(e) => setEmail(e.target.value)}
             required
             autoComplete="email"
-            className="w-full px-4 py-3 bg-[#1a1a2e] border border-gray-700 rounded-lg text-white placeholder-gray-400 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-colors"
+            className={inputClassName}
             placeholder="you@example.com"
             disabled={isDisabled}
           />
         </div>
 
         <div>
-          <label htmlFor="company" className="block text-sm font-medium text-gray-200 mb-2">
+          <label htmlFor="company" className="block text-sm font-medium text-black dark:text-white mb-2">
             Company (Optional)
           </label>
           <input
@@ -205,14 +207,14 @@ export function SignupForm() {
             value={company}
             onChange={(e) => setCompany(e.target.value)}
             autoComplete="organization"
-            className="w-full px-4 py-3 bg-[#1a1a2e] border border-gray-700 rounded-lg text-white placeholder-gray-400 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-colors"
+            className={inputClassName}
             placeholder="Acme Corp"
             disabled={isDisabled}
           />
         </div>
 
         <div>
-          <label htmlFor="password" className="block text-sm font-medium text-gray-200 mb-2">
+          <label htmlFor="password" className="block text-sm font-medium text-black dark:text-white mb-2">
             Password
           </label>
           <input
@@ -223,24 +225,24 @@ export function SignupForm() {
             required
             autoComplete="new-password"
             minLength={8}
-            className="w-full px-4 py-3 bg-[#1a1a2e] border border-gray-700 rounded-lg text-white placeholder-gray-400 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-colors"
+            className={inputClassName}
             placeholder="Minimum 8 characters"
             disabled={isDisabled}
           />
-          <p className="text-xs text-gray-400 mt-1">Must be at least 8 characters</p>
+          <p className="text-xs text-black/40 dark:text-white/40 mt-1">Must be at least 8 characters</p>
         </div>
 
         <button
           type="submit"
           disabled={isDisabled}
-          className="w-full px-4 py-3 bg-blue-600 hover:bg-blue-500 disabled:bg-gray-700 disabled:text-gray-400 text-white font-medium rounded-lg transition-colors"
+          className="w-full px-4 py-3 bg-black dark:bg-white text-white dark:text-black hover:bg-black/90 dark:hover:bg-white/90 disabled:opacity-50 font-medium rounded-lg transition-colors"
         >
           {loading ? 'Creating account...' : 'Create Account'}
         </button>
 
-        <div className="text-center text-sm text-gray-400">
+        <div className="text-center text-sm text-black/50 dark:text-white/50">
           Already have an account?{' '}
-          <Link href="/auth/login" className="text-blue-400 hover:text-blue-300 transition-colors">
+          <Link href="/auth/login" className="text-green-600 dark:text-green-400 hover:underline">
             Sign in
           </Link>
         </div>

@@ -4,6 +4,7 @@
  */
 
 import { SignupForm } from '@/components/auth/signup-form';
+import { Logo } from '@/components/ui/logo';
 import Link from 'next/link';
 
 export const metadata = {
@@ -13,29 +14,30 @@ export const metadata = {
 
 export default function SignupPage() {
   return (
-    <div className="min-h-screen bg-gradient-to-b from-[#0f0f1e] via-[#1a1a2e] to-[#0f0f1e] flex items-center justify-center px-4 py-12">
+    <div className="min-h-screen bg-white dark:bg-neutral-950 flex items-center justify-center px-4 py-12">
       <div className="w-full max-w-md">
         {/* Logo */}
         <div className="text-center mb-8">
-          <Link href="/" className="inline-block">
-            <h1 className="text-3xl font-bold text-white">SpecVault</h1>
+          <Link href="/" className="inline-flex items-center gap-2">
+            <Logo size={32} />
+            <h1 className="text-3xl font-bold text-black dark:text-white">SpecVault</h1>
           </Link>
-          <p className="text-gray-400 mt-2">Create your account</p>
+          <p className="text-black/50 dark:text-white/50 mt-2">Create your account</p>
         </div>
 
         {/* Signup Form */}
-        <div className="bg-[#16213e]/50 backdrop-blur-sm border border-gray-800 rounded-lg p-8">
+        <div className="bg-white dark:bg-neutral-900 border border-black/10 dark:border-white/10 rounded-xl p-8 shadow-lg shadow-black/5 dark:shadow-white/5">
           <SignupForm />
         </div>
 
         {/* Footer */}
-        <div className="text-center mt-6 text-sm text-gray-400">
+        <div className="text-center mt-6 text-sm text-black/40 dark:text-white/40">
           By signing up, you agree to our{' '}
-          <Link href="/terms" className="text-blue-400 hover:text-blue-300">
+          <Link href="/terms" className="text-green-600 dark:text-green-400 hover:underline">
             Terms
           </Link>{' '}
           and{' '}
-          <Link href="/privacy" className="text-blue-400 hover:text-blue-300">
+          <Link href="/privacy" className="text-green-600 dark:text-green-400 hover:underline">
             Privacy Policy
           </Link>
         </div>

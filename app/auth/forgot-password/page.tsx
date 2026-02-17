@@ -7,6 +7,7 @@
 
 import { useState } from 'react';
 import { auth } from '@/lib/auth';
+import { Logo } from '@/components/ui/logo';
 import Link from 'next/link';
 
 export default function ForgotPasswordPage() {
@@ -32,27 +33,28 @@ export default function ForgotPasswordPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-[#0f0f1e] via-[#1a1a2e] to-[#0f0f1e] flex items-center justify-center px-4">
+    <div className="min-h-screen bg-white dark:bg-neutral-950 flex items-center justify-center px-4">
       <div className="w-full max-w-md">
         {/* Logo */}
         <div className="text-center mb-8">
-          <Link href="/" className="inline-block">
-            <h1 className="text-3xl font-bold text-white">SpecVault</h1>
+          <Link href="/" className="inline-flex items-center gap-2">
+            <Logo size={32} />
+            <h1 className="text-3xl font-bold text-black dark:text-white">SpecVault</h1>
           </Link>
-          <p className="text-gray-400 mt-2">Reset your password</p>
+          <p className="text-black/50 dark:text-white/50 mt-2">Reset your password</p>
         </div>
 
         {/* Form */}
-        <div className="bg-[#16213e]/50 backdrop-blur-sm border border-gray-800 rounded-lg p-8">
+        <div className="bg-white dark:bg-neutral-900 border border-black/10 dark:border-white/10 rounded-xl p-8 shadow-lg shadow-black/5 dark:shadow-white/5">
           {success ? (
-            <div className="p-6 bg-green-500/10 border border-green-500/50 rounded-lg text-center">
-              <h3 className="text-lg font-semibold text-green-500 mb-2">Email Sent!</h3>
-              <p className="text-gray-300 mb-4">
+            <div className="p-6 bg-green-50 dark:bg-green-950/30 border border-green-200 dark:border-green-800 rounded-lg text-center">
+              <h3 className="text-lg font-semibold text-green-700 dark:text-green-400 mb-2">Email Sent!</h3>
+              <p className="text-black/60 dark:text-white/60 mb-4">
                 Check your inbox for a password reset link.
               </p>
               <Link
                 href="/auth/login"
-                className="inline-block text-blue-400 hover:text-blue-300 transition-colors"
+                className="inline-block text-green-600 dark:text-green-400 hover:underline"
               >
                 Back to login
               </Link>
@@ -60,16 +62,16 @@ export default function ForgotPasswordPage() {
           ) : (
             <form onSubmit={handleSubmit} className="space-y-6">
               {error && (
-                <div className="p-4 bg-red-500/10 border border-red-500/50 rounded-lg text-red-500 text-sm">
+                <div className="p-4 bg-red-50 dark:bg-red-950/30 border border-red-200 dark:border-red-800 rounded-lg text-red-600 dark:text-red-400 text-sm">
                   {error}
                 </div>
               )}
 
               <div>
-                <p className="text-gray-300 text-sm mb-4">
+                <p className="text-black/60 dark:text-white/60 text-sm mb-4">
                   Enter your email address and we&apos;ll send you a link to reset your password.
                 </p>
-                <label htmlFor="email" className="block text-sm font-medium text-gray-200 mb-2">
+                <label htmlFor="email" className="block text-sm font-medium text-black dark:text-white mb-2">
                   Email
                 </label>
                 <input
@@ -79,7 +81,7 @@ export default function ForgotPasswordPage() {
                   onChange={(e) => setEmail(e.target.value)}
                   required
                   autoComplete="email"
-                  className="w-full px-4 py-3 bg-[#1a1a2e] border border-gray-700 rounded-lg text-white placeholder-gray-400 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-colors"
+                  className="w-full px-4 py-3 bg-white dark:bg-neutral-800 border border-black/10 dark:border-white/10 rounded-lg text-black dark:text-white placeholder-black/30 dark:placeholder-white/30 focus:border-green-500 focus:ring-1 focus:ring-green-500 transition-colors"
                   placeholder="you@example.com"
                   disabled={loading}
                 />
@@ -88,14 +90,14 @@ export default function ForgotPasswordPage() {
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full px-4 py-3 bg-blue-600 hover:bg-blue-500 disabled:bg-gray-700 disabled:text-gray-400 text-white font-medium rounded-lg transition-colors"
+                className="w-full px-4 py-3 bg-black dark:bg-white text-white dark:text-black hover:bg-black/90 dark:hover:bg-white/90 disabled:opacity-50 font-medium rounded-lg transition-colors"
               >
                 {loading ? 'Sending...' : 'Send Reset Link'}
               </button>
 
-              <div className="text-center text-sm text-gray-400">
+              <div className="text-center text-sm text-black/50 dark:text-white/50">
                 Remember your password?{' '}
-                <Link href="/auth/login" className="text-blue-400 hover:text-blue-300 transition-colors">
+                <Link href="/auth/login" className="text-green-600 dark:text-green-400 hover:underline">
                   Sign in
                 </Link>
               </div>

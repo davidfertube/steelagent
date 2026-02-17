@@ -33,7 +33,10 @@ export const metadata: Metadata = {
     images: ['/og-image.png'],
   },
   icons: {
-    icon: '/favicon.ico',
+    icon: [
+      { url: '/icon.svg', type: 'image/svg+xml' },
+    ],
+    apple: '/icon.svg',
   },
   manifest: '/site.webmanifest',
   robots: { index: true, follow: true },
