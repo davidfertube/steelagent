@@ -34,7 +34,7 @@ const ALLOWED_ORIGINS = [
   process.env.NEXT_PUBLIC_APP_URL,
   process.env.PRODUCTION_URL,
   process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : undefined,
-].filter(Boolean).map(url => url.replace(/\/+$/, '')) as string[];
+].filter((url): url is string => Boolean(url)).map(url => url.replace(/\/+$/, ''));
 
 // API routes that require rate limiting
 const RATE_LIMITED_ROUTES = [
