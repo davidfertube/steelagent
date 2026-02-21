@@ -19,7 +19,7 @@ import { Logo } from "@/components/ui/logo";
 function HeroProductMockup() {
   return (
     <motion.div
-      className="relative w-full max-w-[580px] mx-auto"
+      className="relative w-full max-w-[620px] mx-auto"
       initial={{ opacity: 0, y: 30, scale: 0.95 }}
       animate={{ opacity: 1, y: 0, scale: 1 }}
       transition={{ duration: 0.8, delay: 0.3, ease: "easeOut" }}
@@ -508,8 +508,8 @@ export default function Home() {
                     transition={{ duration: 0.5, delay: 0.4 }}
                     className="text-base sm:text-lg text-black/60 dark:text-white/60 max-w-md leading-snug"
                   >
-                    Upload your specs and let Steel Agents find answers, cite
-                    every page, and verify claims. Audit-ready in seconds.
+                    Upload your specs and let steel agents find answers, cite
+                    every page, and verify claims.
                   </motion.p>
                 </div>
 
@@ -574,7 +574,7 @@ export default function Home() {
               </div>
 
               {/* Right: Product Mockup */}
-              <div className="hidden lg:block flex-shrink-0 w-[580px]">
+              <div className="hidden lg:block flex-shrink-0 w-[620px]">
                 <HeroProductMockup />
               </div>
             </div>
@@ -873,7 +873,7 @@ export default function Home() {
               <div className="text-center space-y-2">
                 <span className="text-xs font-semibold tracking-widest text-black/40 dark:text-white/40 uppercase">Built for your team</span>
                 <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold tracking-tight text-black dark:text-white">
-                  Who Uses SpecVault
+                  Built for the MVP
                 </h2>
               </div>
 
@@ -907,6 +907,8 @@ export default function Home() {
                         { prop: "Tensile Strength", val: "90 ksi", spec: "A790", pct: 100 },
                         { prop: "Elongation", val: "25%", spec: "A790", pct: 55 },
                         { prop: "Hardness", val: "293 HBW", spec: "A790", pct: 65 },
+                        { prop: "PREN", val: "≥ 35", spec: "A790", pct: 78 },
+                        { prop: "Impact Energy", val: "45 J", spec: "A790", pct: 50 },
                       ].map((row, j) => (
                         <motion.div
                           key={j}
