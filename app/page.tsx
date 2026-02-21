@@ -454,8 +454,8 @@ export default function Home() {
                     transition={{ duration: 0.5, delay: 0.4 }}
                     className="text-base sm:text-lg text-black/60 dark:text-white/60 max-w-2xl leading-snug"
                   >
-                    Upload your ASTM, API, or NACE specs — our AI agents find answers,
-                    cite pages, and verify claims. Audit-ready in seconds.
+                    Drop your steel specs. Steel Agents pull answers, cite pages,
+                    and flag issues — audit-ready in seconds.
                   </motion.p>
                 </div>
 
