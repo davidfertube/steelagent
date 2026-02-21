@@ -497,7 +497,7 @@ WARNING: No relevant document chunks were retrieved for this query.
 
 RESPONSE GUIDELINES:
 1. If this is about information that would typically be in technical specifications (yield strength, composition, heat treatment, etc.), respond:
-   "I cannot answer this question because the relevant information was not found in the uploaded documents. Please ensure the appropriate specification (e.g., ASTM A790, A789) has been uploaded and processed."
+   "I cannot answer this question because the relevant information was not found in the uploaded documents. Please ensure the appropriate specification (e.g., ASTM A790, A789, API 5CT, API 6A) has been uploaded and processed."
 
 2. If this is asking about pricing, vendors, or commercial information, respond:
    "I cannot answer this question because pricing and vendor information are not included in technical specifications."
