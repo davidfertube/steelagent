@@ -870,9 +870,9 @@ export default function Home() {
               className="space-y-6"
             >
               <div className="text-center space-y-2">
-                <span className="text-xs font-semibold tracking-widest text-black/40 dark:text-white/40 uppercase">Built for your team</span>
+                <span className="text-xs font-semibold tracking-widest text-black/40 dark:text-white/40 uppercase">Who it&apos;s for</span>
                 <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold tracking-tight text-black dark:text-white">
-                  Built for the MVP
+                  Your Role, Your Answers
                 </h2>
               </div>
 
