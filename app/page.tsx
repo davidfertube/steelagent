@@ -988,9 +988,9 @@ export default function Home() {
                         whileInView={{ opacity: 1, y: 0 }}
                         viewport={{ once: true }}
                         transition={{ delay: 0.3 + j * 0.1 }}
-                        className={`grid grid-cols-4 gap-2 py-1.5 px-1.5 rounded-lg text-xs ${row.highlight ? 'bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800' : ''}`}
+                        className={`grid grid-cols-4 gap-1 py-1 px-1.5 rounded-lg text-[11px] ${row.highlight ? 'bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800' : ''}`}
                       >
-                        <span className="font-mono font-bold text-black/80 dark:text-white/80">{row.grade}</span>
+                        <span className="font-mono font-bold text-black/80 dark:text-white/80 truncate">{row.grade}</span>
                         <span className="text-black/60 dark:text-white/60">{row.yield}</span>
                         <span className="text-black/60 dark:text-white/60">{row.tensile}</span>
                         <span className="text-amber-600 dark:text-amber-400 font-medium">{row.spec}</span>
