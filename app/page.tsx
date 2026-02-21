@@ -908,6 +908,7 @@ export default function Home() {
                         { prop: "Hardness", val: "293 HBW", spec: "A790", pct: 65 },
                         { prop: "PREN", val: "≥ 35", spec: "A790", pct: 78 },
                         { prop: "Impact Energy", val: "45 J", spec: "A790", pct: 50 },
+                        { prop: "Density", val: "7.8 g/cm³", spec: "A790", pct: 88 },
                       ].map((row, j) => (
                         <motion.div
                           key={j}
