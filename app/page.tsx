@@ -506,7 +506,7 @@ export default function Home() {
                     initial={{ opacity: 0, y: 10 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.5, delay: 0.4 }}
-                    className="text-base sm:text-lg text-black/60 dark:text-white/60 max-w-md leading-snug"
+                    className="text-base sm:text-lg font-semibold text-black/60 dark:text-white/60 max-w-md leading-snug"
                   >
                     Instant answers. Cited sources. Verified claims.
                   </motion.p>
