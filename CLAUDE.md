@@ -119,7 +119,7 @@ The full pipeline is documented in **[AGENTS.md](AGENTS.md)**. Summary:
 | `lib/langfuse.ts` | Observability + RAG pipeline tracing |
 | `lib/evaluation-engine.ts` | Pattern-based RAG evaluation |
 | `lib/rag-metrics.ts` | RAGAS-style LLM-as-judge evaluation |
-| `components/realtime-comparison.tsx` | Side-by-side RAG vs generic LLM display |
+| `components/realtime-comparison.tsx` | Side-by-side RAG vs generic LLM display (demo section) |
 
 ---
 
@@ -238,5 +238,4 @@ Shared test helpers: `tests/helpers/test-env.ts`, `tests/helpers/citation-valida
 - [README.md](README.md) — Project overview
 - [AGENTS.md](AGENTS.md) — Agentic RAG pipeline architecture
 - [MCP.md](MCP.md) — MCP server configuration
-- [CONTRIBUTING.md](CONTRIBUTING.md) — How to contribute
 - [SECURITY.md](SECURITY.md) — Security policy
