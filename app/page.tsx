@@ -316,7 +316,7 @@ export default function Home() {
     <div className="flex flex-col bg-white dark:bg-neutral-950 text-black dark:text-white">
       {/* Header */}
       <header className="fixed top-0 left-0 right-0 z-50 bg-white/90 dark:bg-neutral-950/90 backdrop-blur-md border-b border-black/5 dark:border-white/10">
-        <div className="container-center">
+        <div className="container-wide">
           <div className="flex h-16 items-center justify-between">
             {/* Logo */}
             <Link href="/" className="flex items-center gap-2 text-lg font-semibold tracking-tight text-black dark:text-white">
@@ -423,7 +423,7 @@ export default function Home() {
 
       <main className="flex-1 pt-16">
         {/* Hero Section */}
-        <section className="relative py-6 sm:py-8 md:py-12">
+        <section className="relative min-h-[calc(100dvh-4rem)] flex flex-col justify-center py-6 sm:py-8 md:py-12">
           <div className="container-wide">
             <div className="flex flex-col lg:flex-row gap-8 lg:gap-6 items-center">
               {/* Left: Text content */}
@@ -438,7 +438,7 @@ export default function Home() {
                     <span className="text-green-500">The Steel Hub</span>
                     {" "}for{" "}
                     <span className="relative inline-block">
-                      Agents
+                      Oil and Gas
                       <motion.span
                         className="absolute -bottom-1 left-0 right-0 h-[3px] bg-green-500"
                         initial={{ scaleX: 0 }}
@@ -528,7 +528,7 @@ export default function Home() {
         </section>
 
         {/* Why SpecVault vs Generic LLMs Section */}
-        <section id="why" className="relative py-6 sm:py-8 md:py-10 scroll-mt-16">
+        <section id="why" className="relative min-h-[calc(100dvh-4rem)] flex flex-col justify-center py-6 sm:py-8 md:py-10 scroll-mt-16">
           <div className="container-wide">
             <motion.div
               initial={{ opacity: 0, y: 20 }}
@@ -808,7 +808,7 @@ export default function Home() {
         </section>
 
         {/* Who This Is For - Persona Section */}
-        <section id="who" className="relative py-6 sm:py-8 md:py-10 scroll-mt-16">
+        <section id="who" className="relative min-h-[calc(100dvh-4rem)] flex flex-col justify-center py-6 sm:py-8 md:py-10 scroll-mt-16">
           <div className="container-wide">
             <motion.div
               initial={{ opacity: 0, y: 20 }}
@@ -1111,7 +1111,7 @@ export default function Home() {
         </section>
 
         {/* Demo Section - Combined Upload & Query */}
-        <section id="demo" className="relative z-10 py-6 sm:py-8 md:py-10 bg-white dark:bg-neutral-950">
+        <section id="demo" className="relative z-10 min-h-[calc(100dvh-4rem)] flex flex-col justify-center py-6 sm:py-8 md:py-10 scroll-mt-16 bg-white dark:bg-neutral-950">
           <div className="container-wide">
             <motion.div
               initial={{ opacity: 0, y: 20 }}
@@ -1279,7 +1279,7 @@ export default function Home() {
         </section>
 
         {/* Lead Collection Section */}
-        <section id="contact" className="relative py-6 sm:py-8 md:py-10 overflow-hidden">
+        <section id="contact" className="relative min-h-[calc(100dvh-4rem)] flex flex-col justify-center py-6 sm:py-8 md:py-10 scroll-mt-16 overflow-hidden">
           <div className="container-wide">
             <motion.div
               initial={{ opacity: 0, y: 20 }}
