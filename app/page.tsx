@@ -426,8 +426,8 @@ export default function Home() {
         <section className="relative py-10 sm:py-14 md:py-20">
           <div className="container-wide">
             <div className="flex flex-col lg:flex-row gap-12 lg:gap-8 items-center">
-              {/* Center/Left: Text content */}
-              <div className="flex-1 text-center space-y-8">
+              {/* Left: Text content */}
+              <div className="flex-1 text-left space-y-8">
                 <div className="space-y-6">
                   <motion.h1
                     initial={{ opacity: 0, y: 20 }}
@@ -451,18 +451,39 @@ export default function Home() {
                     initial={{ opacity: 0, y: 10 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.5, delay: 0.4 }}
-                    className="text-lg sm:text-xl text-black/60 dark:text-white/60 max-w-2xl mx-auto leading-relaxed px-4"
+                    className="text-lg sm:text-xl text-black/60 dark:text-white/60 max-w-2xl leading-relaxed"
                   >
                     Upload ASTM, API, or NACE specs and get audit-ready answers
                     with page-level citations. Zero hallucinations.
                   </motion.p>
                 </div>
 
+                {/* Standards Badges */}
+                <motion.div
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.5, delay: 0.6 }}
+                  className="flex flex-wrap gap-3"
+                >
+                  <span className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-blue-500/10 dark:bg-blue-400/10 border border-blue-500/20 dark:border-blue-400/20">
+                    <span className="w-2 h-2 rounded-full bg-blue-400 shadow-[0_0_8px_2px_rgba(96,165,250,0.5)]" />
+                    <span className="text-sm font-medium text-blue-600 dark:text-blue-400">ASTM</span>
+                  </span>
+                  <span className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-amber-500/10 dark:bg-amber-400/10 border border-amber-500/20 dark:border-amber-400/20">
+                    <span className="w-2 h-2 rounded-full bg-amber-400 shadow-[0_0_8px_2px_rgba(251,191,36,0.5)]" />
+                    <span className="text-sm font-medium text-amber-600 dark:text-amber-400">API</span>
+                  </span>
+                  <span className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-cyan-500/10 dark:bg-cyan-400/10 border border-cyan-500/20 dark:border-cyan-400/20">
+                    <span className="w-2 h-2 rounded-full bg-cyan-400 shadow-[0_0_8px_2px_rgba(34,211,238,0.5)]" />
+                    <span className="text-sm font-medium text-cyan-600 dark:text-cyan-400">NACE</span>
+                  </span>
+                </motion.div>
+
                 <motion.div
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.5, delay: 0.8 }}
-                  className="flex justify-center px-4"
+                  className="flex px-0"
                 >
                   <Button size="lg" className="bg-black dark:bg-white text-white dark:text-black hover:bg-black/90 dark:hover:bg-white/90 h-12 sm:h-14 px-8 sm:px-10 text-base sm:text-lg touch-target transition-all duration-300 hover:scale-105 hover:shadow-lg" asChild>
                     <a href="#demo">
@@ -476,15 +497,23 @@ export default function Home() {
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.5, delay: 1.0 }}
-                  className="grid grid-cols-2 gap-4 sm:gap-6 pt-4 max-w-md mx-auto px-4"
+                  className="grid grid-cols-2 sm:grid-cols-4 gap-4 sm:gap-6 pt-4"
                 >
-                  <div className="text-center">
+                  <div>
                     <p className="text-xl sm:text-2xl md:text-3xl font-semibold text-black dark:text-white">4+ hrs</p>
                     <p className="text-xs sm:text-sm text-black/60 dark:text-white/60">Saved per day</p>
                   </div>
-                  <div className="text-center">
+                  <div>
                     <p className="text-xl sm:text-2xl md:text-3xl font-semibold text-black dark:text-white">100%</p>
                     <p className="text-xs sm:text-sm text-black/60 dark:text-white/60">Cited sources</p>
+                  </div>
+                  <div>
+                    <p className="text-xl sm:text-2xl md:text-3xl font-semibold text-black dark:text-white">~0%</p>
+                    <p className="text-xs sm:text-sm text-black/60 dark:text-white/60">Hallucination rate</p>
+                  </div>
+                  <div>
+                    <p className="text-xl sm:text-2xl md:text-3xl font-semibold text-black dark:text-white">&lt;15s</p>
+                    <p className="text-xs sm:text-sm text-black/60 dark:text-white/60">Avg response time</p>
                   </div>
                 </motion.div>
               </div>
