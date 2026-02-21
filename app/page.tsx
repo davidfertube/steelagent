@@ -2,7 +2,7 @@
 
 import { useState, useCallback, FormEvent, useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { ArrowRight, Menu, X, Sun, Moon, CheckCircle, Shield, FileText, Microscope, ClipboardCheck, Package, Scale } from "lucide-react";
+import { ArrowRight, Menu, X, Sun, Moon, CheckCircle } from "lucide-react";
 import { useTheme } from "next-themes";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
@@ -12,137 +12,208 @@ import { SearchForm } from "@/components/search-form";
 import { RealtimeComparison } from "@/components/realtime-comparison";
 import { DocumentUpload } from "@/components/document-upload";
 
-import { Source, GenericLLMResponse, ConfidenceScore, AnonymousQueryInfo } from "@/lib/api";
-import { Logo } from "@/components/ui/logo";
-import AnonymousQuotaBanner from "@/components/anonymous-quota-banner";
+import { Source, GenericLLMResponse, ConfidenceScore } from "@/lib/api";
+import { NetworkVisualization } from "@/components/network-visualization";
 
-// Simulated product interface for hero section
-function ProductPreview() {
-  const responseText = 'The minimum yield strength for S32205 duplex stainless steel per ASTM A790 is 65 ksi (450 MPa).';
-  const [displayedChars, setDisplayedChars] = useState(0);
-  const [showDetails, setShowDetails] = useState(false);
+function Hero3DAnimation() {
+  return (
+    <div className="relative w-full aspect-square max-w-[500px] mx-auto">
+      <div className="absolute inset-0 flex items-center justify-center">
+        <DocumentFlowAnimation />
+      </div>
+    </div>
+  );
+}
 
-  useEffect(() => {
-    const timeout = setTimeout(() => {
-      if (displayedChars < responseText.length) {
-        setDisplayedChars(prev => prev + 1);
-      } else if (!showDetails) {
-        setTimeout(() => setShowDetails(true), 300);
-      }
-    }, 25);
-    return () => clearTimeout(timeout);
-  }, [displayedChars, showDetails]);
+// Fallback SVG animation - Documents flowing into central AI
+function DocumentFlowAnimation() {
+  const documents = [
+    { id: 1, x: 50, y: 50, delay: 0 },
+    { id: 2, x: 300, y: 50, delay: 0.3 },
+    { id: 3, x: 25, y: 175, delay: 0.6 },
+    { id: 4, x: 325, y: 175, delay: 0.9 },
+    { id: 5, x: 50, y: 300, delay: 1.2 },
+    { id: 6, x: 300, y: 300, delay: 1.5 },
+  ];
 
-  const displayed = responseText.slice(0, displayedChars);
-  // Bold the value portion once fully typed
-  const boldStart = responseText.indexOf('65 ksi');
-  const boldEnd = boldStart + '65 ksi (450 MPa)'.length;
+  const centerX = 200;
+  const centerY = 200;
 
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.8, delay: 0.4 }}
-      className="relative"
-      style={{ perspective: '1200px' }}
-    >
-      <motion.div
-        className="bg-neutral-900 dark:bg-neutral-800 rounded-xl border border-neutral-700 dark:border-neutral-600 shadow-2xl shadow-black/30 overflow-hidden"
-        initial={{ rotateY: -5 }}
-        whileHover={{ rotateY: 0 }}
-        transition={{ duration: 0.4 }}
-        style={{ transformStyle: 'preserve-3d' }}
-      >
-        {/* Browser chrome */}
-        <div className="flex items-center gap-2 px-4 py-3 bg-neutral-800 dark:bg-neutral-700 border-b border-neutral-700 dark:border-neutral-600">
-          <div className="flex gap-1.5">
-            <div className="w-3 h-3 rounded-full bg-red-400" />
-            <div className="w-3 h-3 rounded-full bg-amber-400" />
-            <div className="w-3 h-3 rounded-full bg-green-400" />
-          </div>
-          <span className="text-xs text-neutral-400 ml-2 font-medium">SpecVault</span>
-        </div>
+    <svg viewBox="0 0 400 400" className="w-full h-full [&_.doc-rect]:fill-white dark:[&_.doc-rect]:fill-neutral-800 [&_.doc-stroke]:stroke-black dark:[&_.doc-stroke]:stroke-white [&_.doc-line]:stroke-black dark:[&_.doc-line]:stroke-white [&_.brain-fill]:fill-white dark:[&_.brain-fill]:fill-neutral-800">
+      <defs>
+        <radialGradient id="brainGlow" cx="50%" cy="50%" r="50%">
+          <stop offset="0%" stopColor="#22c55e" stopOpacity="0.4" />
+          <stop offset="70%" stopColor="#22c55e" stopOpacity="0.1" />
+          <stop offset="100%" stopColor="#22c55e" stopOpacity="0" />
+        </radialGradient>
+        <filter id="glow">
+          <feGaussianBlur stdDeviation="3" result="coloredBlur" />
+          <feMerge>
+            <feMergeNode in="coloredBlur" />
+            <feMergeNode in="SourceGraphic" />
+          </feMerge>
+        </filter>
+      </defs>
 
-        <div className="p-5 space-y-4">
-          {/* Query input */}
-          <div className="bg-neutral-800 dark:bg-neutral-900 rounded-lg px-4 py-3 border border-neutral-700 dark:border-neutral-600">
-            <p className="text-sm text-neutral-300 font-mono">
-              What is the yield strength of S32205 per ASTM A790?
-            </p>
-          </div>
+      {/* Connection lines */}
+      {documents.map((doc) => (
+        <motion.line
+          key={`line-${doc.id}`}
+          x1={doc.x + 22}
+          y1={doc.y + 27}
+          x2={centerX}
+          y2={centerY}
+          stroke="#22c55e"
+          strokeWidth="2"
+          strokeDasharray="8 4"
+          initial={{ pathLength: 0, opacity: 0 }}
+          animate={{
+            pathLength: 1,
+            opacity: 0.6,
+            strokeDashoffset: [0, -12]
+          }}
+          transition={{
+            pathLength: { duration: 0.8, delay: doc.delay + 0.3 },
+            opacity: { duration: 0.3, delay: doc.delay + 0.3 },
+            strokeDashoffset: { duration: 1.5, repeat: Infinity, ease: "linear" }
+          }}
+        />
+      ))}
 
-          {/* Response */}
-          <div className="space-y-3">
-            <div className="flex items-center gap-2">
-              <div className="w-2 h-2 rounded-full bg-green-500" />
-              <span className="text-xs font-semibold text-green-400 uppercase tracking-wider">Answer</span>
-            </div>
-            <p className="text-sm text-neutral-200 leading-relaxed min-h-[3rem]">
-              {displayedChars <= boldStart
-                ? displayed
-                : (
-                  <>
-                    {responseText.slice(0, boldStart)}
-                    <strong className="text-green-400">
-                      {displayed.slice(boldStart, Math.min(displayedChars, boldEnd))}
-                    </strong>
-                    {displayedChars > boldEnd ? responseText.slice(boldEnd, displayedChars) : ''}
-                  </>
-                )
-              }
-              {displayedChars < responseText.length && (
-                <motion.span
-                  className="inline-block w-0.5 h-4 bg-green-400 ml-0.5 align-middle"
-                  animate={{ opacity: [1, 0] }}
-                  transition={{ duration: 0.8, repeat: Infinity }}
-                />
-              )}
-            </p>
+      {/* Particles */}
+      {documents.map((doc) => (
+        <motion.circle
+          key={`particle-${doc.id}`}
+          r="5"
+          fill="#22c55e"
+          filter="url(#glow)"
+          initial={{ opacity: 0 }}
+          animate={{
+            opacity: [0, 1, 1, 0],
+            cx: [doc.x + 22, centerX],
+            cy: [doc.y + 27, centerY],
+          }}
+          transition={{
+            duration: 2,
+            repeat: Infinity,
+            delay: doc.delay + 1,
+            ease: "easeInOut",
+            times: [0, 0.1, 0.9, 1]
+          }}
+        />
+      ))}
 
-            {/* Source citation */}
-            <AnimatePresence>
-              {showDetails && (
-                <motion.div
-                  initial={{ opacity: 0, y: 8 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.3 }}
-                  className="space-y-3"
-                >
-                  <div className="flex items-center gap-2">
-                    <div className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-green-500/10 border border-green-500/20 rounded-md">
-                      <FileText className="w-3 h-3 text-green-400" />
-                      <span className="text-xs font-medium text-green-400">ASTM A790-14, Table 1, p.3</span>
-                    </div>
-                  </div>
+      {/* Documents */}
+      {documents.map((doc) => (
+        <g key={`doc-${doc.id}`}>
+          <motion.rect
+            x={doc.x}
+            y={doc.y}
+            width="45"
+            height="55"
+            className="doc-rect doc-stroke"
+            strokeWidth="2"
+            rx="3"
+            initial={{ opacity: 0, scale: 0.8 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 0.4, delay: doc.delay }}
+          />
+          {[12, 22, 32, 42].map((yOffset, i) => (
+            <motion.line
+              key={i}
+              x1={doc.x + 8}
+              y1={doc.y + yOffset}
+              x2={doc.x + (i === 2 ? 30 : 37)}
+              y2={doc.y + yOffset}
+              className="doc-line"
+              strokeWidth="1"
+              strokeOpacity="0.3"
+              initial={{ pathLength: 0 }}
+              animate={{ pathLength: 1 }}
+              transition={{ duration: 0.3, delay: doc.delay + 0.2 + i * 0.05 }}
+            />
+          ))}
+        </g>
+      ))}
 
-                  {/* Confidence bar */}
-                  <div className="space-y-1.5">
-                    <div className="flex items-center justify-between">
-                      <span className="text-xs text-neutral-400">Confidence</span>
-                      <span className="text-xs font-semibold text-green-400">94%</span>
-                    </div>
-                    <div className="h-1.5 bg-neutral-700 rounded-full overflow-hidden">
-                      <motion.div
-                        className="h-full bg-gradient-to-r from-green-500 to-green-400 rounded-full"
-                        initial={{ width: '0%' }}
-                        animate={{ width: '94%' }}
-                        transition={{ duration: 1, delay: 0.2, ease: 'easeOut' }}
-                      />
-                    </div>
-                  </div>
+      {/* Central Brain */}
+      <motion.circle
+        cx={centerX}
+        cy={centerY}
+        r="60"
+        fill="url(#brainGlow)"
+        initial={{ scale: 0 }}
+        animate={{ scale: [1, 1.15, 1] }}
+        transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
+      />
+      <motion.circle
+        cx={centerX}
+        cy={centerY}
+        r="45"
+        className="brain-fill"
+        stroke="#22c55e"
+        strokeWidth="3"
+        filter="url(#glow)"
+        initial={{ scale: 0 }}
+        animate={{ scale: 1 }}
+        transition={{ duration: 0.6, delay: 0.8, type: "spring" }}
+      />
+      <motion.circle
+        cx={centerX}
+        cy={centerY}
+        r="35"
+        fill="none"
+        stroke="#22c55e"
+        strokeWidth="1.5"
+        strokeDasharray="6 3"
+        initial={{ pathLength: 0 }}
+        animate={{ pathLength: 1 }}
+        transition={{ duration: 1, delay: 1.2 }}
+      />
 
-                  {/* Verification */}
-                  <div className="flex items-center gap-1.5 text-xs text-neutral-400">
-                    <Shield className="w-3 h-3 text-green-400" />
-                    <span>3 numerical claims verified against source</span>
-                  </div>
-                </motion.div>
-              )}
-            </AnimatePresence>
-          </div>
-        </div>
-      </motion.div>
-    </motion.div>
+      {/* Neural nodes */}
+      {[
+        { x: centerX - 15, y: centerY - 12 },
+        { x: centerX + 15, y: centerY - 12 },
+        { x: centerX, y: centerY + 5 },
+        { x: centerX - 10, y: centerY + 18 },
+        { x: centerX + 10, y: centerY + 18 },
+      ].map((node, i) => (
+        <motion.circle
+          key={`node-${i}`}
+          cx={node.x}
+          cy={node.y}
+          r="5"
+          fill="#22c55e"
+          initial={{ scale: 0 }}
+          animate={{ scale: [1, 1.4, 1] }}
+          transition={{ duration: 1.5, repeat: Infinity, delay: 1.5 + i * 0.2 }}
+        />
+      ))}
+
+      {/* Neural connections */}
+      <motion.path
+        d={`M ${centerX - 15} ${centerY - 12} L ${centerX} ${centerY + 5} L ${centerX + 15} ${centerY - 12}`}
+        fill="none"
+        stroke="#22c55e"
+        strokeWidth="2"
+        strokeOpacity="0.6"
+        initial={{ pathLength: 0 }}
+        animate={{ pathLength: 1 }}
+        transition={{ duration: 0.8, delay: 1.5 }}
+      />
+      <motion.path
+        d={`M ${centerX - 10} ${centerY + 18} L ${centerX} ${centerY + 5} L ${centerX + 10} ${centerY + 18}`}
+        fill="none"
+        stroke="#22c55e"
+        strokeWidth="2"
+        strokeOpacity="0.6"
+        initial={{ pathLength: 0 }}
+        animate={{ pathLength: 1 }}
+        transition={{ duration: 0.8, delay: 1.7 }}
+      />
+    </svg>
   );
 }
 
@@ -218,7 +289,7 @@ function LeadForm() {
                 name="firstName"
                 required
                 disabled={isSubmitting}
-                className="w-full h-11 px-4 border border-black/20 dark:border-white/20 bg-white dark:bg-neutral-800 text-black dark:text-white rounded focus:outline-none focus:ring-2 focus:ring-black/20 dark:focus:ring-white/20 focus:border-black dark:focus:border-white transition-colors disabled:opacity-50"
+                className="w-full min-h-11 py-2.5 px-4 border border-black/20 dark:border-white/20 bg-white dark:bg-neutral-800 text-black dark:text-white rounded focus:outline-none focus:ring-2 focus:ring-black/20 dark:focus:ring-white/20 focus:border-black dark:focus:border-white transition-colors disabled:opacity-50"
                 placeholder=""
               />
             </div>
@@ -232,7 +303,7 @@ function LeadForm() {
                 name="lastName"
                 required
                 disabled={isSubmitting}
-                className="w-full h-11 px-4 border border-black/20 dark:border-white/20 bg-white dark:bg-neutral-800 text-black dark:text-white rounded focus:outline-none focus:ring-2 focus:ring-black/20 dark:focus:ring-white/20 focus:border-black dark:focus:border-white transition-colors disabled:opacity-50"
+                className="w-full min-h-11 py-2.5 px-4 border border-black/20 dark:border-white/20 bg-white dark:bg-neutral-800 text-black dark:text-white rounded focus:outline-none focus:ring-2 focus:ring-black/20 dark:focus:ring-white/20 focus:border-black dark:focus:border-white transition-colors disabled:opacity-50"
                 placeholder=""
               />
             </div>
@@ -248,7 +319,7 @@ function LeadForm() {
               name="email"
               required
               disabled={isSubmitting}
-              className="w-full h-11 px-4 border border-black/20 dark:border-white/20 bg-white dark:bg-neutral-800 text-black dark:text-white rounded focus:outline-none focus:ring-2 focus:ring-black/20 dark:focus:ring-white/20 focus:border-black dark:focus:border-white transition-colors disabled:opacity-50"
+              className="w-full min-h-11 py-2.5 px-4 border border-black/20 dark:border-white/20 bg-white dark:bg-neutral-800 text-black dark:text-white rounded focus:outline-none focus:ring-2 focus:ring-black/20 dark:focus:ring-white/20 focus:border-black dark:focus:border-white transition-colors disabled:opacity-50"
               placeholder=""
             />
           </div>
@@ -262,7 +333,7 @@ function LeadForm() {
               id="company"
               name="company"
               disabled={isSubmitting}
-              className="w-full h-11 px-4 border border-black/20 dark:border-white/20 bg-white dark:bg-neutral-800 text-black dark:text-white rounded focus:outline-none focus:ring-2 focus:ring-black/20 dark:focus:ring-white/20 focus:border-black dark:focus:border-white transition-colors disabled:opacity-50"
+              className="w-full min-h-11 py-2.5 px-4 border border-black/20 dark:border-white/20 bg-white dark:bg-neutral-800 text-black dark:text-white rounded focus:outline-none focus:ring-2 focus:ring-black/20 dark:focus:ring-white/20 focus:border-black dark:focus:border-white transition-colors disabled:opacity-50"
               placeholder=""
             />
           </div>
@@ -276,7 +347,7 @@ function LeadForm() {
               id="phone"
               name="phone"
               disabled={isSubmitting}
-              className="w-full h-11 px-4 border border-black/20 dark:border-white/20 bg-white dark:bg-neutral-800 text-black dark:text-white rounded focus:outline-none focus:ring-2 focus:ring-black/20 dark:focus:ring-white/20 focus:border-black dark:focus:border-white transition-colors disabled:opacity-50"
+              className="w-full min-h-11 py-2.5 px-4 border border-black/20 dark:border-white/20 bg-white dark:bg-neutral-800 text-black dark:text-white rounded focus:outline-none focus:ring-2 focus:ring-black/20 dark:focus:ring-white/20 focus:border-black dark:focus:border-white transition-colors disabled:opacity-50"
               placeholder=""
             />
           </div>
@@ -289,7 +360,7 @@ function LeadForm() {
             type="submit"
             size="lg"
             disabled={isSubmitting}
-            className="w-full bg-black dark:bg-white text-white dark:text-black hover:bg-black/90 dark:hover:bg-white/90 h-12 text-base font-medium disabled:opacity-50 transition-all duration-300 hover:scale-[1.02] hover:shadow-lg"
+            className="w-full bg-black dark:bg-white text-white dark:text-black hover:bg-black/90 dark:hover:bg-white/90 min-h-12 text-base font-medium disabled:opacity-50 transition-all duration-300 hover:scale-[1.02] hover:shadow-lg"
           >
             {isSubmitting ? 'Submitting...' : 'Join Waitlist'}
             {!isSubmitting && <ArrowRight className="ml-2 h-4 w-4" />}
@@ -319,14 +390,12 @@ export default function Home() {
   // Generic LLM response for comparison display
   const [genericLLMResponse, setGenericLLMResponse] = useState<string | null>(null);
   const [confidence, setConfidence] = useState<ConfidenceScore | null>(null);
-  const [anonymousInfo, setAnonymousInfo] = useState<AnonymousQueryInfo | null>(null);
 
   // Refs for auto-scrolling
   const step2Ref = useRef<HTMLDivElement>(null);
   const step3Ref = useRef<HTMLDivElement>(null);
 
   // Prevent hydration mismatch for theme toggle
-  // eslint-disable-next-line react-hooks/set-state-in-effect
   useEffect(() => { setMounted(true); }, []);
 
   // Auto-scroll to Step 2 when upload completes
@@ -385,35 +454,28 @@ export default function Home() {
   );
 
   return (
-    <div className="flex min-h-screen flex-col bg-white dark:bg-neutral-950 text-black dark:text-white overflow-x-hidden">
+    <div className="flex flex-col bg-white dark:bg-neutral-950 text-black dark:text-white">
       {/* Header */}
       <header className="fixed top-0 left-0 right-0 z-50 bg-white/90 dark:bg-neutral-950/90 backdrop-blur-md border-b border-black/5 dark:border-white/10">
         <div className="container-center">
           <div className="flex h-16 items-center justify-between">
             {/* Logo */}
-            <Link href="/" className="flex items-center gap-2 text-lg font-semibold tracking-tight text-black dark:text-white">
-              <Logo size={28} />
+            <Link href="/" className="text-lg font-semibold tracking-tight text-black dark:text-white">
               SpecVault
             </Link>
 
             {/* Desktop Navigation */}
-            <nav className="hidden md:flex items-center gap-3 lg:gap-6">
-              {[
-                { label: "Who", href: "#features" },
-                { label: "Why", href: "#why" },
-                { label: "Demo", href: "#solutions" },
-                { label: "Contact", href: "#contact" },
-              ].map((item) => (
-                  <a
-                    key={item.label}
-                    href={item.href}
-                    className="relative text-sm text-black/60 dark:text-white/60 hover:text-black dark:hover:text-white transition-colors group"
-                  >
-                    {item.label}
-                    <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-green-500 transition-all duration-300 group-hover:w-full" />
-                  </a>
-                )
-              )}
+            <nav className="hidden md:flex items-center gap-4 lg:gap-8">
+              {["Why", "Demo", "Contact"].map((item) => (
+                <a
+                  key={item}
+                  href={`#${item.toLowerCase()}`}
+                  className="relative text-sm text-black/60 dark:text-white/60 hover:text-black dark:hover:text-white transition-colors group"
+                >
+                  {item}
+                  <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-green-500 transition-all duration-300 group-hover:w-full" />
+                </a>
+              ))}
 
               {/* Dark/Light Mode Toggle */}
               {mounted && (
@@ -457,35 +519,29 @@ export default function Home() {
             transition={{ duration: 0.2 }}
             className="fixed inset-0 z-40 bg-white dark:bg-neutral-950 md:hidden"
           >
-            <div className="flex flex-col items-center justify-center h-full gap-6">
-              {[
-                { label: "Who", href: "#features" },
-                { label: "Why", href: "#why" },
-                { label: "Demo", href: "#solutions" },
-                { label: "Contact", href: "#contact" },
-              ].map((item, i) => (
-                  <motion.a
-                    key={item.label}
-                    href={item.href}
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: i * 0.08 }}
-                    className="text-3xl font-semibold text-black/80 dark:text-white/80 hover:text-black dark:hover:text-white transition-colors"
-                    onClick={() => setMobileMenuOpen(false)}
-                  >
-                    {item.label}
-                  </motion.a>
-                )
-              )}
+            <div className="flex flex-col items-center justify-center h-full gap-8">
+              {["Why", "Demo", "Contact"].map((item, i) => (
+                <motion.a
+                  key={item}
+                  href={`#${item.toLowerCase()}`}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: i * 0.1 }}
+                  className="text-3xl font-semibold text-black/80 dark:text-white/80 hover:text-black dark:hover:text-white transition-colors"
+                  onClick={() => setMobileMenuOpen(false)}
+                >
+                  {item}
+                </motion.a>
+              ))}
 
               {/* Theme toggle in mobile menu */}
               {mounted && (
                 <motion.button
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.6 }}
+                  transition={{ delay: 0.3 }}
                   onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
-                  className="flex items-center gap-3 text-lg text-black/60 dark:text-white/60 hover:text-black dark:hover:text-white transition-colors mt-2"
+                  className="flex items-center gap-3 text-lg text-black/60 dark:text-white/60 hover:text-black dark:hover:text-white transition-colors mt-4"
                 >
                   {theme === "dark" ? (
                     <>
@@ -507,493 +563,116 @@ export default function Home() {
 
       <main className="flex-1 pt-16">
         {/* Hero Section */}
-        <section className="relative py-16 sm:py-24 md:py-32 overflow-hidden">
+        <section className="relative py-16 sm:py-24 md:py-40">
           <div className="container-wide">
-            <div className="flex flex-col lg:flex-row gap-12 lg:gap-16 items-center">
-              {/* Left: Text content */}
-              <div className="flex-1 text-center lg:text-left space-y-8">
-                {/* Badge */}
-                <motion.div
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.4 }}
-                  className="inline-flex items-center gap-2 px-3 py-1.5 border border-green-200 dark:border-green-800 bg-green-50 dark:bg-green-950/30 rounded-full text-xs font-semibold text-green-700 dark:text-green-400"
-                >
-                  <motion.span
-                    className="w-2 h-2 bg-green-500 rounded-full"
-                    animate={{ scale: [1, 1.3, 1], opacity: [1, 0.6, 1] }}
-                    transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
-                  />
-                  Now in Beta
-                </motion.div>
-
-                {/* Headline */}
-                <div className="space-y-5">
+            <div className="flex flex-col lg:flex-row gap-12 lg:gap-8 items-center">
+              {/* Center/Left: Text content */}
+              <div className="flex-1 text-center space-y-8">
+                <div className="space-y-6">
                   <motion.h1
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.6, delay: 0.1 }}
-                    className="text-4xl sm:text-5xl md:text-6xl font-bold tracking-tight leading-[1.08] text-black dark:text-white"
+                    className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold tracking-tight leading-[1.05] text-black dark:text-white"
                   >
-                    The Steel Hub for{" "}<br />
-                    Oil &amp; Gas Engineers
+                    <motion.span
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      transition={{ duration: 0.5, delay: 0.2 }}
+                    >
+                      SPECVAULT
+                    </motion.span>
                   </motion.h1>
                   <motion.p
                     initial={{ opacity: 0, y: 10 }}
                     animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.5, delay: 0.3 }}
-                    className="text-base sm:text-lg text-black/60 dark:text-white/60 max-w-xl leading-relaxed"
+                    transition={{ duration: 0.5, delay: 0.4 }}
+                    className="text-lg sm:text-xl text-black/60 dark:text-white/60 max-w-2xl mx-auto leading-relaxed px-4"
                   >
-                    Upload your ASTM, API, and NACE specs. Ask any question in plain English. Get cited, verified answers in seconds.
+                    ASTM, NACE, and API specs, instantly searchable.
+                    <br />
+                    Built for materials engineers who need{" "}
+                    <span className="relative inline-block text-black dark:text-white font-semibold">
+                      audit-ready answers
+                      <motion.span
+                        className="absolute -bottom-1 left-0 right-0 h-[3px] bg-green-500"
+                        initial={{ scaleX: 0 }}
+                        animate={{ scaleX: 1 }}
+                        transition={{ duration: 0.6, delay: 0.8 }}
+                        style={{ transformOrigin: "left" }}
+                      />
+                    </span>
+                    .
                   </motion.p>
                 </div>
 
-                {/* CTAs */}
                 <motion.div
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.5, delay: 0.5 }}
-                  className="flex flex-wrap gap-3 sm:gap-4 justify-center lg:justify-start"
+                  transition={{ duration: 0.5, delay: 0.8 }}
+                  className="flex flex-wrap gap-3 sm:gap-4 justify-center px-4"
                 >
-                  <a href="#solutions" className="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium bg-black dark:bg-white text-white dark:text-black hover:bg-black/90 dark:hover:bg-white/90 h-12 sm:h-14 px-6 sm:px-8 text-base sm:text-lg touch-target transition-all duration-300 hover:scale-105 hover:shadow-lg">
-                    Try It Now
-                    <ArrowRight className="ml-2 h-4 w-4" />
-                  </a>
-                  <a href="#contact" className="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium border border-black/20 dark:border-white/20 bg-white dark:bg-transparent text-black dark:text-white hover:bg-black/5 dark:hover:bg-white/10 h-12 sm:h-14 px-5 sm:px-6 text-base sm:text-lg touch-target transition-all duration-300 hover:scale-105 hover:shadow-lg">
-                    Get Access
-                  </a>
+                  <Button size="lg" className="bg-black dark:bg-white text-white dark:text-black hover:bg-black/90 dark:hover:bg-white/90 h-12 sm:h-14 px-6 sm:px-8 text-base sm:text-lg touch-target transition-all duration-300 hover:scale-105 hover:shadow-lg" asChild>
+                    <a href="#demo">
+                      Try Demo
+                    </a>
+                  </Button>
+                  <Button size="lg" variant="outline" className="border-black/20 dark:border-white/20 bg-white dark:bg-transparent text-black dark:text-white hover:bg-black/5 dark:hover:bg-white/10 h-12 sm:h-14 px-5 sm:px-6 text-base sm:text-lg touch-target transition-all duration-300 hover:scale-105 hover:shadow-lg" asChild>
+                    <a href="#contact">
+                      Get Access
+                    </a>
+                  </Button>
                 </motion.div>
 
-                {/* 4-Metric Stats Row */}
+                {/* Key Metrics */}
                 <motion.div
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.5, delay: 0.7 }}
-                  className="flex flex-wrap lg:flex-nowrap divide-x divide-black/10 dark:divide-white/10 pt-4"
+                  transition={{ duration: 0.5, delay: 1.0 }}
+                  className="grid grid-cols-2 gap-4 sm:gap-6 pt-4 max-w-md mx-auto px-4"
                 >
-                  {[
-                    { value: "91.3%", label: "Accuracy" },
-                    { value: "~0%", label: "Hallucinations" },
-                    { value: "96.3%", label: "Citation Rate" },
-                    { value: "<15s", label: "Response Time" },
-                  ].map((stat, i) => (
-                    <div key={i} className="flex-1 text-center px-3 sm:px-4 py-2 first:pl-0 last:pr-0">
-                      <p className="text-lg sm:text-xl md:text-2xl font-bold text-black dark:text-white">{stat.value}</p>
-                      <p className="text-xs text-black/50 dark:text-white/50 mt-0.5">{stat.label}</p>
-                    </div>
-                  ))}
-                </motion.div>
-
-                {/* Standards Badges */}
-                <motion.div
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.5, delay: 0.9 }}
-                  className="flex flex-wrap gap-2 justify-center lg:justify-start"
-                >
-                  <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-neutral-100 dark:bg-neutral-800 text-neutral-600 dark:text-neutral-300 border border-neutral-200 dark:border-neutral-700">
-                    ASTM
-                  </span>
-                  <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-blue-50 dark:bg-blue-950/30 text-blue-600 dark:text-blue-400 border border-blue-200 dark:border-blue-800">
-                    API
-                  </span>
-                  <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-amber-50 dark:bg-amber-950/30 text-amber-600 dark:text-amber-400 border border-amber-200 dark:border-amber-800">
-                    NACE
-                  </span>
+                  <div className="text-center">
+                    <p className="text-xl sm:text-2xl md:text-3xl font-semibold text-black dark:text-white">4+ hrs</p>
+                    <p className="text-xs sm:text-sm text-black/60 dark:text-white/60">Saved per day</p>
+                  </div>
+                  <div className="text-center">
+                    <p className="text-xl sm:text-2xl md:text-3xl font-semibold text-black dark:text-white">100%</p>
+                    <p className="text-xs sm:text-sm text-black/60 dark:text-white/60">Cited sources</p>
+                  </div>
                 </motion.div>
               </div>
 
-              {/* Right: Product Preview */}
+              {/* Right: 3D Animation */}
               <motion.div
                 initial={{ opacity: 0, scale: 0.95 }}
                 animate={{ opacity: 1, scale: 1 }}
-                transition={{ duration: 0.8, delay: 0.3 }}
-                className="flex-1 w-full max-w-lg lg:max-w-none"
+                transition={{ duration: 0.8, delay: 0.2 }}
+                className="hidden lg:block flex-shrink-0 w-full max-w-[500px]"
               >
-                <ProductPreview />
+                <Hero3DAnimation />
               </motion.div>
             </div>
           </div>
         </section>
 
-        {/* Who This Is For - Persona Section */}
-        <section id="features" className="relative min-h-screen md:h-screen flex items-center py-8 md:py-4 scroll-mt-16 border-t border-black/5 dark:border-white/10 bg-black/[0.02] dark:bg-white/[0.02]">
-          <div className="container-center">
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.6 }}
-              className="space-y-3 md:space-y-4"
-            >
-              <div className="text-center space-y-1">
-                <span className="text-xs font-semibold tracking-widest text-black/40 dark:text-white/40 uppercase">Built for your team</span>
-                <h2 className="text-3xl sm:text-4xl font-bold tracking-tight text-black dark:text-white">
-                  Who Uses SpecVault
-                </h2>
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-3 lg:gap-4">
-                {/* Materials Engineers */}
-                <motion.div
-                  initial={{ opacity: 0, y: 20 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ duration: 0.5, delay: 0 }}
-                  className="group rounded-2xl border border-black/5 dark:border-white/10 bg-white dark:bg-neutral-900 p-3 space-y-2 hover:shadow-xl hover:border-green-200 dark:hover:border-green-800 transition-all duration-300"
-                >
-                  <div className="flex items-center gap-2">
-                    <div className="w-7 h-7 rounded-lg bg-green-50 dark:bg-green-950/40 border border-green-200 dark:border-green-800 flex items-center justify-center shrink-0">
-                      <Microscope className="w-3.5 h-3.5 text-green-600 dark:text-green-400" />
-                    </div>
-                    <div>
-                      <h3 className="font-semibold text-sm text-black dark:text-white leading-tight">Materials Engineers</h3>
-                      <p className="text-[11px] text-black/50 dark:text-white/50 leading-tight">Find mechanical properties across specs in seconds</p>
-                    </div>
-                  </div>
-                  {/* Mini Dashboard: Property Lookup */}
-                  <div className="rounded-lg bg-neutral-50 dark:bg-neutral-800/50 border border-black/5 dark:border-white/5 p-2 space-y-1 overflow-hidden relative">
-                    {/* Scanning line animation */}
-                    <motion.div
-                      className="absolute left-0 right-0 h-px bg-gradient-to-r from-transparent via-green-500/40 to-transparent"
-                      animate={{ top: ["0%", "100%", "0%"] }}
-                      transition={{ duration: 4, repeat: Infinity, ease: "linear" }}
-                    />
-                    <div className="flex items-center gap-2 text-[10px] font-semibold text-black/40 dark:text-white/40 uppercase tracking-wider">
-                      <motion.div
-                        className="w-1.5 h-1.5 rounded-full bg-green-500"
-                        animate={{ scale: [1, 1.5, 1], opacity: [1, 0.5, 1] }}
-                        transition={{ duration: 2, repeat: Infinity }}
-                      />
-                      Property Lookup — S32205
-                    </div>
-                    <div className="space-y-1">
-                      {[
-                        { prop: "Yield Strength", val: "65 ksi", spec: "A790", pct: 72 },
-                        { prop: "Tensile Strength", val: "90 ksi", spec: "A790", pct: 100 },
-                        { prop: "Elongation", val: "25%", spec: "A790", pct: 55 },
-                        { prop: "Hardness", val: "293 HBW", spec: "A790", pct: 65 },
-                      ].map((row, j) => (
-                        <motion.div
-                          key={j}
-                          initial={{ opacity: 0, x: -20 }}
-                          whileInView={{ opacity: 1, x: 0 }}
-                          viewport={{ once: true }}
-                          transition={{ delay: 0.3 + j * 0.1 }}
-                          className="flex items-center gap-2"
-                        >
-                          <span className="text-[11px] text-black/60 dark:text-white/60 w-24 shrink-0">{row.prop}</span>
-                          <div className="flex-1 h-3.5 bg-black/5 dark:bg-white/5 rounded-full overflow-hidden relative">
-                            <motion.div
-                              className="h-full bg-gradient-to-r from-green-500 to-green-400 rounded-full"
-                              initial={{ width: "0%" }}
-                              whileInView={{ width: `${row.pct}%` }}
-                              viewport={{ once: true }}
-                              transition={{ duration: 1, delay: 0.5 + j * 0.15, ease: "easeOut" }}
-                            />
-                            <motion.div
-                              className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent"
-                              animate={{ x: ["-100%", "200%"] }}
-                              transition={{ duration: 3, repeat: Infinity, delay: j * 0.5, ease: "easeInOut" }}
-                            />
-                          </div>
-                          <motion.span
-                            className="text-[11px] font-bold text-black dark:text-white w-16 text-right"
-                            animate={{ opacity: [1, 0.6, 1] }}
-                            transition={{ duration: 3, repeat: Infinity, delay: j * 0.4 }}
-                          >{row.val}</motion.span>
-                          <span className="text-[10px] text-green-600 dark:text-green-400 font-medium w-8">{row.spec}</span>
-                        </motion.div>
-                      ))}
-                    </div>
-                  </div>
-                </motion.div>
-
-                {/* QA/QC Inspectors */}
-                <motion.div
-                  initial={{ opacity: 0, y: 20 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ duration: 0.5, delay: 0.1 }}
-                  className="group rounded-2xl border border-black/5 dark:border-white/10 bg-white dark:bg-neutral-900 p-3 space-y-2 hover:shadow-xl hover:border-green-200 dark:hover:border-green-800 transition-all duration-300"
-                >
-                  <div className="flex items-center gap-2">
-                    <div className="w-7 h-7 rounded-lg bg-blue-50 dark:bg-blue-950/40 border border-blue-200 dark:border-blue-800 flex items-center justify-center shrink-0">
-                      <ClipboardCheck className="w-3.5 h-3.5 text-blue-600 dark:text-blue-400" />
-                    </div>
-                    <div>
-                      <h3 className="font-semibold text-sm text-black dark:text-white leading-tight">QA/QC Inspectors</h3>
-                      <p className="text-[11px] text-black/50 dark:text-white/50 leading-tight">Verify MTR data against specification requirements</p>
-                    </div>
-                  </div>
-                  {/* Mini Dashboard: Verification Checklist */}
-                  <div className="rounded-lg bg-neutral-50 dark:bg-neutral-800/50 border border-black/5 dark:border-white/5 p-2 space-y-1 overflow-hidden relative">
-                    {/* Scanning line */}
-                    <motion.div
-                      className="absolute left-0 right-0 h-px bg-gradient-to-r from-transparent via-blue-500/40 to-transparent"
-                      animate={{ top: ["0%", "100%", "0%"] }}
-                      transition={{ duration: 5, repeat: Infinity, ease: "linear" }}
-                    />
-                    <div className="flex items-center gap-2 text-[10px] font-semibold text-black/40 dark:text-white/40 uppercase tracking-wider">
-                      <motion.div
-                        className="w-1.5 h-1.5 rounded-full bg-blue-500"
-                        animate={{ scale: [1, 1.5, 1], opacity: [1, 0.5, 1] }}
-                        transition={{ duration: 2, repeat: Infinity }}
-                      />
-                      MTR Verification — Heat #2847A
-                    </div>
-                    <div className="space-y-0.5">
-                      {[
-                        { check: "Yield Strength ≥ 65 ksi", mtr: "71.2 ksi", pass: true },
-                        { check: "Tensile Strength ≥ 90 ksi", mtr: "97.5 ksi", pass: true },
-                        { check: "Elongation ≥ 25%", mtr: "32%", pass: true },
-                        { check: "Hardness ≤ 293 HBW", mtr: "256 HBW", pass: true },
-                        { check: "NACE MR0175 Compliant", mtr: "Yes", pass: true },
-                      ].map((row, j) => (
-                        <motion.div
-                          key={j}
-                          initial={{ opacity: 0, x: -15 }}
-                          whileInView={{ opacity: 1, x: 0 }}
-                          viewport={{ once: true }}
-                          transition={{ delay: 0.3 + j * 0.12 }}
-                          className="flex items-center gap-1.5 py-0.5 px-1 rounded"
-                        >
-                          <motion.div
-                            animate={{ scale: [1, 1.2, 1] }}
-                            transition={{ duration: 2, repeat: Infinity, delay: j * 0.6 }}
-                          >
-                            <CheckCircle className={`w-3.5 h-3.5 ${row.pass ? 'text-green-500' : 'text-red-500'}`} />
-                          </motion.div>
-                          <span className="text-[11px] text-black/70 dark:text-white/70 flex-1">{row.check}</span>
-                          <motion.span
-                            className="text-[11px] font-mono font-bold text-black/80 dark:text-white/80"
-                            animate={{ opacity: [1, 0.5, 1] }}
-                            transition={{ duration: 3, repeat: Infinity, delay: j * 0.3 }}
-                          >{row.mtr}</motion.span>
-                        </motion.div>
-                      ))}
-                    </div>
-                    <motion.div
-                      initial={{ opacity: 0, y: 5 }}
-                      whileInView={{ opacity: 1, y: 0 }}
-                      viewport={{ once: true }}
-                      transition={{ delay: 1.2 }}
-                      className="flex items-center justify-center gap-1.5 py-1.5 rounded-lg bg-green-50 dark:bg-green-950/30 border border-green-200 dark:border-green-800"
-                    >
-                      <motion.div animate={{ rotate: [0, 10, -10, 0] }} transition={{ duration: 3, repeat: Infinity }}>
-                        <Shield className="w-3 h-3 text-green-600 dark:text-green-400" />
-                      </motion.div>
-                      <span className="text-[11px] font-semibold text-green-700 dark:text-green-400">All 5 checks passed</span>
-                    </motion.div>
-                  </div>
-                </motion.div>
-
-                {/* Procurement Teams */}
-                <motion.div
-                  initial={{ opacity: 0, y: 20 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ duration: 0.5, delay: 0.2 }}
-                  className="group rounded-2xl border border-black/5 dark:border-white/10 bg-white dark:bg-neutral-900 p-4 space-y-3 hover:shadow-xl hover:border-green-200 dark:hover:border-green-800 transition-all duration-300"
-                >
-                  <div className="flex items-center gap-2.5">
-                    <div className="w-8 h-8 rounded-lg bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-800 flex items-center justify-center">
-                      <Package className="w-4 h-4 text-amber-600 dark:text-amber-400" />
-                    </div>
-                    <div>
-                      <h3 className="font-semibold text-sm text-black dark:text-white">Procurement Teams</h3>
-                      <p className="text-[11px] text-black/50 dark:text-white/50">Compare material grades across standards</p>
-                    </div>
-                  </div>
-                  {/* Mini Dashboard: Grade Comparison Table */}
-                  <div className="rounded-xl bg-neutral-50 dark:bg-neutral-800/50 border border-black/5 dark:border-white/5 p-3 space-y-2 overflow-hidden relative">
-                    {/* Scanning line */}
-                    <motion.div
-                      className="absolute left-0 right-0 h-px bg-gradient-to-r from-transparent via-amber-500/40 to-transparent"
-                      animate={{ top: ["0%", "100%", "0%"] }}
-                      transition={{ duration: 4.5, repeat: Infinity, ease: "linear" }}
-                    />
-                    <div className="flex items-center gap-2 text-[10px] font-semibold text-black/40 dark:text-white/40 uppercase tracking-wider">
-                      <motion.div
-                        className="w-1.5 h-1.5 rounded-full bg-amber-500"
-                        animate={{ scale: [1, 1.5, 1], opacity: [1, 0.5, 1] }}
-                        transition={{ duration: 2, repeat: Infinity }}
-                      />
-                      Grade Comparison — Duplex SS
-                    </div>
-                    {/* Table header */}
-                    <div className="grid grid-cols-4 gap-2 text-[10px] font-semibold text-black/40 dark:text-white/40 uppercase pb-1 border-b border-black/5 dark:border-white/5">
-                      <span>Grade</span>
-                      <span>Yield</span>
-                      <span>Tensile</span>
-                      <span>Spec</span>
-                    </div>
-                    {/* Table rows */}
-                    {[
-                      { grade: "S32205", yield: "65 ksi", tensile: "90 ksi", spec: "A790", highlight: true },
-                      { grade: "S32205", yield: "70 ksi", tensile: "90 ksi", spec: "A789", highlight: false },
-                      { grade: "S31803", yield: "65 ksi", tensile: "90 ksi", spec: "A790", highlight: false },
-                      { grade: "S32750", yield: "80 ksi", tensile: "116 ksi", spec: "A790", highlight: false },
-                    ].map((row, j) => (
-                      <motion.div
-                        key={j}
-                        initial={{ opacity: 0, y: 10 }}
-                        whileInView={{ opacity: 1, y: 0 }}
-                        viewport={{ once: true }}
-                        transition={{ delay: 0.3 + j * 0.1 }}
-                        className={`grid grid-cols-4 gap-2 py-1.5 px-1.5 rounded-lg text-xs ${row.highlight ? 'bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800' : ''}`}
-                      >
-                        <span className="font-mono font-bold text-black/80 dark:text-white/80">{row.grade}</span>
-                        <motion.span
-                          className="text-black/60 dark:text-white/60"
-                          animate={row.highlight ? { color: ["rgba(0,0,0,0.6)", "rgba(217,119,6,1)", "rgba(0,0,0,0.6)"] } : {}}
-                          transition={{ duration: 3, repeat: Infinity, delay: j * 0.3 }}
-                        >{row.yield}</motion.span>
-                        <span className="text-black/60 dark:text-white/60">{row.tensile}</span>
-                        <span className="text-amber-600 dark:text-amber-400 font-medium">{row.spec}</span>
-                      </motion.div>
-                    ))}
-                    <motion.div
-                      className="text-[10px] text-black/40 dark:text-white/40 text-center pt-1"
-                      animate={{ opacity: [0.4, 1, 0.4] }}
-                      transition={{ duration: 3, repeat: Infinity }}
-                    >
-                      ⚠ A789 vs A790 yield differs for S32205 — 70 vs 65 ksi
-                    </motion.div>
-                  </div>
-                </motion.div>
-
-                {/* Compliance Officers */}
-                <motion.div
-                  initial={{ opacity: 0, y: 20 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ duration: 0.5, delay: 0.3 }}
-                  className="group rounded-2xl border border-black/5 dark:border-white/10 bg-white dark:bg-neutral-900 p-4 space-y-3 hover:shadow-xl hover:border-green-200 dark:hover:border-green-800 transition-all duration-300"
-                >
-                  <div className="flex items-center gap-2.5">
-                    <div className="w-8 h-8 rounded-lg bg-purple-50 dark:bg-purple-950/40 border border-purple-200 dark:border-purple-800 flex items-center justify-center">
-                      <Scale className="w-4 h-4 text-purple-600 dark:text-purple-400" />
-                    </div>
-                    <div>
-                      <h3 className="font-semibold text-sm text-black dark:text-white">Compliance Officers</h3>
-                      <p className="text-[11px] text-black/50 dark:text-white/50">Generate audit-ready documentation with citations</p>
-                    </div>
-                  </div>
-                  {/* Mini Dashboard: Audit Pipeline */}
-                  <div className="rounded-xl bg-neutral-50 dark:bg-neutral-800/50 border border-black/5 dark:border-white/5 p-3 space-y-2 overflow-hidden relative">
-                    {/* Scanning line */}
-                    <motion.div
-                      className="absolute left-0 right-0 h-px bg-gradient-to-r from-transparent via-purple-500/40 to-transparent"
-                      animate={{ top: ["0%", "100%", "0%"] }}
-                      transition={{ duration: 5.5, repeat: Infinity, ease: "linear" }}
-                    />
-                    <div className="flex items-center gap-2 text-[10px] font-semibold text-black/40 dark:text-white/40 uppercase tracking-wider">
-                      <motion.div
-                        className="w-1.5 h-1.5 rounded-full bg-purple-500"
-                        animate={{ scale: [1, 1.5, 1], opacity: [1, 0.5, 1] }}
-                        transition={{ duration: 2, repeat: Infinity }}
-                      />
-                      Audit Pipeline
-                    </div>
-                    {/* Pipeline stages */}
-                    <div className="space-y-2">
-                      {[
-                        { stage: "Document Upload", status: "complete", icon: "📄" },
-                        { stage: "Spec Extraction", status: "complete", icon: "🔍" },
-                        { stage: "Claim Verification", status: "complete", icon: "✓" },
-                        { stage: "Citation Mapping", status: "active", icon: "🔗" },
-                        { stage: "Report Generation", status: "pending", icon: "📋" },
-                      ].map((step, j) => (
-                        <motion.div
-                          key={j}
-                          initial={{ opacity: 0, x: -10 }}
-                          whileInView={{ opacity: 1, x: 0 }}
-                          viewport={{ once: true }}
-                          transition={{ delay: 0.3 + j * 0.12 }}
-                          className="flex items-center gap-3"
-                        >
-                          {/* Connector line */}
-                          <div className="flex flex-col items-center w-5">
-                            <div className={`w-5 h-5 rounded-full flex items-center justify-center text-[10px] ${
-                              step.status === 'complete' ? 'bg-green-500 text-white' :
-                              step.status === 'active' ? 'bg-purple-500 text-white' :
-                              'bg-black/10 dark:bg-white/10 text-black/40 dark:text-white/40'
-                            }`}>
-                              {step.status === 'complete' ? '✓' : step.status === 'active' ? (
-                                <motion.span
-                                  animate={{ opacity: [1, 0.3, 1] }}
-                                  transition={{ duration: 1.5, repeat: Infinity }}
-                                >●</motion.span>
-                              ) : '○'}
-                            </div>
-                            {j < 4 && (
-                              <div className={`w-0.5 h-2 ${
-                                step.status === 'complete' ? 'bg-green-300 dark:bg-green-700' :
-                                'bg-black/10 dark:bg-white/10'
-                              }`} />
-                            )}
-                          </div>
-                          <span className={`text-xs flex-1 ${
-                            step.status === 'complete' ? 'text-black/70 dark:text-white/70' :
-                            step.status === 'active' ? 'text-purple-700 dark:text-purple-400 font-semibold' :
-                            'text-black/30 dark:text-white/30'
-                          }`}>{step.stage}</span>
-                          {step.status === 'active' && (
-                            <motion.span
-                              className="text-[10px] px-2 py-0.5 bg-purple-100 dark:bg-purple-900/50 text-purple-600 dark:text-purple-400 rounded-full font-medium"
-                              animate={{ opacity: [1, 0.5, 1] }}
-                              transition={{ duration: 2, repeat: Infinity }}
-                            >
-                              Processing...
-                            </motion.span>
-                          )}
-                        </motion.div>
-                      ))}
-                    </div>
-                    <motion.div
-                      initial={{ opacity: 0 }}
-                      whileInView={{ opacity: 1 }}
-                      viewport={{ once: true }}
-                      transition={{ delay: 1.2 }}
-                      className="flex items-center justify-between pt-2 border-t border-black/5 dark:border-white/5"
-                    >
-                      <span className="text-[10px] text-black/40 dark:text-white/40">3 of 5 stages complete</span>
-                      <div className="h-1.5 w-20 bg-black/5 dark:bg-white/5 rounded-full overflow-hidden">
-                        <motion.div
-                          className="h-full bg-gradient-to-r from-purple-500 to-green-500 rounded-full"
-                          initial={{ width: "0%" }}
-                          whileInView={{ width: "60%" }}
-                          viewport={{ once: true }}
-                          transition={{ duration: 1.2, delay: 0.8, ease: "easeOut" }}
-                        />
-                      </div>
-                    </motion.div>
-                  </div>
-                </motion.div>
-              </div>
-            </motion.div>
-          </div>
-        </section>
-
         {/* Why SpecVault vs Generic LLMs Section */}
-        <section id="why" className="relative h-screen flex items-center py-4 sm:py-6 md:py-8 pb-8 sm:pb-10 md:pb-12 scroll-mt-16 border-t border-black/5 dark:border-white/10 bg-black/[0.02] dark:bg-white/[0.02]">
+        <section id="why" className="relative py-16 sm:py-20 md:py-28">
           <div className="container-center">
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.6 }}
-              className="space-y-6"
+              className="space-y-16" // Increased spacing
             >
               {/* Section Header */}
-              <div className="text-center space-y-4">
+              <div className="text-center space-y-6">
                 <motion.h2
                   initial={{ opacity: 0, y: 10 }}
                   whileInView={{ opacity: 1, y: 0 }}
                   viewport={{ once: true }}
                   transition={{ duration: 0.5, delay: 0.1 }}
-                  className="text-3xl sm:text-4xl md:text-5xl font-bold tracking-tight text-black dark:text-white"
+                  className="text-4xl sm:text-5xl md:text-6xl font-bold tracking-tight text-black dark:text-white"
                 >
                   Why SpecVault?
                 </motion.h2>
@@ -1002,278 +681,213 @@ export default function Home() {
                   whileInView={{ opacity: 1, y: 0 }}
                   viewport={{ once: true }}
                   transition={{ duration: 0.5, delay: 0.2 }}
-                  className="text-lg text-black/60 dark:text-white/60 max-w-3xl mx-auto leading-relaxed"
+                  className="text-xl text-black/60 dark:text-white/60 max-w-3xl mx-auto leading-relaxed"
                 >
-                  Same question, two very different answers. See what <span className="text-black dark:text-white font-semibold">your documents</span> make possible.
+                  Generic LLMs (ChatGPT, Claude, Gemini) hallucinate specs. <br className="hidden sm:block" />
+                  SpecVault only answers from <span className="text-black dark:text-white font-semibold">your documents</span>.
                 </motion.p>
               </div>
 
-              {/* Shared Query Bar */}
-              <motion.div
-                initial={{ opacity: 0, y: 10 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.5, delay: 0.25 }}
-                className="max-w-3xl mx-auto"
-              >
-                <div className="bg-neutral-900 dark:bg-neutral-800 rounded-xl px-5 py-3.5 border border-neutral-700 dark:border-neutral-600 flex items-center gap-3">
-                  <div className="w-2 h-2 rounded-full bg-green-500 shrink-0" />
-                  <p className="text-sm text-neutral-300 font-mono">
-                    What is the yield strength of S32205 per ASTM A790?
-                  </p>
-                </div>
-              </motion.div>
-
-              {/* Comparison Dashboard Grid */}
-              <div className="grid md:grid-cols-2 gap-4 lg:gap-6 max-w-5xl mx-auto">
-                {/* SpecVault Dashboard */}
+              {/* Comparison Grid */}
+              <div className="grid md:grid-cols-2 gap-6 md:gap-8 max-w-5xl mx-auto px-4">
+                {/* SpecVault Card */}
                 <motion.div
                   initial={{ opacity: 0, x: -20 }}
                   whileInView={{ opacity: 1, x: 0 }}
                   viewport={{ once: true }}
                   transition={{ duration: 0.5, delay: 0.3 }}
-                  className="group rounded-2xl border border-green-200 dark:border-green-800 bg-white dark:bg-neutral-900 p-4 space-y-3 hover:shadow-xl hover:border-green-300 dark:hover:border-green-700 transition-all duration-300"
+                  className="rounded-2xl border border-green-200 dark:border-green-800 bg-green-50/50 dark:bg-green-950/30 p-8 space-y-8 hover:shadow-lg transition-shadow duration-300"
                 >
-                  {/* Header */}
-                  <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-lg bg-green-50 dark:bg-green-950/40 border border-green-200 dark:border-green-800 flex items-center justify-center">
-                      <Shield className="w-5 h-5 text-green-600 dark:text-green-400" />
+                  <div className="flex flex-col items-center text-center gap-4">
+                    <div className="w-16 h-16 rounded-full bg-green-500 flex items-center justify-center shadow-lg shadow-green-500/20">
+                      <svg className="w-8 h-8 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" />
+                      </svg>
                     </div>
                     <div>
-                      <h3 className="font-semibold text-green-700 dark:text-green-400">SpecVault</h3>
-                      <p className="text-xs text-green-600/70 dark:text-green-400/70">Trustworthy &amp; Traceable</p>
+                      <h3 className="text-2xl font-bold text-green-700 dark:text-green-400">SpecVault</h3>
+                      <p className="text-sm text-green-600/80 dark:text-green-400/80 font-medium mt-1">Trustworthy & Traceable</p>
                     </div>
                   </div>
-
-                  {/* Response Panel */}
-                  <div className="rounded-xl bg-green-50/50 dark:bg-green-950/20 border border-green-100 dark:border-green-800/50 p-3 space-y-2 overflow-hidden relative">
-                    <motion.div
-                      className="absolute left-0 right-0 h-px bg-gradient-to-r from-transparent via-green-500/30 to-transparent"
-                      animate={{ top: ["0%", "100%", "0%"] }}
-                      transition={{ duration: 5, repeat: Infinity, ease: "linear" }}
-                    />
-                    <div className="flex items-center gap-2 text-[10px] font-semibold text-green-600/60 dark:text-green-400/60 uppercase tracking-wider">
-                      <motion.div
-                        className="w-1.5 h-1.5 rounded-full bg-green-500"
-                        animate={{ scale: [1, 1.5, 1], opacity: [1, 0.5, 1] }}
-                        transition={{ duration: 2, repeat: Infinity }}
-                      />
-                      Response
-                    </div>
-                    <p className="text-sm text-black/90 dark:text-white/90 leading-relaxed">
-                      The minimum yield strength for S32205 duplex stainless steel per ASTM A790 is <strong className="text-green-700 dark:text-green-400">65 ksi (450 MPa)</strong>.
-                    </p>
-                  </div>
-
-                  {/* Source Citation */}
-                  <div className="rounded-xl bg-neutral-50 dark:bg-neutral-800/50 border border-black/5 dark:border-white/5 p-3 space-y-2 overflow-hidden relative">
-                    <div className="flex items-center gap-2 text-[10px] font-semibold text-black/40 dark:text-white/40 uppercase tracking-wider">
-                      <motion.div
-                        className="w-1.5 h-1.5 rounded-full bg-green-500"
-                        animate={{ scale: [1, 1.5, 1], opacity: [1, 0.5, 1] }}
-                        transition={{ duration: 2, repeat: Infinity, delay: 0.5 }}
-                      />
-                      Source &amp; Verification
-                    </div>
-                    <motion.div
-                      initial={{ opacity: 0, y: 5 }}
-                      whileInView={{ opacity: 1, y: 0 }}
-                      viewport={{ once: true }}
-                      transition={{ delay: 0.5 }}
-                      className="flex items-center gap-2 px-3 py-2 bg-green-50 dark:bg-green-950/30 border border-green-200 dark:border-green-800 rounded-lg"
-                    >
-                      <FileText className="w-3.5 h-3.5 text-green-600 dark:text-green-400 shrink-0" />
-                      <span className="text-xs font-medium text-green-700 dark:text-green-400">ASTM A790-14, Table 1, Page 3</span>
-                    </motion.div>
-
-                    {/* Confidence Bar */}
-                    <div className="space-y-1.5">
-                      <div className="flex items-center justify-between">
-                        <span className="text-[10px] text-black/40 dark:text-white/40 uppercase tracking-wider font-semibold">Confidence</span>
-                        <motion.span
-                          className="text-xs font-bold text-green-600 dark:text-green-400"
-                          animate={{ opacity: [1, 0.6, 1] }}
-                          transition={{ duration: 3, repeat: Infinity }}
-                        >94%</motion.span>
-                      </div>
-                      <div className="h-2 bg-black/5 dark:bg-white/5 rounded-full overflow-hidden">
-                        <motion.div
-                          className="h-full bg-gradient-to-r from-green-500 to-green-400 rounded-full"
-                          initial={{ width: "0%" }}
-                          whileInView={{ width: "94%" }}
-                          viewport={{ once: true }}
-                          transition={{ duration: 1.2, delay: 0.6, ease: "easeOut" }}
-                        />
-                      </div>
-                    </div>
-
-                    {/* Claim Verification */}
-                    <div className="space-y-1.5 pt-1">
-                      {[
-                        { claim: "Yield: 65 ksi", status: "Verified" },
-                        { claim: "Tensile: 90 ksi", status: "Verified" },
-                        { claim: "Spec: A790", status: "Verified" },
-                      ].map((item, j) => (
-                        <motion.div
-                          key={j}
-                          initial={{ opacity: 0, x: -10 }}
-                          whileInView={{ opacity: 1, x: 0 }}
-                          viewport={{ once: true }}
-                          transition={{ delay: 0.7 + j * 0.1 }}
-                          className="flex items-center gap-2"
-                        >
-                          <motion.div
-                            animate={{ scale: [1, 1.15, 1] }}
-                            transition={{ duration: 2.5, repeat: Infinity, delay: j * 0.4 }}
-                          >
-                            <CheckCircle className="w-3.5 h-3.5 text-green-500" />
-                          </motion.div>
-                          <span className="text-[11px] text-black/60 dark:text-white/60 flex-1">{item.claim}</span>
-                          <span className="text-[10px] font-semibold text-green-600 dark:text-green-400">{item.status}</span>
-                        </motion.div>
-                      ))}
-                    </div>
-                  </div>
-
-                  {/* Audit Trail */}
-                  <motion.div
-                    initial={{ opacity: 0, y: 5 }}
-                    whileInView={{ opacity: 1, y: 0 }}
-                    viewport={{ once: true }}
-                    transition={{ delay: 1.1 }}
-                    className="flex items-center justify-between px-3 py-2.5 rounded-lg bg-green-50 dark:bg-green-950/30 border border-green-200 dark:border-green-800"
-                  >
-                    <div className="flex items-center gap-2">
-                      <motion.div animate={{ rotate: [0, 10, -10, 0] }} transition={{ duration: 3, repeat: Infinity }}>
-                        <Shield className="w-3.5 h-3.5 text-green-600 dark:text-green-400" />
-                      </motion.div>
-                      <span className="text-xs font-semibold text-green-700 dark:text-green-400">Audit-ready</span>
-                    </div>
-                    <span className="text-[10px] text-green-600/60 dark:text-green-400/60">3 claims verified against source</span>
-                  </motion.div>
+                  <ul className="space-y-4">
+                    {[
+                      "Every answer traceable to page & document",
+                      "Audit-ready for ISO/API/ASTM compliance",
+                      "Quotes exact values from YOUR specs",
+                      "Current as your latest upload",
+                      "Searches YOUR documents only",
+                      "Liability-safe with traceable sources",
+                    ].map((item, i) => (
+                      <motion.li
+                        key={i}
+                        initial={{ opacity: 0, x: -10 }}
+                        whileInView={{ opacity: 1, x: 0 }}
+                        viewport={{ once: true }}
+                        transition={{ delay: 0.4 + i * 0.05 }}
+                        className="flex items-start gap-3"
+                      >
+                        <div className="mt-1 flex-shrink-0 w-5 h-5 rounded-full bg-green-200 dark:bg-green-800 flex items-center justify-center">
+                          <svg className="w-3.5 h-3.5 text-green-700 dark:text-green-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
+                          </svg>
+                        </div>
+                        <span className="text-base text-black/80 dark:text-white/80 font-medium">{item}</span>
+                      </motion.li>
+                    ))}
+                  </ul>
                 </motion.div>
 
-                {/* Generic LLM Dashboard */}
+                {/* Generic LLM Card */}
                 <motion.div
                   initial={{ opacity: 0, x: 20 }}
                   whileInView={{ opacity: 1, x: 0 }}
                   viewport={{ once: true }}
                   transition={{ duration: 0.5, delay: 0.4 }}
-                  className="group rounded-2xl border border-red-200 dark:border-red-800 bg-white dark:bg-neutral-900 p-4 space-y-3 hover:shadow-xl hover:border-red-300 dark:hover:border-red-700 transition-all duration-300"
+                  className="rounded-2xl border border-red-200 dark:border-red-800 bg-red-50/30 dark:bg-red-950/30 p-8 space-y-8 hover:shadow-lg transition-shadow duration-300"
                 >
-                  {/* Header */}
-                  <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-lg bg-red-50 dark:bg-red-950/40 border border-red-200 dark:border-red-800 flex items-center justify-center">
-                      <svg className="w-5 h-5 text-red-500 dark:text-red-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                  <div className="flex flex-col items-center text-center gap-4">
+                    <div className="w-16 h-16 rounded-full bg-red-400 flex items-center justify-center shadow-lg shadow-red-400/20">
+                      <svg className="w-8 h-8 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M6 18L18 6M6 6l12 12" />
                       </svg>
                     </div>
                     <div>
-                      <h3 className="font-semibold text-red-600 dark:text-red-400">Generic LLM</h3>
-                      <p className="text-xs text-red-500/70 dark:text-red-400/70">ChatGPT / Claude / Gemini</p>
-                    </div>
-                  </div>
-
-                  {/* Response Panel */}
-                  <div className="rounded-xl bg-red-50/30 dark:bg-red-950/10 border border-red-100 dark:border-red-800/50 p-3 space-y-2 overflow-hidden relative">
-                    <div className="flex items-center gap-2 text-[10px] font-semibold text-red-500/60 dark:text-red-400/60 uppercase tracking-wider">
-                      <div className="w-1.5 h-1.5 rounded-full bg-red-400" />
-                      Response
-                    </div>
-                    <p className="text-sm text-black/60 dark:text-white/60 leading-relaxed italic">
-                      S32205 duplex stainless steel typically has a yield strength of <span className="bg-red-100 dark:bg-red-900/50 text-red-600 dark:text-red-400 px-1 rounded font-medium not-italic">around 60-80 ksi</span>, depending on the heat treatment and product form...
-                    </p>
-                  </div>
-
-                  {/* No Source */}
-                  <div className="rounded-xl bg-neutral-50 dark:bg-neutral-800/50 border border-black/5 dark:border-white/5 p-3 space-y-2 overflow-hidden relative">
-                    <div className="flex items-center gap-2 text-[10px] font-semibold text-black/40 dark:text-white/40 uppercase tracking-wider">
-                      <div className="w-1.5 h-1.5 rounded-full bg-red-400" />
-                      Source &amp; Verification
-                    </div>
-                    <motion.div
-                      initial={{ opacity: 0, y: 5 }}
-                      whileInView={{ opacity: 1, y: 0 }}
-                      viewport={{ once: true }}
-                      transition={{ delay: 0.5 }}
-                      className="flex items-center gap-2 px-3 py-2 bg-red-50 dark:bg-red-950/30 border border-red-200 dark:border-red-800 rounded-lg"
-                    >
-                      <svg className="w-3.5 h-3.5 text-red-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-                      </svg>
-                      <span className="text-xs font-medium text-red-500 dark:text-red-400">No source document available</span>
-                    </motion.div>
-
-                    {/* No Confidence */}
-                    <div className="space-y-1.5">
-                      <div className="flex items-center justify-between">
-                        <span className="text-[10px] text-black/40 dark:text-white/40 uppercase tracking-wider font-semibold">Confidence</span>
-                        <span className="text-xs font-bold text-black/20 dark:text-white/20">N/A</span>
-                      </div>
-                      <div className="h-2 bg-black/5 dark:bg-white/5 rounded-full overflow-hidden">
-                        <div className="h-full bg-black/5 dark:bg-white/5 rounded-full" />
+                      <h3 className="text-2xl font-bold text-red-600 dark:text-red-400">Generic LLM</h3>
+                      <div className="mt-2 inline-block px-3 py-1 bg-red-100 dark:bg-red-900/50 text-red-600 dark:text-red-400 text-xs font-semibold rounded-full">
+                        ChatGPT / Claude / Gemini
                       </div>
                     </div>
-
-                    {/* Failed Verification */}
-                    <div className="space-y-1.5 pt-1">
-                      {[
-                        { claim: "Yield: ~60-80 ksi", status: "Unverified" },
-                        { claim: "Source: none", status: "Missing" },
-                        { claim: "Spec version", status: "Unknown" },
-                      ].map((item, j) => (
-                        <motion.div
-                          key={j}
-                          initial={{ opacity: 0, x: 10 }}
-                          whileInView={{ opacity: 1, x: 0 }}
-                          viewport={{ once: true }}
-                          transition={{ delay: 0.7 + j * 0.1 }}
-                          className="flex items-center gap-2"
-                        >
-                          <svg className="w-3.5 h-3.5 text-red-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </div>
+                  <ul className="space-y-4">
+                    {[
+                      "No source citations",
+                      "Not acceptable for audits",
+                      "May hallucinate numbers",
+                      "Training cutoff: months old",
+                      "Generic internet knowledge",
+                      "No accountability for errors",
+                    ].map((item, i) => (
+                      <motion.li
+                        key={i}
+                        initial={{ opacity: 0, x: 10 }}
+                        whileInView={{ opacity: 1, x: 0 }}
+                        viewport={{ once: true }}
+                        transition={{ delay: 0.5 + i * 0.05 }}
+                        className="flex items-start gap-3"
+                      >
+                        <div className="mt-1 flex-shrink-0 w-5 h-5 rounded-full bg-red-100 dark:bg-red-900/50 flex items-center justify-center">
+                          <svg className="w-3.5 h-3.5 text-red-500 dark:text-red-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M6 18L18 6M6 6l12 12" />
                           </svg>
-                          <span className="text-[11px] text-black/40 dark:text-white/40 flex-1">{item.claim}</span>
-                          <span className="text-[10px] font-semibold text-red-500 dark:text-red-400">{item.status}</span>
-                        </motion.div>
-                      ))}
-                    </div>
-                  </div>
-
-                  {/* Warning Footer */}
-                  <div className="flex items-center justify-between px-3 py-2.5 rounded-lg bg-red-50 dark:bg-red-950/30 border border-red-200 dark:border-red-800">
-                    <div className="flex items-center gap-2">
-                      <svg className="w-3.5 h-3.5 text-red-500 dark:text-red-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-                      </svg>
-                      <span className="text-xs font-semibold text-red-600 dark:text-red-400">Not audit-ready</span>
-                    </div>
-                    <span className="text-[10px] text-red-500/60 dark:text-red-400/60">Training cutoff: months old</span>
-                  </div>
+                        </div>
+                        <span className="text-base text-black/60 dark:text-white/60">{item}</span>
+                      </motion.li>
+                    ))}
+                  </ul>
                 </motion.div>
               </div>
             </motion.div>
           </div>
         </section>
 
-        {/* Solutions Section - Combined Upload & Query */}
-        <section id="solutions" className="relative min-h-screen md:h-screen flex items-center py-6 md:py-4 scroll-mt-16 border-t border-black/5 dark:border-white/10">
+        {/* Live Comparison Section */}
+        <section className="relative py-12 sm:py-16 md:py-20">
+          <div className="container-center">
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.5, delay: 0.6 }}
+              className="bg-white dark:bg-neutral-900 rounded-2xl border border-black/5 dark:border-white/10 shadow-xl shadow-black/5 dark:shadow-white/5 p-8 md:p-10 max-w-4xl mx-auto"
+            >
+              <div className="text-center mb-8">
+                <span className="text-xs font-semibold tracking-wider text-black/40 dark:text-white/40 uppercase">Live Comparison</span>
+                <h4 className="text-2xl font-bold text-black dark:text-white mt-2">
+                  &quot;What is the yield strength of 316L stainless steel?&quot;
+                </h4>
+              </div>
+
+              <div className="grid md:grid-cols-2 gap-6 md:gap-8">
+                {/* SpecVault Response */}
+                <div className="space-y-4">
+                  <div className="flex items-center justify-center gap-2">
+                    <div className="w-6 h-6 rounded-full bg-green-500 flex items-center justify-center">
+                      <svg className="w-3.5 h-3.5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                      </svg>
+                    </div>
+                    <span className="font-bold text-green-700 dark:text-green-400">SpecVault</span>
+                  </div>
+                  <div className="bg-green-50 dark:bg-green-950/30 rounded-xl p-5 border border-green-100 dark:border-green-800 relative">
+                    <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 w-3 h-3 bg-green-50 dark:bg-green-950/30 border-t border-l border-green-100 dark:border-green-800 rotate-45 transform"></div>
+                    <p className="text-black/90 dark:text-white/90 text-lg">&quot;The minimum yield strength of 316L is <strong className="bg-green-200/50 dark:bg-green-800/50 px-1 rounded">170 MPa (25 ksi)</strong> [1]&quot;</p>
+                    <div className="mt-3 flex items-center gap-2 text-xs font-medium text-green-700 dark:text-green-400 bg-white/50 dark:bg-black/20 p-2 rounded-lg border border-green-100 dark:border-green-800">
+                      <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                      </svg>
+                      Source: ASTM_A240.pdf, Page 3
+                    </div>
+                  </div>
+                </div>
+
+                {/* Generic LLM Response */}
+                <div className="space-y-4">
+                  <div className="flex items-center justify-center gap-2">
+                    <div className="w-6 h-6 rounded-full bg-red-400 flex items-center justify-center">
+                      <svg className="w-3.5 h-3.5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                      </svg>
+                    </div>
+                    <span className="font-bold text-red-600 dark:text-red-400">Generic LLM</span>
+                  </div>
+                  <div className="bg-red-50/50 dark:bg-red-950/30 rounded-xl p-5 border border-red-100 dark:border-red-800 relative">
+                    <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 w-3 h-3 bg-red-50/50 dark:bg-red-950/30 border-t border-l border-red-100 dark:border-red-800 rotate-45 transform"></div>
+                    <p className="text-black/60 dark:text-white/60 italic">&quot;316L stainless steel typically has a yield strength around 170-290 MPa...&quot;</p>
+                    <div className="mt-3 flex items-center gap-2 text-xs font-medium text-red-500 dark:text-red-400 bg-white/50 dark:bg-black/20 p-2 rounded-lg border border-red-100 dark:border-red-800">
+                      <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                      </svg>
+                      No source • Cannot verify
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </motion.div>
+          </div>
+        </section>
+
+        {/* Demo Section - Combined Upload & Query */}
+        <section id="demo" className="relative z-10 py-12 sm:py-16 md:py-20 bg-white dark:bg-neutral-950">
           <div className="container-center">
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.6 }}
-              className="space-y-4"
+              className="space-y-12"
             >
               {/* Section Header */}
-              <div className="text-center space-y-2">
+              <div className="text-center space-y-4">
+                <motion.div
+                  initial={{ opacity: 0, scale: 0.9 }}
+                  whileInView={{ opacity: 1, scale: 1 }}
+                  viewport={{ once: true }}
+                  transition={{ duration: 0.4 }}
+                  className="inline-flex items-center gap-2 px-3 py-1 border border-black/10 dark:border-white/10 rounded-full text-xs font-medium text-black/70 dark:text-white/70"
+                >
+                  <motion.span
+                    className="w-2 h-2 bg-green-500 rounded-full"
+                    animate={{ scale: [1, 1.2, 1], opacity: [1, 0.7, 1] }}
+                    transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+                  />
+                  TRY IT NOW
+                </motion.div>
                 <motion.h2
                   initial={{ opacity: 0, y: 10 }}
                   whileInView={{ opacity: 1, y: 0 }}
                   viewport={{ once: true }}
                   transition={{ duration: 0.5, delay: 0.1 }}
-                  className="text-3xl sm:text-4xl font-semibold tracking-tight text-black dark:text-white"
+                  className="text-3xl sm:text-4xl md:text-5xl font-semibold tracking-tight text-black dark:text-white"
                 >
                   Upload & Ask
                 </motion.h2>
@@ -1282,7 +896,7 @@ export default function Home() {
                   whileInView={{ opacity: 1, y: 0 }}
                   viewport={{ once: true }}
                   transition={{ duration: 0.5, delay: 0.2 }}
-                  className="text-base text-black/70 dark:text-white/70 max-w-2xl mx-auto"
+                  className="text-lg text-black/70 dark:text-white/70 max-w-2xl mx-auto"
                 >
                   Upload your steel specification PDF, then ask any question. Get cited answers instantly.
                 </motion.p>
@@ -1290,12 +904,12 @@ export default function Home() {
 
               {/* Combined Card with Upload + Search */}
               <Card className="border border-black/10 dark:border-white/10 shadow-lg shadow-black/5 dark:shadow-white/5 bg-white dark:bg-neutral-900">
-                <CardContent className="p-4 sm:p-6 space-y-4">
+                <CardContent className="p-6 sm:p-8 lg:p-10 space-y-8">
                   {/* Upload Area */}
-                  <div className="space-y-2">
-                    <div className="flex items-center gap-2">
-                      <span className="flex items-center justify-center w-6 h-6 rounded-full bg-black dark:bg-white text-white dark:text-black text-xs font-medium">1</span>
-                      <h3 className="text-base font-semibold text-black dark:text-white">Upload PDF</h3>
+                  <div className="space-y-4">
+                    <div className="flex items-center gap-3">
+                      <span className="flex items-center justify-center w-7 h-7 rounded-full bg-black dark:bg-white text-white dark:text-black text-sm font-medium">1</span>
+                      <h3 className="text-lg font-semibold text-black dark:text-white">Upload PDF</h3>
                     </div>
                     <DocumentUpload onUploadComplete={handleUploadComplete} />
                   </div>
@@ -1305,16 +919,16 @@ export default function Home() {
                   {/* Search Area - Animated when upload completes */}
                   <motion.div
                     ref={step2Ref}
-                    className={`space-y-3 p-3 -m-3 rounded-xl transition-all duration-500 ${hasDocumentUploaded ? 'bg-green-50 dark:bg-green-950/30 ring-2 ring-green-500 ring-offset-2 dark:ring-offset-neutral-900' : ''
+                    className={`space-y-4 p-4 -m-4 rounded-xl transition-all duration-500 ${hasDocumentUploaded ? 'bg-green-50 dark:bg-green-950/30 ring-2 ring-green-500 ring-offset-2 dark:ring-offset-neutral-900' : ''
                       }`}
                     animate={hasDocumentUploaded ? {
                       scale: [1, 1.03, 1],
                       transition: { duration: 0.6, ease: "easeOut" }
                     } : {}}
                   >
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-3">
                       <motion.span
-                        className={`flex items-center justify-center w-6 h-6 rounded-full text-white text-xs font-bold transition-colors duration-300 ${hasDocumentUploaded ? 'bg-green-500' : 'bg-black dark:bg-white dark:text-black'
+                        className={`flex items-center justify-center w-8 h-8 rounded-full text-white text-sm font-bold transition-colors duration-300 ${hasDocumentUploaded ? 'bg-green-500' : 'bg-black dark:bg-white dark:text-black'
                           }`}
                         animate={hasDocumentUploaded ? {
                           scale: [1, 1.3, 1],
@@ -1323,7 +937,7 @@ export default function Home() {
                       >
                         2
                       </motion.span>
-                      <h3 className={`text-base font-semibold transition-colors duration-300 ${hasDocumentUploaded ? 'text-green-700 dark:text-green-400' : 'text-black dark:text-white'
+                      <h3 className={`text-lg font-semibold transition-colors duration-300 ${hasDocumentUploaded ? 'text-green-700 dark:text-green-400' : 'text-black dark:text-white'
                         }`}>
                         {hasDocumentUploaded ? "Now Ask a Question!" : "Ask a Question"}
                       </h3>
@@ -1347,14 +961,13 @@ export default function Home() {
                       </motion.p>
                     )}
                     <SearchForm
-                        onResult={handleResult}
-                        onError={handleError}
-                        onLoadingChange={handleLoadingChange}
-                        onComparisonResult={handleComparisonResult}
-                        onQuerySubmit={setLastQuery}
-                        onAnonymousInfo={setAnonymousInfo}
-                        documentId={uploadedDocumentId}
-                      />
+                      onResult={handleResult}
+                      onError={handleError}
+                      onLoadingChange={handleLoadingChange}
+                      onComparisonResult={handleComparisonResult}
+                      onQuerySubmit={setLastQuery}
+                      documentId={uploadedDocumentId}
+                    />
                   </motion.div>
 
                   {/* Response Display */}
@@ -1363,7 +976,7 @@ export default function Home() {
                       <Separator className="bg-black/10 dark:bg-white/10" />
                       <motion.div
                         ref={step3Ref}
-                        className="space-y-3"
+                        className="space-y-4"
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ duration: 0.4 }}
@@ -1400,7 +1013,6 @@ export default function Home() {
                           isLoading={isLoading}
                           error={error}
                           confidence={confidence}
-                          documentId={uploadedDocumentId}
                           onRetry={() => setError(null)}
                         />
                       </motion.div>
@@ -1413,41 +1025,86 @@ export default function Home() {
         </section>
 
         {/* Lead Collection Section */}
-        <section id="contact" className="relative min-h-screen flex items-center py-12 sm:py-16 md:py-20 scroll-mt-16 border-t border-black/5 dark:border-white/10 overflow-hidden">
-          <div className="container-wide flex justify-center">
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.6 }}
-              className="w-full max-w-xl"
-            >
-              <div className="text-center space-y-6 mb-8">
-                <h2 className="text-4xl sm:text-5xl font-bold tracking-tight text-black dark:text-white">
-                  Get Priority Access
-                </h2>
-                <p className="text-lg text-black/70 dark:text-white/70 leading-relaxed">
-                  Be the first to automate your compliance reviews with AI.
-                </p>
-              </div>
+        <section id="contact" className="relative py-12 sm:py-16 md:py-20 overflow-hidden">
+          <div className="container-wide">
+            <div className="flex flex-col lg:flex-row gap-12 lg:gap-16 items-center">
+              {/* Left Column: Form & Content */}
+              <motion.div
+                initial={{ opacity: 0, x: -20 }}
+                whileInView={{ opacity: 1, x: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.6 }}
+                className="flex-1 w-full max-w-2xl mx-auto lg:mx-0"
+              >
+                <div className="text-left space-y-6 mb-8">
+                  <motion.div
+                    initial={{ opacity: 0, scale: 0.9 }}
+                    whileInView={{ opacity: 1, scale: 1 }}
+                    viewport={{ once: true }}
+                    transition={{ duration: 0.4 }}
+                    className="inline-flex items-center gap-2 px-3 py-1 border border-black/10 dark:border-white/10 rounded-full text-xs font-medium text-black/70 dark:text-white/70"
+                  >
+                    <motion.span
+                      className="w-2 h-2 bg-amber-500 rounded-full"
+                      animate={{ scale: [1, 1.2, 1], opacity: [1, 0.7, 1] }}
+                      transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+                    />
+                    EARLY ACCESS
+                  </motion.div>
+                  <h2 className="text-4xl sm:text-5xl font-bold tracking-tight text-black dark:text-white">
+                    Get Priority Access
+                  </h2>
+                  <p className="text-lg text-black/70 dark:text-white/70 leading-relaxed">
+                    Be the first to automate your compliance reviews with AI.
+                  </p>
+                </div>
 
-              <div className="bg-white dark:bg-neutral-900 rounded-2xl border border-black/5 dark:border-white/10 shadow-xl shadow-black/5 dark:shadow-white/5 p-6 sm:p-8">
+                {/* Lead Form */}
                 <LeadForm />
-              </div>
-            </motion.div>
+              </motion.div>
+
+              {/* Right Column: Visualization */}
+              <motion.div
+                initial={{ opacity: 0, x: 20 }}
+                whileInView={{ opacity: 1, x: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.8, delay: 0.2 }}
+                className="flex-1 w-full hidden lg:flex items-center justify-center"
+              >
+                <div className="relative overflow-hidden">
+                  {/* Decorative background element */}
+                  <div className="absolute inset-0 bg-blue-50/50 dark:bg-blue-950/20 rounded-full blur-3xl -z-10" />
+                  {/* Processing Pipeline Animation */}
+                  <NetworkVisualization />
+                </div>
+              </motion.div>
+            </div>
           </div>
         </section>
       </main>
 
       {/* Footer */}
-      <footer className="border-t border-black/5 dark:border-white/10 py-6 bg-white dark:bg-neutral-950">
-        <div className="container-center space-y-3">
+      <footer className="py-8 sm:py-12 bg-white dark:bg-neutral-950">
+        <div className="container-center">
+          <div className="flex justify-center">
+            <div>
+              <span className="font-semibold text-black dark:text-white">SpecVault</span>
+              <span className="text-black/60 dark:text-white/60 text-sm ml-2">
+                by Antigravity
+              </span>
+            </div>
+          </div>
+          <Separator className="my-8 bg-black/5 dark:bg-white/10" />
           <p className="text-center text-xs text-black/40 dark:text-white/40 max-w-2xl mx-auto">
             <strong>Disclaimer:</strong> SpecVault provides AI-generated responses for reference only.
             Always verify specifications against original source documents. Not intended for safety-critical
             decisions without professional engineering review. Users are responsible for their own document licenses.
           </p>
-          <p className="text-center text-xs text-black/40 dark:text-white/40">&copy; {new Date().getFullYear()} SpecVault. All rights reserved.</p>
+          <div className="flex justify-center gap-4 mt-4 text-xs text-black/40 dark:text-white/40">
+            <Link href="/terms" className="hover:text-black/60 dark:hover:text-white/60 transition-colors">Terms of Service</Link>
+            <span>·</span>
+            <Link href="/privacy" className="hover:text-black/60 dark:hover:text-white/60 transition-colors">Privacy Policy</Link>
+          </div>
         </div>
       </footer>
 
