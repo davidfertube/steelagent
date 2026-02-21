@@ -12,7 +12,7 @@
  * to only search A790 documents.
  */
 
-import { supabase } from "./supabase";
+import { getReadClient } from "./supabase";
 
 export interface DocumentMapping {
   documentId: number;
@@ -103,7 +103,7 @@ function extractCodesFromContent(content: string): {
 async function refreshDocumentCache(): Promise<void> {
   console.log("[Document Mapper] Refreshing document cache...");
 
-  const { data: documents, error } = await supabase
+  const { data: documents, error } = await getReadClient()
     .from("documents")
     .select("id, filename")
     .eq("status", "indexed");
@@ -160,7 +160,7 @@ async function refreshDocumentCache(): Promise<void> {
   // Phase 2: Extract codes from first 5 chunks per document
   // This catches documents with non-standard filenames (e.g., "Casing_and_Tubing_Specifications.pdf")
   for (const doc of documents) {
-    const { data: sampleChunks } = await supabase
+    const { data: sampleChunks } = await getReadClient()
       .from("chunks")
       .select("content")
       .eq("document_id", doc.id)

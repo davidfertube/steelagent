@@ -18,8 +18,17 @@ import { Logo } from "@/components/ui/logo";
 // Static product mockup for hero section
 function HeroProductMockup() {
   return (
-    <div className="relative w-full max-w-[520px] mx-auto">
-      <div className="absolute -inset-4 bg-green-500/10 dark:bg-green-500/5 rounded-3xl blur-2xl" />
+    <motion.div
+      className="relative w-full max-w-[580px] mx-auto"
+      initial={{ opacity: 0, y: 30, scale: 0.95 }}
+      animate={{ opacity: 1, y: 0, scale: 1 }}
+      transition={{ duration: 0.8, delay: 0.3, ease: "easeOut" }}
+    >
+      <motion.div
+        className="absolute -inset-4 bg-green-500/10 dark:bg-green-500/5 rounded-3xl blur-2xl"
+        animate={{ opacity: [0.5, 1, 0.5] }}
+        transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
+      />
       <div className="relative bg-neutral-900 dark:bg-neutral-950 rounded-2xl shadow-2xl shadow-black/40 border border-neutral-800 overflow-hidden">
         {/* Terminal header */}
         <div className="flex items-center gap-2 px-4 py-3 border-b border-neutral-800">
@@ -30,49 +39,94 @@ function HeroProductMockup() {
         </div>
         <div className="p-6 space-y-5">
           {/* Query */}
-          <div className="bg-neutral-800/60 rounded-lg px-4 py-3 border border-neutral-700/50">
+          <motion.div
+            className="bg-neutral-800/60 rounded-lg px-4 py-3 border border-neutral-700/50"
+            initial={{ opacity: 0, x: -10 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.5, delay: 0.8 }}
+          >
             <p className="text-neutral-300 text-sm font-mono">What is the yield strength of S32205 per ASTM A790?</p>
-          </div>
+          </motion.div>
           {/* Answer */}
-          <div className="space-y-1">
+          <motion.div
+            className="space-y-1"
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 1.1 }}
+          >
             <div className="flex items-center gap-2">
-              <div className="w-2 h-2 rounded-full bg-green-500" />
+              <motion.div
+                className="w-2 h-2 rounded-full bg-green-500"
+                animate={{ scale: [1, 1.4, 1], opacity: [1, 0.6, 1] }}
+                transition={{ duration: 2, repeat: Infinity }}
+              />
               <span className="text-green-400 text-xs font-bold tracking-wider uppercase">Answer</span>
             </div>
             <p className="text-neutral-200 text-[15px] leading-relaxed">
               The minimum yield strength for S32205 duplex stainless steel per ASTM A790 is{" "}
               <strong className="text-white">65 ksi (450 MPa)</strong>.
             </p>
-          </div>
+          </motion.div>
           {/* Source */}
-          <div className="flex items-center gap-2">
+          <motion.div
+            className="flex items-center gap-2"
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 1.4 }}
+          >
             <div className="px-3 py-1.5 bg-neutral-800 rounded-lg border border-neutral-700/50 flex items-center gap-2">
               <svg className="w-3.5 h-3.5 text-green-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
               </svg>
               <span className="text-neutral-300 text-xs font-medium">ASTM A790-14, Table 1, p.3</span>
             </div>
-          </div>
+          </motion.div>
           {/* Confidence */}
-          <div className="space-y-2">
+          <motion.div
+            className="space-y-2"
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 1.7 }}
+          >
             <div className="flex items-center justify-between text-xs">
               <span className="text-neutral-400 font-medium">Confidence</span>
-              <span className="text-green-400 font-bold">94%</span>
+              <motion.span
+                className="text-green-400 font-bold"
+                animate={{ opacity: [1, 0.6, 1] }}
+                transition={{ duration: 3, repeat: Infinity }}
+              >94%</motion.span>
             </div>
             <div className="w-full h-2 bg-neutral-800 rounded-full overflow-hidden">
-              <div className="h-full w-[94%] bg-gradient-to-r from-green-500 to-green-400 rounded-full" />
+              <motion.div
+                className="h-full bg-gradient-to-r from-green-500 to-green-400 rounded-full"
+                initial={{ width: "0%" }}
+                animate={{ width: "94%" }}
+                transition={{ duration: 1.2, delay: 2.0, ease: "easeOut" }}
+              />
             </div>
-          </div>
+          </motion.div>
           {/* Verification */}
-          <div className="flex items-center gap-2 text-xs text-neutral-500">
-            <svg className="w-3.5 h-3.5 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <motion.div
+            className="flex items-center gap-2 text-xs text-neutral-500"
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 2.2 }}
+          >
+            <motion.svg
+              className="w-3.5 h-3.5 text-green-500"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+              animate={{ scale: [1, 1.15, 1] }}
+              transition={{ duration: 2.5, repeat: Infinity }}
+            >
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-            </svg>
+            </motion.svg>
             3 numerical claims verified
-          </div>
+          </motion.div>
         </div>
       </div>
-    </div>
+    </motion.div>
   );
 }
 
@@ -316,7 +370,7 @@ export default function Home() {
     <div className="flex flex-col bg-white dark:bg-neutral-950 text-black dark:text-white">
       {/* Header */}
       <header className="fixed top-0 left-0 right-0 z-50 bg-white/90 dark:bg-neutral-950/90 backdrop-blur-md border-b border-black/5 dark:border-white/10">
-        <div className="container-center">
+        <div className="container-wide">
           <div className="flex h-16 items-center justify-between">
             {/* Logo */}
             <Link href="/" className="flex items-center gap-2 text-lg font-semibold tracking-tight text-black dark:text-white">
@@ -423,7 +477,7 @@ export default function Home() {
 
       <main className="flex-1 pt-16">
         {/* Hero Section */}
-        <section className="relative py-6 sm:py-8 md:py-12">
+        <section className="relative min-h-[calc(100dvh-4rem)] flex flex-col justify-center py-6 sm:py-8 md:py-12">
           <div className="container-wide">
             <div className="flex flex-col lg:flex-row gap-8 lg:gap-6 items-center">
               {/* Left: Text content */}
@@ -438,7 +492,7 @@ export default function Home() {
                     <span className="text-green-500">The Steel Hub</span>
                     {" "}for{" "}
                     <span className="relative inline-block">
-                      Agents
+                      Oil and Gas
                       <motion.span
                         className="absolute -bottom-1 left-0 right-0 h-[3px] bg-green-500"
                         initial={{ scaleX: 0 }}
@@ -452,10 +506,10 @@ export default function Home() {
                     initial={{ opacity: 0, y: 10 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.5, delay: 0.4 }}
-                    className="text-base sm:text-lg text-black/60 dark:text-white/60 max-w-2xl leading-snug"
+                    className="text-base sm:text-lg text-black/60 dark:text-white/60 max-w-md leading-snug"
                   >
-                    Upload your ASTM, API, or NACE specs — our AI agents find answers,
-                    cite pages, and verify claims. Audit-ready in seconds.
+                    Upload your specs and let Steel Agents find answers, cite
+                    every page, and verify claims. Audit-ready in seconds.
                   </motion.p>
                 </div>
 
@@ -519,8 +573,8 @@ export default function Home() {
                 </motion.div>
               </div>
 
-              {/* Right: Static Product Mockup */}
-              <div className="hidden lg:block flex-shrink-0 w-[520px]">
+              {/* Right: Product Mockup */}
+              <div className="hidden lg:block flex-shrink-0 w-[580px]">
                 <HeroProductMockup />
               </div>
             </div>
@@ -528,7 +582,7 @@ export default function Home() {
         </section>
 
         {/* Why SpecVault vs Generic LLMs Section */}
-        <section id="why" className="relative py-6 sm:py-8 md:py-10 scroll-mt-16">
+        <section id="why" className="relative min-h-[calc(100dvh-4rem)] flex flex-col justify-center py-6 sm:py-8 md:py-10 scroll-mt-16">
           <div className="container-wide">
             <motion.div
               initial={{ opacity: 0, y: 20 }}
@@ -555,8 +609,7 @@ export default function Home() {
                   transition={{ duration: 0.5, delay: 0.2 }}
                   className="text-lg text-black/60 dark:text-white/60 max-w-3xl mx-auto leading-snug"
                 >
-                  Same question, two very different answers. <br className="hidden sm:block" />
-                  See what <span className="text-black dark:text-white font-semibold">your documents</span> make possible.
+                  Same question, two very different answers. See what <span className="text-black dark:text-white font-semibold">your documents</span> make possible.
                 </motion.p>
               </div>
 
@@ -808,7 +861,7 @@ export default function Home() {
         </section>
 
         {/* Who This Is For - Persona Section */}
-        <section id="who" className="relative py-6 sm:py-8 md:py-10 scroll-mt-16">
+        <section id="who" className="relative min-h-[calc(100dvh-4rem)] flex flex-col justify-center py-6 sm:py-8 md:py-10 scroll-mt-16">
           <div className="container-wide">
             <motion.div
               initial={{ opacity: 0, y: 20 }}
@@ -1111,7 +1164,7 @@ export default function Home() {
         </section>
 
         {/* Demo Section - Combined Upload & Query */}
-        <section id="demo" className="relative z-10 py-6 sm:py-8 md:py-10 bg-white dark:bg-neutral-950">
+        <section id="demo" className="relative z-10 min-h-[calc(100dvh-4rem)] flex flex-col justify-center py-6 sm:py-8 md:py-10 scroll-mt-16 bg-white dark:bg-neutral-950">
           <div className="container-wide">
             <motion.div
               initial={{ opacity: 0, y: 20 }}
@@ -1279,7 +1332,7 @@ export default function Home() {
         </section>
 
         {/* Lead Collection Section */}
-        <section id="contact" className="relative py-6 sm:py-8 md:py-10 overflow-hidden">
+        <section id="contact" className="relative min-h-[calc(100dvh-4rem)] flex flex-col justify-center py-6 sm:py-8 md:py-10 scroll-mt-16 overflow-hidden">
           <div className="container-wide">
             <motion.div
               initial={{ opacity: 0, y: 20 }}

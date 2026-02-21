@@ -10,7 +10,7 @@
  * - Fusion combines strengths of both approaches
  */
 
-import { supabase } from "./supabase";
+import { getReadClient } from "./supabase";
 import { getCachedQueryEmbedding } from "./embedding-cache";
 import {
   preprocessQuery,
@@ -199,7 +199,7 @@ export async function hybridSearchChunks(
   // Step 3: Call hybrid search function in Supabase
   // Use expanded query for BM25 text matching (e.g., "nitrogen N" matches both)
   // Pass document filter if provided (for spec-specific queries like "per A790")
-  const { data, error } = await supabase.rpc("hybrid_search_chunks", {
+  const { data, error } = await getReadClient().rpc("hybrid_search_chunks", {
     query_text: searchQuery,
     query_embedding: embedding,
     match_count: matchCount,
@@ -293,7 +293,7 @@ export async function bm25OnlySearch(
   query: string,
   matchCount: number = 10
 ): Promise<Omit<HybridSearchResult, "vector_score" | "combined_score">[]> {
-  const { data, error } = await supabase.rpc("bm25_search_chunks", {
+  const { data, error } = await getReadClient().rpc("bm25_search_chunks", {
     query_text: query,
     match_count: matchCount,
   });
@@ -356,7 +356,7 @@ export async function isHybridSearchAvailable(): Promise<boolean> {
     // Try calling with empty embedding - will fail if function doesn't exist
     // We use a minimal call that will execute but return no results
     const embedding = new Array(3072).fill(0);
-    const { error } = await supabase.rpc("hybrid_search_chunks", {
+    const { error } = await getReadClient().rpc("hybrid_search_chunks", {
       query_text: "test",
       query_embedding: embedding,
       match_count: 1,

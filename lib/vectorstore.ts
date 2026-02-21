@@ -1,4 +1,4 @@
-import { supabase } from "./supabase";
+import { supabase, getReadClient } from "./supabase";
 import { getCachedQueryEmbedding } from "./embedding-cache";
 import type { SupabaseClient } from "@supabase/supabase-js";
 
@@ -60,7 +60,7 @@ export async function searchSimilarChunks(
   // Use cached embedding for repeat queries
   const embedding = await getCachedQueryEmbedding(query);
 
-  const { data, error } = await supabase.rpc("search_chunks", {
+  const { data, error } = await getReadClient().rpc("search_chunks", {
     query_embedding: embedding,
     match_threshold: matchThreshold,
     match_count: matchCount,
@@ -75,7 +75,7 @@ export async function searchSimilarChunks(
 }
 
 export async function getDocumentById(id: number) {
-  const { data, error } = await supabase
+  const { data, error } = await getReadClient()
     .from("documents")
     .select("*")
     .eq("id", id)
