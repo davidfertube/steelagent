@@ -43,10 +43,19 @@ export interface Workspace {
 
 // Client-side auth client (for use in Client Components)
 export function createAuthClient() {
-  return createBrowserClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-  );
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+
+  // During static prerendering (e.g. /_not-found), env vars may be unavailable.
+  // Return a placeholder client that will be replaced on hydration.
+  if (!url || !key) {
+    return createBrowserClient(
+      'https://placeholder.supabase.co',
+      'placeholder-key'
+    );
+  }
+
+  return createBrowserClient(url, key);
 }
 
 // Server-side auth client (for use in Server Components and API routes)
