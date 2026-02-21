@@ -15,205 +15,73 @@ import { DocumentUpload } from "@/components/document-upload";
 import { Source, GenericLLMResponse, ConfidenceScore } from "@/lib/api";
 import { NetworkVisualization } from "@/components/network-visualization";
 
-function Hero3DAnimation() {
+// Static product mockup — shows the end result immediately (no build-up animation)
+function HeroProductMockup() {
   return (
-    <div className="relative w-full aspect-square max-w-[500px] mx-auto">
-      <div className="absolute inset-0 flex items-center justify-center">
-        <DocumentFlowAnimation />
+    <div className="relative w-full max-w-[520px] mx-auto">
+      {/* Glow behind the card */}
+      <div className="absolute -inset-4 bg-green-500/10 dark:bg-green-500/5 rounded-3xl blur-2xl" />
+
+      {/* Terminal-style card */}
+      <div className="relative bg-neutral-900 dark:bg-neutral-950 rounded-2xl shadow-2xl shadow-black/40 border border-neutral-800 overflow-hidden">
+        {/* Title bar */}
+        <div className="flex items-center gap-2 px-4 py-3 border-b border-neutral-800">
+          <div className="w-3 h-3 rounded-full bg-red-500/80" />
+          <div className="w-3 h-3 rounded-full bg-yellow-500/80" />
+          <div className="w-3 h-3 rounded-full bg-green-500/80" />
+          <span className="ml-2 text-sm text-neutral-400 font-medium">SpecVault</span>
+        </div>
+
+        {/* Content */}
+        <div className="p-6 space-y-5">
+          {/* Query */}
+          <div className="bg-neutral-800/60 rounded-lg px-4 py-3 border border-neutral-700/50">
+            <p className="text-neutral-300 text-sm font-mono">
+              What is the yield strength of S32205 per ASTM A790?
+            </p>
+          </div>
+
+          {/* Answer */}
+          <div className="space-y-1">
+            <div className="flex items-center gap-2">
+              <div className="w-2 h-2 rounded-full bg-green-500" />
+              <span className="text-green-400 text-xs font-bold tracking-wider uppercase">Answer</span>
+            </div>
+            <p className="text-neutral-200 text-[15px] leading-relaxed">
+              The minimum yield strength for S32205 duplex stainless steel per ASTM A790 is{" "}
+              <strong className="text-white">65 ksi (450 MPa)</strong>.
+            </p>
+          </div>
+
+          {/* Source citation */}
+          <div className="inline-flex items-center gap-2 bg-green-950/40 border border-green-800/50 rounded-lg px-3 py-2">
+            <svg className="w-4 h-4 text-green-500 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+            </svg>
+            <span className="text-green-400 text-sm font-medium">ASTM A790-14, Table 1, p.3</span>
+          </div>
+
+          {/* Confidence bar */}
+          <div className="space-y-2">
+            <div className="flex items-center justify-between">
+              <span className="text-neutral-400 text-sm">Confidence</span>
+              <span className="text-green-400 text-sm font-bold">94%</span>
+            </div>
+            <div className="w-full h-2 bg-neutral-800 rounded-full overflow-hidden">
+              <div className="h-full bg-gradient-to-r from-green-500 to-green-400 rounded-full" style={{ width: "94%" }} />
+            </div>
+          </div>
+
+          {/* Verification note */}
+          <div className="flex items-center gap-2 text-neutral-500 text-xs">
+            <svg className="w-3.5 h-3.5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+            </svg>
+            3 numerical claims verified against source
+          </div>
+        </div>
       </div>
     </div>
-  );
-}
-
-// Fallback SVG animation - Documents flowing into central AI
-function DocumentFlowAnimation() {
-  const documents = [
-    { id: 1, x: 50, y: 50, delay: 0 },
-    { id: 2, x: 300, y: 50, delay: 0.3 },
-    { id: 3, x: 25, y: 175, delay: 0.6 },
-    { id: 4, x: 325, y: 175, delay: 0.9 },
-    { id: 5, x: 50, y: 300, delay: 1.2 },
-    { id: 6, x: 300, y: 300, delay: 1.5 },
-  ];
-
-  const centerX = 200;
-  const centerY = 200;
-
-  return (
-    <svg viewBox="0 0 400 400" className="w-full h-full [&_.doc-rect]:fill-white dark:[&_.doc-rect]:fill-neutral-800 [&_.doc-stroke]:stroke-black dark:[&_.doc-stroke]:stroke-white [&_.doc-line]:stroke-black dark:[&_.doc-line]:stroke-white [&_.brain-fill]:fill-white dark:[&_.brain-fill]:fill-neutral-800">
-      <defs>
-        <radialGradient id="brainGlow" cx="50%" cy="50%" r="50%">
-          <stop offset="0%" stopColor="#22c55e" stopOpacity="0.4" />
-          <stop offset="70%" stopColor="#22c55e" stopOpacity="0.1" />
-          <stop offset="100%" stopColor="#22c55e" stopOpacity="0" />
-        </radialGradient>
-        <filter id="glow">
-          <feGaussianBlur stdDeviation="3" result="coloredBlur" />
-          <feMerge>
-            <feMergeNode in="coloredBlur" />
-            <feMergeNode in="SourceGraphic" />
-          </feMerge>
-        </filter>
-      </defs>
-
-      {/* Connection lines */}
-      {documents.map((doc) => (
-        <motion.line
-          key={`line-${doc.id}`}
-          x1={doc.x + 22}
-          y1={doc.y + 27}
-          x2={centerX}
-          y2={centerY}
-          stroke="#22c55e"
-          strokeWidth="2"
-          strokeDasharray="8 4"
-          initial={{ pathLength: 0, opacity: 0 }}
-          animate={{
-            pathLength: 1,
-            opacity: 0.6,
-            strokeDashoffset: [0, -12]
-          }}
-          transition={{
-            pathLength: { duration: 0.8, delay: doc.delay + 0.3 },
-            opacity: { duration: 0.3, delay: doc.delay + 0.3 },
-            strokeDashoffset: { duration: 1.5, repeat: Infinity, ease: "linear" }
-          }}
-        />
-      ))}
-
-      {/* Particles */}
-      {documents.map((doc) => (
-        <motion.circle
-          key={`particle-${doc.id}`}
-          r="5"
-          fill="#22c55e"
-          filter="url(#glow)"
-          initial={{ opacity: 0 }}
-          animate={{
-            opacity: [0, 1, 1, 0],
-            cx: [doc.x + 22, centerX],
-            cy: [doc.y + 27, centerY],
-          }}
-          transition={{
-            duration: 2,
-            repeat: Infinity,
-            delay: doc.delay + 1,
-            ease: "easeInOut",
-            times: [0, 0.1, 0.9, 1]
-          }}
-        />
-      ))}
-
-      {/* Documents */}
-      {documents.map((doc) => (
-        <g key={`doc-${doc.id}`}>
-          <motion.rect
-            x={doc.x}
-            y={doc.y}
-            width="45"
-            height="55"
-            className="doc-rect doc-stroke"
-            strokeWidth="2"
-            rx="3"
-            initial={{ opacity: 0, scale: 0.8 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ duration: 0.4, delay: doc.delay }}
-          />
-          {[12, 22, 32, 42].map((yOffset, i) => (
-            <motion.line
-              key={i}
-              x1={doc.x + 8}
-              y1={doc.y + yOffset}
-              x2={doc.x + (i === 2 ? 30 : 37)}
-              y2={doc.y + yOffset}
-              className="doc-line"
-              strokeWidth="1"
-              strokeOpacity="0.3"
-              initial={{ pathLength: 0 }}
-              animate={{ pathLength: 1 }}
-              transition={{ duration: 0.3, delay: doc.delay + 0.2 + i * 0.05 }}
-            />
-          ))}
-        </g>
-      ))}
-
-      {/* Central Brain */}
-      <motion.circle
-        cx={centerX}
-        cy={centerY}
-        r="60"
-        fill="url(#brainGlow)"
-        initial={{ scale: 0 }}
-        animate={{ scale: [1, 1.15, 1] }}
-        transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
-      />
-      <motion.circle
-        cx={centerX}
-        cy={centerY}
-        r="45"
-        className="brain-fill"
-        stroke="#22c55e"
-        strokeWidth="3"
-        filter="url(#glow)"
-        initial={{ scale: 0 }}
-        animate={{ scale: 1 }}
-        transition={{ duration: 0.6, delay: 0.8, type: "spring" }}
-      />
-      <motion.circle
-        cx={centerX}
-        cy={centerY}
-        r="35"
-        fill="none"
-        stroke="#22c55e"
-        strokeWidth="1.5"
-        strokeDasharray="6 3"
-        initial={{ pathLength: 0 }}
-        animate={{ pathLength: 1 }}
-        transition={{ duration: 1, delay: 1.2 }}
-      />
-
-      {/* Neural nodes */}
-      {[
-        { x: centerX - 15, y: centerY - 12 },
-        { x: centerX + 15, y: centerY - 12 },
-        { x: centerX, y: centerY + 5 },
-        { x: centerX - 10, y: centerY + 18 },
-        { x: centerX + 10, y: centerY + 18 },
-      ].map((node, i) => (
-        <motion.circle
-          key={`node-${i}`}
-          cx={node.x}
-          cy={node.y}
-          r="5"
-          fill="#22c55e"
-          initial={{ scale: 0 }}
-          animate={{ scale: [1, 1.4, 1] }}
-          transition={{ duration: 1.5, repeat: Infinity, delay: 1.5 + i * 0.2 }}
-        />
-      ))}
-
-      {/* Neural connections */}
-      <motion.path
-        d={`M ${centerX - 15} ${centerY - 12} L ${centerX} ${centerY + 5} L ${centerX + 15} ${centerY - 12}`}
-        fill="none"
-        stroke="#22c55e"
-        strokeWidth="2"
-        strokeOpacity="0.6"
-        initial={{ pathLength: 0 }}
-        animate={{ pathLength: 1 }}
-        transition={{ duration: 0.8, delay: 1.5 }}
-      />
-      <motion.path
-        d={`M ${centerX - 10} ${centerY + 18} L ${centerX} ${centerY + 5} L ${centerX + 10} ${centerY + 18}`}
-        fill="none"
-        stroke="#22c55e"
-        strokeWidth="2"
-        strokeOpacity="0.6"
-        initial={{ pathLength: 0 }}
-        animate={{ pathLength: 1 }}
-        transition={{ duration: 0.8, delay: 1.7 }}
-      />
-    </svg>
   );
 }
 
@@ -642,15 +510,10 @@ export default function Home() {
                 </motion.div>
               </div>
 
-              {/* Right: 3D Animation */}
-              <motion.div
-                initial={{ opacity: 0, scale: 0.95 }}
-                animate={{ opacity: 1, scale: 1 }}
-                transition={{ duration: 0.8, delay: 0.2 }}
-                className="hidden lg:block flex-shrink-0 w-full max-w-[500px]"
-              >
-                <Hero3DAnimation />
-              </motion.div>
+              {/* Right: Static product mockup */}
+              <div className="hidden lg:block flex-shrink-0 w-full max-w-[520px]">
+                <HeroProductMockup />
+              </div>
             </div>
           </div>
         </section>
