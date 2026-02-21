@@ -151,7 +151,7 @@ The full pipeline is documented in **[AGENTS.md](AGENTS.md)**. Summary:
 | `lib/query-cache.ts` | Query result caching |
 | `lib/supabase.ts` | Supabase client configuration |
 | `middleware.ts` | Security middleware (auth, CSRF, rate limiting) |
-| `components/realtime-comparison.tsx` | Side-by-side RAG vs generic LLM display |
+| `components/realtime-comparison.tsx` | Side-by-side RAG vs generic LLM display (demo section) |
 
 ---
 
@@ -360,9 +360,8 @@ Additional standalone SQL:
 
 ## Related Documentation
 
-- [README.md](README.md) -- Project overview + non-technical summary
-- [AGENTS.md](AGENTS.md) -- Agentic RAG pipeline architecture + improvement recommendations
-- [SECURITY.md](SECURITY.md) -- Security policy + enterprise compliance
-- [ENVIRONMENT.md](ENVIRONMENT.md) -- Environment setup + deployment configuration
-- [MCP.md](MCP.md) -- MCP server configuration for Claude Code
-- [BUSINESS-PLAN.md](BUSINESS-PLAN.md) -- SaaS business plan + go-to-market strategy
+- [README.md](README.md) — Project overview
+- [AGENTS.md](AGENTS.md) — Agentic RAG pipeline architecture
+- [SECURITY.md](SECURITY.md) — Security policy
+- [ENVIRONMENT.md](ENVIRONMENT.md) — Environment setup + deployment configuration
+- [MCP.md](MCP.md) — MCP server configuration

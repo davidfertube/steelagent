@@ -173,6 +173,19 @@ export async function multiQueryRAG(
     ? [filterDocumentId]
     : await resolveSpecsToDocuments(processed.extractedCodes, query);
 
+  // Boost generic "this pdf" queries with domain keywords for better BM25/vector recall
+  let effectiveQuery = query;
+  if (
+    filterDocumentId &&
+    !processed.extractedCodes.astm?.length &&
+    !processed.extractedCodes.uns?.length &&
+    /this\s+(pdf|document|spec(?:ification)?|file)|the\s+uploaded|in\s+this/i.test(query)
+  ) {
+    const domainBoost = "chemical composition mechanical properties yield tensile hardness requirements Table";
+    effectiveQuery = `${query} ${domainBoost}`;
+    console.log(`[Multi-Query RAG] Generic PDF query detected — boosted search terms`);
+  }
+
   if (documentIds) {
     const reason = filterDocumentId ? "uploaded document" : `ASTM codes: ${processed.extractedCodes.astm?.join(", ")}`;
     console.log(`[Multi-Query RAG] Document filter: [${documentIds.join(", ")}] for ${reason}`);
@@ -200,7 +213,7 @@ export async function multiQueryRAG(
     };
     console.log(`[Multi-Query RAG] Fast path: skipping decomposition`);
   } else {
-    decomposition = await timedOperation('query_decomposition', () => decomposeQuerySmart(query));
+    decomposition = await timedOperation('query_decomposition', () => decomposeQuerySmart(effectiveQuery));
   }
 
   console.log(`[Multi-Query RAG] Intent: ${decomposition.intent}`);
@@ -377,11 +390,12 @@ export async function multiQueryRAG(
           const retryCandidates = Math.ceil(60 / decomposition.subqueries.length);
           const retryResults = await Promise.all(
             decomposition.subqueries.map(async (subquery) => {
-              return await searchWithFallback(subquery, retryCandidates, null, null);
+              // Preserve uploaded document filter to avoid searching unrelated docs
+              return await searchWithFallback(subquery, retryCandidates, documentIds, null);
             })
           );
           const retryMerged = mergeResults(retryResults);
-          console.log(`[Multi-Query RAG] Broader retry: ${retryMerged.length} candidates (no filters)`);
+          console.log(`[Multi-Query RAG] Broader retry: ${retryMerged.length} candidates (documentIds: ${documentIds ? JSON.stringify(documentIds) : 'null'})`);
           retryChunks = await rerankAndSelect(query, retryMerged, topK, decomposition.subqueries);
         } else if (strategy === 'section_lookup') {
           const sectionKeywords = extractSectionKeywords(query);
