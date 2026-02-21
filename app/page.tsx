@@ -508,8 +508,7 @@ export default function Home() {
                     transition={{ duration: 0.5, delay: 0.4 }}
                     className="text-base sm:text-lg text-black/60 dark:text-white/60 max-w-md leading-snug"
                   >
-                    Upload your specs and let steel agents find answers, cite
-                    every page, and verify claims.
+                    Instant answers. Cited sources. Verified claims.
                   </motion.p>
                 </div>
 
