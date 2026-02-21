@@ -15,6 +15,7 @@ import { groundResponse } from "@/lib/answer-grounding";
 import { validateResponseCoherence } from "@/lib/response-validator";
 import { getLangfuse, flushLangfuse } from "@/lib/langfuse";
 import { getCachedResponse, setCachedResponse } from "@/lib/query-cache";
+import { CONFIDENCE_WEIGHTS } from "@/lib/schemas";
 
 /**
  * Chat API Route - RAG-powered Q&A (with Streaming)
@@ -688,7 +689,7 @@ RESPONSE GUIDELINES:
     // C5.5: Confidence-driven final gate — regenerate if overall confidence is very low
     // Placed before source building so the regenerated text gets proper citation remapping
     const earlyConfidence = Math.round(
-      retrievalConfidence * 0.35 + groundingScore * 0.25 + coherenceScore * 0.40
+      retrievalConfidence * CONFIDENCE_WEIGHTS.retrieval + groundingScore * CONFIDENCE_WEIGHTS.grounding + coherenceScore * CONFIDENCE_WEIGHTS.coherence
     );
     if (earlyConfidence < 55 && chunks.length > 0 && regenCount < MAX_REGENS) {
       console.log(`[Chat API] Low early confidence (${earlyConfidence}%) — triggering confidence-driven regeneration`);
@@ -821,9 +822,9 @@ RESPONSE GUIDELINES:
   // Step 6: Compute Confidence & Return Response (C5)
   // ========================================
   const overallConfidence = Math.round(
-    retrievalConfidence * 0.35 +
-    groundingScore * 0.25 +
-    coherenceScore * 0.40
+    retrievalConfidence * CONFIDENCE_WEIGHTS.retrieval +
+    groundingScore * CONFIDENCE_WEIGHTS.grounding +
+    coherenceScore * CONFIDENCE_WEIGHTS.coherence
   );
 
   console.log(`[Chat API] Confidence: overall=${overallConfidence}% (retrieval=${retrievalConfidence}, grounding=${groundingScore}, coherence=${coherenceScore})`);

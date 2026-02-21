@@ -10,6 +10,7 @@
  */
 
 import { getModelFallbackClient } from "./model-fallback";
+import { CoherenceValidationSchema, parseJudgeOutput } from "./schemas";
 
 export interface ValidationResult {
   /** Coherence score 0-100 */
@@ -64,23 +65,24 @@ IMPORTANT: If the response says "I cannot answer" or "I cannot provide", score i
   try {
     const { text } = await client.generateContent(prompt);
 
-    let cleaned = text.trim();
-    if (cleaned.startsWith('```')) {
-      cleaned = cleaned.replace(/```json\n?/g, '').replace(/```\n?/g, '');
+    const parsed = parseJudgeOutput(text, CoherenceValidationSchema, "Response Validator");
+
+    if (!parsed) {
+      return {
+        coherenceScore: 70,
+        passed: true,
+        reason: "Parse/validation failed, proceeding with response",
+      };
     }
 
-    const result = JSON.parse(cleaned);
-    const score = Math.min(100, Math.max(0, result.score || 0));
-
     return {
-      coherenceScore: score,
-      passed: score >= 60,
-      reason: result.reason || "No reason provided",
-      missingAspects: score < 60 && result.missing ? result.missing : undefined,
+      coherenceScore: parsed.score,
+      passed: parsed.score >= 60,
+      reason: parsed.reason,
+      missingAspects: parsed.score < 60 && parsed.missing ? parsed.missing : undefined,
     };
   } catch (error) {
     console.warn("[Response Validator] Validation failed, assuming coherent:", error);
-    // Fail open — same pattern as retrieval-evaluator.ts
     return {
       coherenceScore: 70,
       passed: true,

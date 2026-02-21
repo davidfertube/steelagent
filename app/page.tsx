@@ -289,7 +289,7 @@ function LeadForm() {
                 name="firstName"
                 required
                 disabled={isSubmitting}
-                className="w-full h-11 px-4 border border-black/20 dark:border-white/20 bg-white dark:bg-neutral-800 text-black dark:text-white rounded focus:outline-none focus:ring-2 focus:ring-black/20 dark:focus:ring-white/20 focus:border-black dark:focus:border-white transition-colors disabled:opacity-50"
+                className="w-full min-h-11 py-2.5 px-4 border border-black/20 dark:border-white/20 bg-white dark:bg-neutral-800 text-black dark:text-white rounded focus:outline-none focus:ring-2 focus:ring-black/20 dark:focus:ring-white/20 focus:border-black dark:focus:border-white transition-colors disabled:opacity-50"
                 placeholder=""
               />
             </div>
@@ -303,7 +303,7 @@ function LeadForm() {
                 name="lastName"
                 required
                 disabled={isSubmitting}
-                className="w-full h-11 px-4 border border-black/20 dark:border-white/20 bg-white dark:bg-neutral-800 text-black dark:text-white rounded focus:outline-none focus:ring-2 focus:ring-black/20 dark:focus:ring-white/20 focus:border-black dark:focus:border-white transition-colors disabled:opacity-50"
+                className="w-full min-h-11 py-2.5 px-4 border border-black/20 dark:border-white/20 bg-white dark:bg-neutral-800 text-black dark:text-white rounded focus:outline-none focus:ring-2 focus:ring-black/20 dark:focus:ring-white/20 focus:border-black dark:focus:border-white transition-colors disabled:opacity-50"
                 placeholder=""
               />
             </div>
@@ -319,7 +319,7 @@ function LeadForm() {
               name="email"
               required
               disabled={isSubmitting}
-              className="w-full h-11 px-4 border border-black/20 dark:border-white/20 bg-white dark:bg-neutral-800 text-black dark:text-white rounded focus:outline-none focus:ring-2 focus:ring-black/20 dark:focus:ring-white/20 focus:border-black dark:focus:border-white transition-colors disabled:opacity-50"
+              className="w-full min-h-11 py-2.5 px-4 border border-black/20 dark:border-white/20 bg-white dark:bg-neutral-800 text-black dark:text-white rounded focus:outline-none focus:ring-2 focus:ring-black/20 dark:focus:ring-white/20 focus:border-black dark:focus:border-white transition-colors disabled:opacity-50"
               placeholder=""
             />
           </div>
@@ -333,7 +333,7 @@ function LeadForm() {
               id="company"
               name="company"
               disabled={isSubmitting}
-              className="w-full h-11 px-4 border border-black/20 dark:border-white/20 bg-white dark:bg-neutral-800 text-black dark:text-white rounded focus:outline-none focus:ring-2 focus:ring-black/20 dark:focus:ring-white/20 focus:border-black dark:focus:border-white transition-colors disabled:opacity-50"
+              className="w-full min-h-11 py-2.5 px-4 border border-black/20 dark:border-white/20 bg-white dark:bg-neutral-800 text-black dark:text-white rounded focus:outline-none focus:ring-2 focus:ring-black/20 dark:focus:ring-white/20 focus:border-black dark:focus:border-white transition-colors disabled:opacity-50"
               placeholder=""
             />
           </div>
@@ -347,7 +347,7 @@ function LeadForm() {
               id="phone"
               name="phone"
               disabled={isSubmitting}
-              className="w-full h-11 px-4 border border-black/20 dark:border-white/20 bg-white dark:bg-neutral-800 text-black dark:text-white rounded focus:outline-none focus:ring-2 focus:ring-black/20 dark:focus:ring-white/20 focus:border-black dark:focus:border-white transition-colors disabled:opacity-50"
+              className="w-full min-h-11 py-2.5 px-4 border border-black/20 dark:border-white/20 bg-white dark:bg-neutral-800 text-black dark:text-white rounded focus:outline-none focus:ring-2 focus:ring-black/20 dark:focus:ring-white/20 focus:border-black dark:focus:border-white transition-colors disabled:opacity-50"
               placeholder=""
             />
           </div>
@@ -360,7 +360,7 @@ function LeadForm() {
             type="submit"
             size="lg"
             disabled={isSubmitting}
-            className="w-full bg-black dark:bg-white text-white dark:text-black hover:bg-black/90 dark:hover:bg-white/90 h-12 text-base font-medium disabled:opacity-50 transition-all duration-300 hover:scale-[1.02] hover:shadow-lg"
+            className="w-full bg-black dark:bg-white text-white dark:text-black hover:bg-black/90 dark:hover:bg-white/90 min-h-12 text-base font-medium disabled:opacity-50 transition-all duration-300 hover:scale-[1.02] hover:shadow-lg"
           >
             {isSubmitting ? 'Submitting...' : 'Join Waitlist'}
             {!isSubmitting && <ArrowRight className="ml-2 h-4 w-4" />}
@@ -454,7 +454,7 @@ export default function Home() {
   );
 
   return (
-    <div className="flex min-h-screen flex-col bg-white dark:bg-neutral-950 text-black dark:text-white overflow-x-hidden">
+    <div className="flex flex-col bg-white dark:bg-neutral-950 text-black dark:text-white">
       {/* Header */}
       <header className="fixed top-0 left-0 right-0 z-50 bg-white/90 dark:bg-neutral-950/90 backdrop-blur-md border-b border-black/5 dark:border-white/10">
         <div className="container-center">
@@ -563,7 +563,7 @@ export default function Home() {
 
       <main className="flex-1 pt-16">
         {/* Hero Section */}
-        <section className="relative py-16 sm:py-24 md:py-40 overflow-hidden">
+        <section className="relative py-16 sm:py-24 md:py-40">
           <div className="container-wide">
             <div className="flex flex-col lg:flex-row gap-12 lg:gap-8 items-center">
               {/* Center/Left: Text content */}
@@ -647,7 +647,7 @@ export default function Home() {
                 initial={{ opacity: 0, scale: 0.95 }}
                 animate={{ opacity: 1, scale: 1 }}
                 transition={{ duration: 0.8, delay: 0.2 }}
-                className="hidden lg:block flex-shrink-0 w-[500px]"
+                className="hidden lg:block flex-shrink-0 w-full max-w-[500px]"
               >
                 <Hero3DAnimation />
               </motion.div>
@@ -656,7 +656,7 @@ export default function Home() {
         </section>
 
         {/* Why SpecVault vs Generic LLMs Section */}
-        <section id="why" className="relative min-h-screen flex items-center py-12 sm:py-16 md:py-20 border-t border-black/5 dark:border-white/10 bg-black/[0.02] dark:bg-white/[0.02]">
+        <section id="why" className="relative py-16 sm:py-20 md:py-28">
           <div className="container-center">
             <motion.div
               initial={{ opacity: 0, y: 20 }}
@@ -689,7 +689,7 @@ export default function Home() {
               </div>
 
               {/* Comparison Grid */}
-              <div className="grid md:grid-cols-2 gap-8 max-w-5xl mx-auto px-4">
+              <div className="grid md:grid-cols-2 gap-6 md:gap-8 max-w-5xl mx-auto px-4">
                 {/* SpecVault Card */}
                 <motion.div
                   initial={{ opacity: 0, x: -20 }}
@@ -791,7 +791,7 @@ export default function Home() {
         </section>
 
         {/* Live Comparison Section */}
-        <section className="relative py-12 sm:py-16 md:py-20 bg-black/[0.02] dark:bg-white/[0.02]">
+        <section className="relative py-12 sm:py-16 md:py-20">
           <div className="container-center">
             <motion.div
               initial={{ opacity: 0, y: 20 }}
@@ -807,7 +807,7 @@ export default function Home() {
                 </h4>
               </div>
 
-              <div className="grid md:grid-cols-2 gap-8">
+              <div className="grid md:grid-cols-2 gap-6 md:gap-8">
                 {/* SpecVault Response */}
                 <div className="space-y-4">
                   <div className="flex items-center justify-center gap-2">
@@ -857,7 +857,7 @@ export default function Home() {
         </section>
 
         {/* Demo Section - Combined Upload & Query */}
-        <section id="demo" className="relative py-12 sm:py-16 md:py-20 border-t border-black/5 dark:border-white/10">
+        <section id="demo" className="relative z-10 py-12 sm:py-16 md:py-20 bg-white dark:bg-neutral-950">
           <div className="container-center">
             <motion.div
               initial={{ opacity: 0, y: 20 }}
@@ -1025,7 +1025,7 @@ export default function Home() {
         </section>
 
         {/* Lead Collection Section */}
-        <section id="contact" className="relative py-12 sm:py-16 md:py-20 border-t border-black/5 dark:border-white/10 overflow-hidden">
+        <section id="contact" className="relative py-12 sm:py-16 md:py-20 overflow-hidden">
           <div className="container-wide">
             <div className="flex flex-col lg:flex-row gap-12 lg:gap-16 items-center">
               {/* Left Column: Form & Content */}
@@ -1060,9 +1060,7 @@ export default function Home() {
                 </div>
 
                 {/* Lead Form */}
-                <div className="bg-white dark:bg-neutral-900 rounded-2xl border border-black/5 dark:border-white/10 shadow-xl shadow-black/5 dark:shadow-white/5 p-6 sm:p-8">
-                  <LeadForm />
-                </div>
+                <LeadForm />
               </motion.div>
 
               {/* Right Column: Visualization */}
@@ -1073,9 +1071,9 @@ export default function Home() {
                 transition={{ duration: 0.8, delay: 0.2 }}
                 className="flex-1 w-full hidden lg:flex items-center justify-center"
               >
-                <div className="relative">
+                <div className="relative overflow-hidden">
                   {/* Decorative background element */}
-                  <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[120%] h-[120%] bg-blue-50/50 dark:bg-blue-950/20 rounded-full blur-3xl -z-10" />
+                  <div className="absolute inset-0 bg-blue-50/50 dark:bg-blue-950/20 rounded-full blur-3xl -z-10" />
                   {/* Processing Pipeline Animation */}
                   <NetworkVisualization />
                 </div>
@@ -1086,7 +1084,7 @@ export default function Home() {
       </main>
 
       {/* Footer */}
-      <footer className="border-t border-black/5 dark:border-white/10 py-8 sm:py-12 bg-white dark:bg-neutral-950">
+      <footer className="py-8 sm:py-12 bg-white dark:bg-neutral-950">
         <div className="container-center">
           <div className="flex justify-center">
             <div>

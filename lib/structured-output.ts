@@ -4,45 +4,19 @@
  * Forces LLM to output structured JSON for easier verification.
  * Each claim is extracted with source references and exact quotes
  * for post-generation verification.
+ *
+ * Uses Zod schemas for runtime validation of LLM outputs.
  */
+
+import { StructuredResponseSchema } from "./schemas";
+import type { ClaimType, StructuredResponseType } from "./schemas";
 
 // ============================================================================
-// Types
+// Types (re-exported from Zod schemas for backward compatibility)
 // ============================================================================
 
-/**
- * A single factual claim extracted from the response
- */
-export interface Claim {
-  /** The factual statement being made */
-  claim: string;
-  /** Source reference (e.g., "[1]") */
-  source_ref: string;
-  /** Exact quote from the source document */
-  exact_quote: string;
-  /** Confidence level based on source match */
-  confidence: "high" | "medium" | "low";
-  /** Optional: numerical values extracted from claim */
-  numerical_values?: {
-    value: number;
-    unit: string;
-    property: string;
-  }[];
-}
-
-/**
- * Structured response from the LLM
- */
-export interface StructuredResponse {
-  /** Direct answer to the user's question */
-  answer: string;
-  /** List of factual claims with sources */
-  claims: Claim[];
-  /** Information that couldn't be found */
-  missing_info?: string;
-  /** Whether answer is from documents or general knowledge */
-  source_type: "documents" | "general_knowledge";
-}
+export type Claim = ClaimType;
+export type StructuredResponse = StructuredResponseType;
 
 /**
  * Parsed response with metadata
@@ -140,35 +114,33 @@ Instructions:
 /**
  * Parse LLM response into structured format
  *
- * Handles both valid JSON and fallback parsing for malformed responses.
+ * Uses Zod schema validation for type-safe parsing with automatic
+ * coercion and defaults. Falls back to citation-extraction for
+ * malformed responses.
  */
 export function parseStructuredResponse(rawResponse: string): ParsedResponse {
   // Try to extract JSON from the response
   const jsonMatch = rawResponse.match(/\{[\s\S]*\}/);
 
   if (!jsonMatch) {
-    // No JSON found - create a fallback structured response
     return createFallbackResponse(rawResponse, "No JSON object found in response");
   }
 
   try {
-    const parsed = JSON.parse(jsonMatch[0]) as Partial<StructuredResponse>;
+    const raw = JSON.parse(jsonMatch[0]);
+    const result = StructuredResponseSchema.safeParse(raw);
 
-    // Validate required fields
-    if (!parsed.answer || typeof parsed.answer !== "string") {
-      return createFallbackResponse(rawResponse, "Missing or invalid 'answer' field");
+    if (!result.success) {
+      const errors = result.error.flatten();
+      console.warn("[Structured Output] Zod validation failed:", errors);
+      return createFallbackResponse(
+        rawResponse,
+        `Schema validation failed: ${JSON.stringify(errors.fieldErrors)}`
+      );
     }
 
-    // Normalize the response
-    const structured: StructuredResponse = {
-      answer: parsed.answer,
-      claims: Array.isArray(parsed.claims) ? normalizeClaims(parsed.claims) : [],
-      missing_info: parsed.missing_info || undefined,
-      source_type: parsed.source_type === "general_knowledge" ? "general_knowledge" : "documents",
-    };
-
     return {
-      structured,
+      structured: result.data,
       raw: rawResponse,
       parseSuccess: true,
     };
@@ -178,54 +150,6 @@ export function parseStructuredResponse(rawResponse: string): ParsedResponse {
       `JSON parse error: ${error instanceof Error ? error.message : "Unknown error"}`
     );
   }
-}
-
-/**
- * Normalize claims array to ensure consistent structure
- */
-function normalizeClaims(claims: unknown[]): Claim[] {
-  return claims
-    .filter((c): c is Record<string, unknown> => typeof c === "object" && c !== null)
-    .map((c) => ({
-      claim: String(c.claim || ""),
-      source_ref: String(c.source_ref || "[?]"),
-      exact_quote: String(c.exact_quote || ""),
-      confidence: normalizeConfidence(c.confidence),
-      numerical_values: normalizeNumericalValues(c.numerical_values),
-    }))
-    .filter((c) => c.claim.length > 0);
-}
-
-/**
- * Normalize confidence level
- */
-function normalizeConfidence(value: unknown): "high" | "medium" | "low" {
-  if (value === "high" || value === "medium" || value === "low") {
-    return value;
-  }
-  return "medium";
-}
-
-/**
- * Normalize numerical values array
- */
-function normalizeNumericalValues(
-  values: unknown
-): Claim["numerical_values"] {
-  if (!Array.isArray(values)) {
-    return undefined;
-  }
-
-  const normalized = values
-    .filter((v): v is Record<string, unknown> => typeof v === "object" && v !== null)
-    .map((v) => ({
-      value: typeof v.value === "number" ? v.value : parseFloat(String(v.value)) || 0,
-      unit: String(v.unit || ""),
-      property: String(v.property || "unknown"),
-    }))
-    .filter((v) => !isNaN(v.value));
-
-  return normalized.length > 0 ? normalized : undefined;
 }
 
 /**
@@ -244,6 +168,7 @@ function createFallbackResponse(rawResponse: string, error: string): ParsedRespo
         source_ref: citationMatch[0],
         exact_quote: "",
         confidence: "low",
+        numerical_values: undefined,
       });
     }
   }
@@ -252,6 +177,7 @@ function createFallbackResponse(rawResponse: string, error: string): ParsedRespo
     structured: {
       answer: rawResponse,
       claims,
+      missing_info: undefined,
       source_type: "documents",
     },
     raw: rawResponse,

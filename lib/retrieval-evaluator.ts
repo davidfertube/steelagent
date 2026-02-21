@@ -9,6 +9,7 @@
 
 import { getModelFallbackClient } from "./model-fallback";
 import type { HybridSearchResult } from "./hybrid-search";
+import { RetrievalEvaluationSchema, parseJudgeOutput } from "./schemas";
 
 export type RetryStrategy = 'broader_search' | 'section_lookup' | 'more_candidates';
 
@@ -86,23 +87,26 @@ Set retry_strategy to suggest how to improve retrieval if confidence < 60:
   try {
     const { text } = await client.generateContent(prompt);
 
-    let cleaned = text.trim();
-    if (cleaned.startsWith('```')) {
-      cleaned = cleaned.replace(/```json\n?/g, '').replace(/```\n?/g, '');
+    const parsed = parseJudgeOutput(text, RetrievalEvaluationSchema, "Retrieval Evaluator");
+
+    if (!parsed) {
+      return {
+        isRelevant: true,
+        confidence: 50,
+        reason: "Parse/validation failed, proceeding with available chunks",
+      };
     }
 
-    const result = JSON.parse(cleaned);
-    const confidence = Math.min(100, Math.max(0, result.confidence || 0));
-
     return {
-      isRelevant: confidence >= 60,
-      confidence,
-      reason: result.reason || "No reason provided",
-      suggestedRetryStrategy: confidence < 60 ? (result.retry_strategy || 'broader_search') : undefined,
+      isRelevant: parsed.confidence >= 60,
+      confidence: parsed.confidence,
+      reason: parsed.reason,
+      suggestedRetryStrategy: parsed.confidence < 60
+        ? (parsed.retry_strategy as RetryStrategy || 'broader_search')
+        : undefined,
     };
   } catch (error) {
     console.warn("[Retrieval Evaluator] Evaluation failed, assuming relevant:", error);
-    // On failure, assume chunks are good enough to avoid blocking the pipeline
     return {
       isRelevant: true,
       confidence: 50,

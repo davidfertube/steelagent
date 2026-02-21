@@ -3,9 +3,12 @@
  *
  * Breaks complex queries into simpler sub-queries for better retrieval.
  * Handles comparison queries, multi-hop reasoning, and list queries.
+ *
+ * Uses Zod schemas for validating LLM decomposition output.
  */
 
 import { getModelFallbackClient } from "./model-fallback";
+import { DecomposedQueryLLMSchema, parseJudgeOutput } from "./schemas";
 
 export type QueryIntent = 'lookup' | 'compare' | 'list' | 'explain' | 'verify';
 
@@ -73,52 +76,31 @@ Respond ONLY with valid JSON (no markdown, no explanation):
   try {
     const { text } = await client.generateContent(prompt);
 
-    // Clean up response - remove markdown code blocks if present
-    let cleanedText = text.trim();
-    if (cleanedText.startsWith('```')) {
-      cleanedText = cleanedText.replace(/```json\n?/g, '').replace(/```\n?/g, '');
-    }
+    const parsed = parseJudgeOutput(text, DecomposedQueryLLMSchema, "Query Decomposition");
 
-    // Safe JSON parsing with explicit fallback
-    let result;
-    try {
-      result = JSON.parse(cleanedText);
-    } catch {
-      console.warn("[Query Decomposition] JSON parse failed for:", cleanedText.slice(0, 200));
-      // Return safe fallback instead of throwing
+    if (!parsed) {
       return {
         original: query,
         intent: 'lookup' as QueryIntent,
         subqueries: [query],
         requires_aggregation: false,
-        reasoning: "Fallback: JSON parse failed",
+        reasoning: "Fallback: parse/validation failed",
       };
     }
 
-    // Validate result structure
-    if (!result.intent || !result.subqueries || !Array.isArray(result.subqueries)) {
-      console.warn("[Query Decomposition] Invalid structure:", result);
-      return {
-        original: query,
-        intent: 'lookup' as QueryIntent,
-        subqueries: [query],
-        requires_aggregation: false,
-        reasoning: "Fallback: invalid response structure",
-      };
-    }
+    // Replace placeholder subqueries that Zod's .catch() may have inserted
+    const subqueries = parsed.subqueries[0] === "fallback" ? [query] : parsed.subqueries;
 
     return {
       original: query,
-      intent: result.intent as QueryIntent,
-      subqueries: result.subqueries,
-      requires_aggregation: result.requires_aggregation ?? false,
-      reasoning: result.reasoning,
+      intent: parsed.intent,
+      subqueries,
+      requires_aggregation: parsed.requires_aggregation,
+      reasoning: parsed.reasoning,
     };
   } catch (error) {
     console.error("[Query Decomposition] Failed to decompose query:", error);
 
-    // Fallback: treat as simple lookup
-    console.warn("[Query Decomposition] Using fallback: treating as simple lookup");
     return {
       original: query,
       intent: 'lookup',
