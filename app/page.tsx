@@ -555,8 +555,7 @@ export default function Home() {
                   transition={{ duration: 0.5, delay: 0.2 }}
                   className="text-lg text-black/60 dark:text-white/60 max-w-3xl mx-auto leading-snug"
                 >
-                  Same question, two very different answers. <br className="hidden sm:block" />
-                  See what <span className="text-black dark:text-white font-semibold">your documents</span> make possible.
+                  Same question, two very different answers. See what <span className="text-black dark:text-white font-semibold">your documents</span> make possible.
                 </motion.p>
               </div>
 
