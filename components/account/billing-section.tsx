@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useSearchParams } from 'next/navigation';
+import { motion } from 'framer-motion';
 
 interface UsageBar {
   label: string;
@@ -37,14 +38,24 @@ function UsageProgressBar({ label, used, limit }: { label: string; used: number;
           {used.toLocaleString()} / {limit.toLocaleString()}
         </span>
       </div>
-      <div className="h-2 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
-        <div
-          className={`h-full rounded-full transition-all ${
+      <motion.div
+        className="h-2 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden"
+        whileHover={{ scaleY: 2 }}
+        transition={{ type: "spring", stiffness: 400, damping: 25 }}
+      >
+        <motion.div
+          className={`h-full rounded-full relative overflow-hidden ${
             isHigh ? 'bg-red-500' : 'bg-blue-500'
           }`}
-          style={{ width: `${pct}%` }}
-        />
-      </div>
+          initial={{ width: "0%" }}
+          animate={{ width: `${pct}%` }}
+          transition={{ duration: 1, ease: "easeOut" }}
+        >
+          <div className="absolute inset-0 animate-shimmer">
+            <div className="h-full w-1/2 bg-gradient-to-r from-transparent via-white/20 to-transparent" />
+          </div>
+        </motion.div>
+      </motion.div>
     </div>
   );
 }
@@ -111,7 +122,11 @@ export default function BillingSection() {
     : null;
 
   return (
-    <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-6 space-y-6">
+    <motion.div
+      className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-6 space-y-6"
+      animate={{ y: [0, -3, 0] }}
+      transition={{ duration: 5, repeat: Infinity, ease: "easeInOut" }}
+    >
       {billingSuccess && (
         <div className="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg p-4">
           <p className="text-green-700 dark:text-green-300 font-medium">
@@ -145,12 +160,21 @@ export default function BillingSection() {
             </button>
           ) : null}
           {data.plan === 'free' && (
-            <a
+            <motion.a
               href="/#contact"
               className="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700"
+              animate={{
+                boxShadow: [
+                  "0 0 0 0 rgba(37, 99, 235, 0)",
+                  "0 0 15px 3px rgba(37, 99, 235, 0.3)",
+                  "0 0 0 0 rgba(37, 99, 235, 0)"
+                ]
+              }}
+              transition={{ duration: 2, repeat: Infinity }}
+              whileHover={{ scale: 1.05 }}
             >
               Upgrade
-            </a>
+            </motion.a>
           )}
         </div>
       </div>
@@ -160,6 +184,6 @@ export default function BillingSection() {
         <UsageProgressBar label="Documents" used={data.documents.used} limit={data.documents.limit} />
         <UsageProgressBar label="API Calls" used={data.apiCalls.used} limit={data.apiCalls.limit} />
       </div>
-    </div>
+    </motion.div>
   );
 }

@@ -32,9 +32,9 @@ function HeroProductMockup() {
       <div className="relative bg-neutral-900 dark:bg-neutral-950 rounded-2xl shadow-2xl shadow-black/40 border border-neutral-800 overflow-hidden">
         {/* Terminal header */}
         <div className="flex items-center gap-2 px-4 py-3 border-b border-neutral-800">
-          <div className="w-3 h-3 rounded-full bg-red-500/80" />
-          <div className="w-3 h-3 rounded-full bg-yellow-500/80" />
-          <div className="w-3 h-3 rounded-full bg-green-500/80" />
+          <motion.div className="w-3 h-3 rounded-full bg-red-500/80" animate={{ scale: [1, 1.15, 1], opacity: [0.8, 1, 0.8] }} transition={{ duration: 3, repeat: Infinity, delay: 0 }} />
+          <motion.div className="w-3 h-3 rounded-full bg-yellow-500/80" animate={{ scale: [1, 1.15, 1], opacity: [0.8, 1, 0.8] }} transition={{ duration: 3, repeat: Infinity, delay: 0.3 }} />
+          <motion.div className="w-3 h-3 rounded-full bg-green-500/80" animate={{ scale: [1, 1.15, 1], opacity: [0.8, 1, 0.8] }} transition={{ duration: 3, repeat: Infinity, delay: 0.6 }} />
           <span className="ml-2 text-sm text-neutral-400 font-medium">SpecVault</span>
         </div>
         <div className="p-6 space-y-5">
@@ -45,7 +45,7 @@ function HeroProductMockup() {
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.5, delay: 0.8 }}
           >
-            <p className="text-neutral-300 text-sm font-mono">What is the yield strength of S32205 per ASTM A790?</p>
+            <p className="text-neutral-300 text-sm font-mono">What is the yield strength of S32205 per ASTM A790?<span className="inline-block w-[2px] h-4 bg-green-400 ml-0.5 align-middle animate-cursor-blink" /></p>
           </motion.div>
           {/* Answer */}
           <motion.div
@@ -98,11 +98,15 @@ function HeroProductMockup() {
             </div>
             <div className="w-full h-2 bg-neutral-800 rounded-full overflow-hidden">
               <motion.div
-                className="h-full bg-gradient-to-r from-green-500 to-green-400 rounded-full"
+                className="h-full bg-gradient-to-r from-green-500 to-green-400 rounded-full relative overflow-hidden"
                 initial={{ width: "0%" }}
                 animate={{ width: "94%" }}
                 transition={{ duration: 1.2, delay: 2.0, ease: "easeOut" }}
-              />
+              >
+                <div className="absolute inset-0 animate-shimmer">
+                  <div className="h-full w-1/2 bg-gradient-to-r from-transparent via-white/25 to-transparent" />
+                </div>
+              </motion.div>
             </div>
           </motion.div>
           {/* Verification */}
@@ -637,6 +641,7 @@ export default function Home() {
                   whileInView={{ opacity: 1, x: 0 }}
                   viewport={{ once: true }}
                   transition={{ duration: 0.5, delay: 0.3 }}
+                  whileHover={{ y: -6, scale: 1.01 }}
                   className="group rounded-2xl border border-green-200 dark:border-green-800 bg-white dark:bg-neutral-900 p-4 sm:p-5 space-y-3 hover:shadow-xl hover:border-green-300 dark:hover:border-green-700 transition-all duration-300"
                 >
                   <div className="flex items-center gap-3">
@@ -702,12 +707,16 @@ export default function Home() {
                       </div>
                       <div className="h-2 bg-black/5 dark:bg-white/5 rounded-full overflow-hidden">
                         <motion.div
-                          className="h-full bg-gradient-to-r from-green-500 to-green-400 rounded-full"
+                          className="h-full bg-gradient-to-r from-green-500 to-green-400 rounded-full relative overflow-hidden"
                           initial={{ width: "0%" }}
                           whileInView={{ width: "94%" }}
                           viewport={{ once: true }}
                           transition={{ duration: 1.2, delay: 0.6, ease: "easeOut" }}
-                        />
+                        >
+                          <div className="absolute inset-0 animate-shimmer">
+                            <div className="h-full w-1/2 bg-gradient-to-r from-transparent via-white/25 to-transparent" />
+                          </div>
+                        </motion.div>
                       </div>
                     </div>
 
@@ -727,13 +736,20 @@ export default function Home() {
                           className="flex items-center gap-2"
                         >
                           <motion.div
-                            animate={{ scale: [1, 1.15, 1] }}
+                            animate={{
+                              scale: [1, 1.2, 1],
+                              filter: ["drop-shadow(0 0 0px rgba(34,197,94,0))", "drop-shadow(0 0 4px rgba(34,197,94,0.5))", "drop-shadow(0 0 0px rgba(34,197,94,0))"]
+                            }}
                             transition={{ duration: 2.5, repeat: Infinity, delay: j * 0.4 }}
                           >
                             <CheckCircle className="w-3.5 h-3.5 text-green-500" />
                           </motion.div>
                           <span className="text-[11px] text-black/60 dark:text-white/60 flex-1">{item.claim}</span>
-                          <span className="text-[10px] font-semibold text-green-600 dark:text-green-400">{item.status}</span>
+                          <motion.span
+                            className="text-[10px] font-semibold text-green-600 dark:text-green-400"
+                            animate={{ opacity: [1, 0.6, 1] }}
+                            transition={{ duration: 2, repeat: Infinity, delay: j * 0.3 }}
+                          >{item.status}</motion.span>
                         </motion.div>
                       ))}
                     </div>
@@ -763,6 +779,7 @@ export default function Home() {
                   whileInView={{ opacity: 1, x: 0 }}
                   viewport={{ once: true }}
                   transition={{ duration: 0.5, delay: 0.4 }}
+                  whileHover={{ y: -6, scale: 1.01 }}
                   className="group rounded-2xl border border-red-200 dark:border-red-800 bg-white dark:bg-neutral-900 p-4 sm:p-5 space-y-3 hover:shadow-xl hover:border-red-300 dark:hover:border-red-700 transition-all duration-300"
                 >
                   <div className="flex items-center gap-3">
@@ -833,11 +850,25 @@ export default function Home() {
                           transition={{ delay: 0.7 + j * 0.1 }}
                           className="flex items-center gap-2"
                         >
-                          <svg className="w-3.5 h-3.5 text-red-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <motion.svg
+                            className="w-3.5 h-3.5 text-red-400 shrink-0"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                            stroke="currentColor"
+                            animate={{
+                              x: [0, -1, 1, -0.5, 0],
+                              rotate: [0, -1, 1, -0.5, 0]
+                            }}
+                            transition={{ duration: 0.4, repeat: Infinity, repeatDelay: 3 + j * 0.5 }}
+                          >
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                          </svg>
+                          </motion.svg>
                           <span className="text-[11px] text-black/40 dark:text-white/40 flex-1">{item.claim}</span>
-                          <span className="text-[10px] font-semibold text-red-500 dark:text-red-400">{item.status}</span>
+                          <motion.span
+                            className="text-[10px] font-semibold text-red-500 dark:text-red-400"
+                            animate={{ opacity: [1, 0.5, 1] }}
+                            transition={{ duration: 2, repeat: Infinity, delay: j * 0.4 }}
+                          >{item.status}</motion.span>
                         </motion.div>
                       ))}
                     </div>
@@ -883,6 +914,7 @@ export default function Home() {
                   whileInView={{ opacity: 1, y: 0 }}
                   viewport={{ once: true }}
                   transition={{ duration: 0.5, delay: 0 }}
+                  whileHover={{ scale: 1.02, y: -4 }}
                   className="group rounded-2xl border border-black/5 dark:border-white/10 bg-white dark:bg-neutral-900 p-4 space-y-3 hover:shadow-xl hover:border-green-200 dark:hover:border-green-800 transition-all duration-300"
                 >
                   <div className="flex items-center gap-2">
@@ -921,12 +953,16 @@ export default function Home() {
                           <span className="text-[11px] text-black/60 dark:text-white/60 w-16 lg:w-20 shrink-0 truncate">{row.prop}</span>
                           <div className="flex-1 h-4 bg-black/5 dark:bg-white/5 rounded-full overflow-hidden relative">
                             <motion.div
-                              className="h-full bg-gradient-to-r from-green-500 to-green-400 rounded-full"
+                              className="h-full bg-gradient-to-r from-green-500 to-green-400 rounded-full relative overflow-hidden animate-bar-pulse"
                               initial={{ width: "0%" }}
                               whileInView={{ width: `${row.pct}%` }}
                               viewport={{ once: true }}
                               transition={{ duration: 1, delay: 0.5 + j * 0.15, ease: "easeOut" }}
-                            />
+                            >
+                              <div className="absolute inset-0 animate-shimmer">
+                                <div className="h-full w-1/2 bg-gradient-to-r from-transparent via-white/20 to-transparent" />
+                              </div>
+                            </motion.div>
                           </div>
                           <span className="text-[11px] font-bold text-black dark:text-white w-14 text-right shrink-0">{row.val}</span>
                         </motion.div>
@@ -941,6 +977,7 @@ export default function Home() {
                   whileInView={{ opacity: 1, y: 0 }}
                   viewport={{ once: true }}
                   transition={{ duration: 0.5, delay: 0.1 }}
+                  whileHover={{ scale: 1.02, y: -4 }}
                   className="group rounded-2xl border border-black/5 dark:border-white/10 bg-white dark:bg-neutral-900 p-4 space-y-3 hover:shadow-xl hover:border-green-200 dark:hover:border-green-800 transition-all duration-300"
                 >
                   <div className="flex items-center gap-2">
@@ -972,7 +1009,8 @@ export default function Home() {
                           whileInView={{ opacity: 1, x: 0 }}
                           viewport={{ once: true }}
                           transition={{ delay: 0.3 + j * 0.12 }}
-                          className="flex items-center gap-1.5 py-1 px-1.5 rounded-lg hover:bg-black/[0.02] dark:hover:bg-white/[0.02]"
+                          whileHover={{ x: 3, backgroundColor: "rgba(0,0,0,0.02)" }}
+                          className="flex items-center gap-1.5 py-1 px-1.5 rounded-lg"
                         >
                           <motion.div
                             initial={{ scale: 0 }}
@@ -980,7 +1018,15 @@ export default function Home() {
                             viewport={{ once: true }}
                             transition={{ delay: 0.6 + j * 0.15, type: "spring", stiffness: 500 }}
                           >
-                            <CheckCircle className={`w-3.5 h-3.5 shrink-0 ${row.pass ? 'text-green-500' : 'text-red-500'}`} />
+                            <motion.div
+                              animate={{
+                                scale: [1, 1.2, 1],
+                                filter: ["drop-shadow(0 0 0px rgba(34,197,94,0))", "drop-shadow(0 0 3px rgba(34,197,94,0.4))", "drop-shadow(0 0 0px rgba(34,197,94,0))"]
+                              }}
+                              transition={{ duration: 2, repeat: Infinity, delay: 1.5 + j * 0.3 }}
+                            >
+                              <CheckCircle className={`w-3.5 h-3.5 shrink-0 ${row.pass ? 'text-green-500' : 'text-red-500'}`} />
+                            </motion.div>
                           </motion.div>
                           <span className="text-[11px] text-black/70 dark:text-white/70 flex-1 truncate">{row.check}</span>
                           <span className="text-[11px] font-mono font-bold text-black/80 dark:text-white/80 shrink-0">{row.mtr}</span>
@@ -1006,6 +1052,7 @@ export default function Home() {
                   whileInView={{ opacity: 1, y: 0 }}
                   viewport={{ once: true }}
                   transition={{ duration: 0.5, delay: 0.2 }}
+                  whileHover={{ scale: 1.02, y: -4 }}
                   className="group rounded-2xl border border-black/5 dark:border-white/10 bg-white dark:bg-neutral-900 p-4 space-y-3 hover:shadow-xl hover:border-green-200 dark:hover:border-green-800 transition-all duration-300"
                 >
                   <div className="flex items-center gap-2">
@@ -1043,7 +1090,8 @@ export default function Home() {
                         whileInView={{ opacity: 1, y: 0 }}
                         viewport={{ once: true }}
                         transition={{ delay: 0.3 + j * 0.1 }}
-                        className={`grid grid-cols-4 gap-1 py-1 px-1.5 rounded-lg text-[11px] ${row.highlight ? 'bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800' : ''}`}
+                        whileHover={{ x: row.highlight ? 0 : 3 }}
+                        className={`grid grid-cols-4 gap-1 py-1 px-1.5 rounded-lg text-[11px] transition-all duration-200 ${row.highlight ? 'bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800 animate-border-glow-amber' : 'hover:bg-black/[0.02] dark:hover:bg-white/[0.02]'}`}
                       >
                         <span className="font-mono font-bold text-black/80 dark:text-white/80 truncate">{row.grade}</span>
                         <span className="text-black/60 dark:text-white/60">{row.yield}</span>
@@ -1069,6 +1117,7 @@ export default function Home() {
                   whileInView={{ opacity: 1, y: 0 }}
                   viewport={{ once: true }}
                   transition={{ duration: 0.5, delay: 0.3 }}
+                  whileHover={{ scale: 1.02, y: -4 }}
                   className="group rounded-2xl border border-black/5 dark:border-white/10 bg-white dark:bg-neutral-900 p-4 space-y-3 hover:shadow-xl hover:border-green-200 dark:hover:border-green-800 transition-all duration-300"
                 >
                   <div className="flex items-center gap-2">
@@ -1104,18 +1153,26 @@ export default function Home() {
                           className="flex items-center gap-3"
                         >
                           <div className="flex flex-col items-center w-5">
-                            <div className={`w-5 h-5 rounded-full flex items-center justify-center text-[10px] ${
-                              step.status === 'complete' ? 'bg-green-500 text-white' :
-                              step.status === 'active' ? 'bg-purple-500 text-white' :
-                              'bg-black/10 dark:bg-white/10 text-black/40 dark:text-white/40'
-                            }`}>
+                            <motion.div
+                              className={`w-5 h-5 rounded-full flex items-center justify-center text-[10px] relative ${
+                                step.status === 'complete' ? 'bg-green-500 text-white' :
+                                step.status === 'active' ? 'bg-purple-500 text-white' :
+                                'bg-black/10 dark:bg-white/10 text-black/40 dark:text-white/40'
+                              }`}
+                              animate={step.status === 'complete' ? { opacity: [1, 0.7, 1] } : {}}
+                              transition={{ duration: 4, repeat: Infinity, delay: j * 0.8 }}
+                            >
                               {step.status === 'complete' ? '✓' : step.status === 'active' ? (
-                                <motion.span
-                                  animate={{ opacity: [1, 0.3, 1] }}
-                                  transition={{ duration: 1.5, repeat: Infinity }}
-                                >●</motion.span>
+                                <>
+                                  <motion.span
+                                    className="relative z-10"
+                                    animate={{ opacity: [1, 0.3, 1] }}
+                                    transition={{ duration: 1.5, repeat: Infinity }}
+                                  >●</motion.span>
+                                  <span className="absolute inset-0 rounded-full bg-purple-500/30 animate-expanding-ring" />
+                                </>
                               ) : '○'}
-                            </div>
+                            </motion.div>
                             {j < 4 && (
                               <div className={`w-0.5 h-2 ${
                                 step.status === 'complete' ? 'bg-green-300 dark:bg-green-700' :
@@ -1150,12 +1207,16 @@ export default function Home() {
                       <span className="text-[10px] text-black/40 dark:text-white/40">3 of 5 stages complete</span>
                       <div className="h-1.5 w-20 bg-black/5 dark:bg-white/5 rounded-full overflow-hidden">
                         <motion.div
-                          className="h-full bg-gradient-to-r from-purple-500 to-green-500 rounded-full"
+                          className="h-full bg-gradient-to-r from-purple-500 to-green-500 rounded-full relative overflow-hidden"
                           initial={{ width: "0%" }}
                           whileInView={{ width: "60%" }}
                           viewport={{ once: true }}
                           transition={{ duration: 1.2, delay: 0.8, ease: "easeOut" }}
-                        />
+                        >
+                          <div className="absolute inset-0 animate-shimmer">
+                            <div className="h-full w-1/2 bg-gradient-to-r from-transparent via-white/25 to-transparent" />
+                          </div>
+                        </motion.div>
                       </div>
                     </motion.div>
                   </div>

@@ -62,6 +62,12 @@ Every request to protected routes goes through this pipeline:
 ```
 Request
   |
+  +-- 0. Security Headers
+  |     - X-Content-Type-Options: nosniff
+  |     - X-Frame-Options: DENY
+  |     - Strict-Transport-Security (HSTS)
+  |     - Content-Security-Policy (CSP)
+  |
   +-- 1. Authentication Check
   |     - Check session cookie (browser)
   |     - Check x-api-key header (programmatic)
@@ -91,11 +97,13 @@ Request
 | `/auth/*` | Public | No | No |
 | `/privacy`, `/terms` | Public | No | No |
 | `/api/leads` | Public | No | Yes (10/min) |
+| `/api/health` | Public | No | No |
 | `/api/chat` | Protected | Yes | Yes (30/min) |
 | `/api/documents/*` | Protected | Yes | Yes (5-10/min) |
 | `/api/feedback` | Protected | Yes | Yes (30/min) |
 | `/api/billing/*` | Protected | Yes | No |
 | `/api/webhooks/stripe` | Public | No (signature-verified) | No |
+| `/api/account/delete` | Protected | Yes | Yes |
 | `/pricing` | Public | No | No |
 | `/api/auth/api-keys` | Protected | Yes | Yes |
 | `/dashboard/*` | Protected | Yes | No |
@@ -122,15 +130,9 @@ Request
 
 - [x] **Stripe Webhook Signature Verification** -- Implemented in `app/api/webhooks/stripe/route.ts` using `stripe.webhooks.constructEvent()`. Prevents forged subscription events.
 
-- [ ] **Content Security Policy (CSP)** -- Add CSP headers to prevent XSS:
-  ```
-  default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:;
-  ```
+- [x] **Content Security Policy (CSP)** -- CSP headers added in `middleware.ts` to prevent XSS.
 
-- [ ] **HSTS (Strict-Transport-Security)** -- Force HTTPS:
-  ```
-  Strict-Transport-Security: max-age=31536000; includeSubDomains
-  ```
+- [x] **HSTS (Strict-Transport-Security)** -- HSTS header added in `middleware.ts` to force HTTPS.
 
 - [x] **CORS Exact-Match Validation** -- Fixed `startsWith()` bypass vulnerability. Origins are now validated via exact match only. Localhost included for development only.
 

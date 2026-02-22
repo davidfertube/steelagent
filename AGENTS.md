@@ -206,9 +206,9 @@ Not used in the default path due to higher latency, but available for high-stake
 All LLM calls go through `ModelFallbackClient`, which chains providers:
 
 1. **Anthropic** -- Claude Opus 4.6 (primary), Claude Haiku 4.5 (fast fallback)
-2. **Groq** -- Llama 3.3 70B (free tier)
-3. **Cerebras** -- Llama 3.3 70B (free tier)
-4. **SambaNova** -- Llama 3.3 70B (free tier)
+2. **Groq** -- Llama 3.3 70B Versatile / 3.1 8B Instant (free tier)
+3. **Cerebras** -- Llama 3.3 70B / 3.1 8B (free tier)
+4. **SambaNova** -- Llama 3.3 70B Instruct (free tier)
 5. **OpenRouter** -- Llama 3.3 70B (paid, then free)
 
 Progressive backoff on rate limits: `500ms x 2^n`, capped at 4 seconds. Model-not-found errors skip immediately without backoff.

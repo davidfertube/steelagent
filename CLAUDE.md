@@ -9,10 +9,10 @@
 - **Re-ranker**: Voyage AI rerank-2 (cross-encoder, ~200ms)
 - **Database**: Supabase PostgreSQL + pgvector (HNSW)
 - **Hosting**: Vercel (free tier)
-- **Auth**: Supabase Auth (email/password, API keys)
+- **Auth**: Supabase Auth (email/password, OAuth, API keys)
 - **Rate Limiting**: Upstash Redis (free tier) + in-memory fallback
-- **Payments**: Stripe (planned)
-- **Email**: Resend (planned)
+- **Payments**: Stripe (`lib/stripe.ts`, billing API routes)
+- **Email**: Resend (`lib/email.ts`, planned integration)
 - **OCR**: Google Gemini Vision (`lib/ocr.ts`)
 - **Observability**: Langfuse (`lib/langfuse.ts`)
 
@@ -22,16 +22,16 @@
 
 | Category | Count | Details |
 |----------|-------|---------|
-| **Library modules** | 45 | `lib/*.ts` -- core pipeline, auth, utilities |
-| **API routes** | 11 | `app/api/**/route.ts` |
-| **Page components** | 12 | `app/**/page.tsx` -- dashboard, auth, legal |
-| **React components** | 20 | `components/**/*.tsx` -- UI, auth, dashboard |
-| **SQL migrations** | 11 | `supabase/migrations/*.sql` |
-| **CI/CD workflows** | 6 | `.github/workflows/*.yml` |
-| **Test files** | 17 | `tests/**/*.test.ts` + helpers |
+| **Library modules** | 42 | `lib/*.ts` -- core pipeline, auth, utilities |
+| **API routes** | 15 | `app/api/**/route.ts` |
+| **Page components** | 10 | `app/**/page.tsx` -- dashboard, auth, legal |
+| **React components** | 21 | `components/**/*.tsx` -- UI, auth, dashboard |
+| **SQL migrations** | 15 | `supabase/migrations/*.sql` |
+| **CI/CD workflows** | 3 | `.github/workflows/*.yml` |
+| **Test files** | 11 | `tests/**/*.test.ts` + helpers |
 | **Golden datasets** | 10 | `tests/golden-dataset/*.json` |
-| **Scripts** | 12 | `scripts/*.ts` -- accuracy, smoke, feedback, dedup |
-| **Total TypeScript** | ~140+ | ~25,000 lines |
+| **Scripts** | 11 | `scripts/*.ts` -- accuracy, smoke, feedback, dedup |
+| **Total TypeScript** | ~131 | ~27,500 lines |
 
 ---
 
@@ -124,9 +124,17 @@ The full pipeline is documented in **[AGENTS.md](AGENTS.md)**. Summary:
 |------|---------|
 | `app/api/chat/route.ts` | Main RAG endpoint (SSE streaming, agentic verification) |
 | `app/api/documents/process/route.ts` | PDF text extraction + embedding + storage |
-| `app/api/documents/pdf/route.ts` | PDF retrieval endpoint |
+| `app/api/documents/upload/route.ts` | Upload confirmation + PDF validation |
+| `app/api/documents/upload-url/route.ts` | Signed URL for direct upload |
 | `app/api/auth/api-keys/route.ts` | API key management (create, list) |
 | `app/api/feedback/route.ts` | Feedback submission + retrieval |
+| `app/api/health/route.ts` | Health check endpoint |
+| `app/api/billing/checkout/route.ts` | Stripe checkout session creation |
+| `app/api/billing/portal/route.ts` | Stripe customer portal access |
+| `app/api/billing/subscription/route.ts` | Subscription + quota status |
+| `app/api/webhooks/stripe/route.ts` | Stripe webhook handler |
+| `app/api/account/delete/route.ts` | Account deletion |
+| `app/api/leads/route.ts` | Lead capture |
 | `lib/multi-query-rag.ts` | Query decomposition + multi-hop retrieval |
 | `lib/hybrid-search.ts` | BM25 + vector fusion search |
 | `lib/reranker.ts` | Voyage AI rerank-2 + LLM fallback (800-char window) |
@@ -148,9 +156,22 @@ The full pipeline is documented in **[AGENTS.md](AGENTS.md)**. Summary:
 | `lib/langfuse.ts` | Observability + RAG pipeline tracing |
 | `lib/evaluation-engine.ts` | Pattern-based RAG evaluation |
 | `lib/rag-metrics.ts` | RAGAS-style LLM-as-judge evaluation |
+| `lib/query-decomposition.ts` | Query decomposition into sub-queries (Zod validated) |
+| `lib/query-enhancement.ts` | Document hints + technical term expansion |
 | `lib/query-cache.ts` | Query result caching |
+| `lib/embedding-cache.ts` | In-memory embedding cache (1h TTL, 1000 max) |
+| `lib/latency-optimizer.ts` | Cache, early termination, parallel execution |
+| `lib/formula-detector.ts` | Detects formula requests, prevents hallucination |
+| `lib/llm-judge.ts` | LLM-as-judge for RAGAS evaluation |
+| `lib/embeddings.ts` | Voyage AI embedding generation |
+| `lib/vectorstore.ts` | Chunk storage + vector search retrieval |
+| `lib/schemas.ts` | Zod schemas for LLM output validation |
+| `lib/validation.ts` | PDF file validation (magic bytes, 50MB limit) |
+| `lib/stripe.ts` | Stripe billing client + plan configuration |
+| `lib/email.ts` | Email service via Resend |
+| `lib/errors.ts` | Standardized error handling |
 | `lib/supabase.ts` | Supabase client configuration |
-| `middleware.ts` | Security middleware (auth, CSRF, rate limiting) |
+| `middleware.ts` | Security middleware (auth, CSRF, rate limiting, security headers) |
 | `components/realtime-comparison.tsx` | Side-by-side RAG vs generic LLM display (demo section) |
 
 ---
@@ -252,19 +273,15 @@ RESEND_API_KEY=xxx                # Resend (resend.com) -- billing notifications
 | POST | `/api/documents/upload` | `FormData(file)` | `{ success, message }` |
 | POST | `/api/documents/upload-url` | `{ filename, contentType }` | `{ signedUrl }` |
 | POST | `/api/documents/process` | `{ documentId }` | `{ success, chunks }` |
-| GET | `/api/documents/pdf` | `?id=documentId` | PDF file stream |
 | POST/GET | `/api/feedback` | `{ query, response, sources, confidence, rating, issue_type?, comment? }` | `{ success }` / `{ data: FeedbackEntry[] }` |
 | POST | `/api/auth/api-keys` | `{ name, expiresAt? }` | `{ key, id }` |
 | DELETE | `/api/auth/api-keys/[id]` | -- | `{ success }` |
 | POST | `/api/leads` | `{ firstName, lastName, email, company?, phone? }` | `{ success }` |
-
-### Planned Endpoints (Stripe Billing)
-
-| Method | Endpoint | Request | Response |
-|--------|----------|---------|----------|
+| GET | `/api/health` | -- | `{ status: "ok" }` |
+| DELETE | `/api/account/delete` | -- | `{ success }` |
 | POST | `/api/billing/checkout` | `{ priceId }` | `{ url }` (Stripe Checkout URL) |
 | POST | `/api/billing/portal` | -- | `{ url }` (Stripe Portal URL) |
-| GET | `/api/billing/subscription` | -- | `{ plan, status, periodEnd }` |
+| GET | `/api/billing/subscription` | -- | `{ plan, status, periodEnd, quota }` |
 | POST | `/api/webhooks/stripe` | Stripe event payload | `{ received: true }` |
 
 ---
@@ -305,11 +322,12 @@ Materials compliance is safety-critical -- AI errors can lead to using incorrect
 See **[SECURITY.md](SECURITY.md)** for full details. Summary:
 
 **Middleware flow** (`middleware.ts`):
-1. Authentication check (session cookie or API key)
-2. CSRF protection (Origin/Referer validation)
-3. Rate limiting (Upstash Redis, per-route limits)
-4. Quota enforcement (per-workspace limits)
-5. Route handler
+1. Security headers (X-Content-Type-Options, X-Frame-Options, HSTS, CSP)
+2. Authentication check (session cookie or API key)
+3. CSRF protection (Origin/Referer validation)
+4. Rate limiting (Upstash Redis, per-route limits)
+5. Quota enforcement (per-workspace limits)
+6. Route handler
 
 **Protected routes**: `/api/chat`, `/api/documents/*`, `/api/feedback`, `/dashboard/*`, `/account/*`
 **Public routes**: `/`, `/auth/*`, `/privacy`, `/terms`, `/api/health`, `/api/leads`
@@ -351,6 +369,10 @@ Located in `supabase/migrations/`. Run in order via Supabase SQL Editor:
 | `003_add_user_tables.sql` | Users, workspaces, API keys, invitations |
 | `004_add_subscription_tables.sql` | Stripe customers, quotas, invoices, payments |
 | `006_update_rls_policies.sql` | RLS policies, audit logs, triggers |
+| `007_add_oauth_user_trigger.sql` | OAuth user auto-provisioning |
+| `008_atomic_quota_check.sql` | Atomic quota enforcement |
+| `009_fix_quota_and_stripe.sql` | Quota and Stripe fixes |
+| `COMBINED_003_to_009_run_in_supabase.sql` | Combined migration bundle (003-009) |
 
 Additional standalone SQL:
 - `supabase/feedback-migration.sql` -- Feedback table

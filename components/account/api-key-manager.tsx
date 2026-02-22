@@ -245,7 +245,7 @@ export function ApiKeyManager({ userId, workspaceId }: { userId: string; workspa
               </thead>
               <tbody>
                 {keys.map((key) => (
-                  <tr key={key.id} className="border-b border-gray-800 last:border-0 hover:bg-gray-800/20">
+                  <tr key={key.id} className="border-b border-gray-800 last:border-0 hover:bg-gray-800/20 hover:translate-x-1 transition-all duration-200">
                     <td className="p-4 text-white">{key.name}</td>
                     <td className="p-4 text-gray-400 font-mono text-sm">{key.key_prefix}...</td>
                     <td className="p-4 text-gray-400">{formatDate(key.created_at)}</td>
@@ -254,7 +254,7 @@ export function ApiKeyManager({ userId, workspaceId }: { userId: string; workspa
                       <span
                         className={`px-2 py-1 rounded text-sm ${
                           key.is_active
-                            ? 'bg-green-500/20 text-green-400'
+                            ? 'bg-green-500/20 text-green-400 animate-pulse-glow'
                             : 'bg-red-500/20 text-red-400'
                         }`}
                       >

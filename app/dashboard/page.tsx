@@ -89,30 +89,30 @@ export default async function DashboardPage() {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           <Link
             href="/"
-            className="p-6 bg-[#16213e]/50 backdrop-blur-sm border border-gray-800 rounded-lg hover:border-blue-500 transition-colors"
+            className="group p-6 bg-[#16213e]/50 backdrop-blur-sm border border-gray-800 rounded-lg hover:border-blue-500 hover:-translate-y-1 hover:shadow-lg hover:shadow-blue-500/10 transition-all duration-300"
           >
-            <h3 className="text-lg font-semibold text-white mb-2">Ask a Question</h3>
-            <p className="text-gray-400 text-sm">
+            <h3 className="text-lg font-semibold text-white mb-2 group-hover:text-blue-400 transition-colors duration-300">Ask a Question</h3>
+            <p className="text-gray-400 text-sm group-hover:text-gray-300 transition-colors duration-300">
               Query your documents with AI-powered search
             </p>
           </Link>
 
           <Link
             href="/account"
-            className="p-6 bg-[#16213e]/50 backdrop-blur-sm border border-gray-800 rounded-lg hover:border-blue-500 transition-colors"
+            className="group p-6 bg-[#16213e]/50 backdrop-blur-sm border border-gray-800 rounded-lg hover:border-blue-500 hover:-translate-y-1 hover:shadow-lg hover:shadow-blue-500/10 transition-all duration-300"
           >
-            <h3 className="text-lg font-semibold text-white mb-2">API Keys</h3>
-            <p className="text-gray-400 text-sm">
+            <h3 className="text-lg font-semibold text-white mb-2 group-hover:text-blue-400 transition-colors duration-300">API Keys</h3>
+            <p className="text-gray-400 text-sm group-hover:text-gray-300 transition-colors duration-300">
               Generate API keys for programmatic access
             </p>
           </Link>
 
           <Link
             href="/account"
-            className="p-6 bg-[#16213e]/50 backdrop-blur-sm border border-gray-800 rounded-lg hover:border-blue-500 transition-colors"
+            className="group p-6 bg-[#16213e]/50 backdrop-blur-sm border border-gray-800 rounded-lg hover:border-blue-500 hover:-translate-y-1 hover:shadow-lg hover:shadow-blue-500/10 transition-all duration-300"
           >
-            <h3 className="text-lg font-semibold text-white mb-2">Account Settings</h3>
-            <p className="text-gray-400 text-sm">
+            <h3 className="text-lg font-semibold text-white mb-2 group-hover:text-blue-400 transition-colors duration-300">Account Settings</h3>
+            <p className="text-gray-400 text-sm group-hover:text-gray-300 transition-colors duration-300">
               Update your profile and preferences
             </p>
           </Link>

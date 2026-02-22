@@ -93,7 +93,7 @@ export default async function WorkspacePage() {
           {/* Workspace Info */}
           <section>
             <h2 className="text-2xl font-bold text-white mb-4">Workspace Details</h2>
-            <div className="p-6 bg-[#16213e]/50 backdrop-blur-sm border border-gray-800 rounded-lg">
+            <div className="p-6 bg-[#16213e]/50 backdrop-blur-sm border border-gray-800 rounded-lg hover:border-gray-600 transition-all duration-300">
               {workspace ? (
                 <div className="space-y-4">
                   <div className="flex items-center justify-between">
@@ -102,7 +102,7 @@ export default async function WorkspacePage() {
                       <p className="text-white text-lg font-semibold">{workspace.name}</p>
                     </div>
                     <span
-                      className={`px-3 py-1 text-white text-sm font-medium rounded-full ${
+                      className={`px-3 py-1 text-white text-sm font-medium rounded-full animate-pulse-glow ${
                         planColors[workspace.plan] || 'bg-gray-600'
                       }`}
                     >
@@ -161,7 +161,7 @@ export default async function WorkspacePage() {
                     {members.map((member) => (
                       <tr
                         key={member.id}
-                        className="border-b border-gray-800/50 last:border-b-0"
+                        className="border-b border-gray-800/50 last:border-b-0 hover:bg-gray-800/20 hover:translate-x-1 transition-all duration-200"
                       >
                         <td className="px-6 py-4">
                           <div>
@@ -185,7 +185,7 @@ export default async function WorkspacePage() {
                           >
                             <span
                               className={`w-2 h-2 rounded-full ${
-                                member.is_active ? 'bg-green-400' : 'bg-gray-500'
+                                member.is_active ? 'bg-green-400 animate-pulse' : 'bg-gray-500'
                               }`}
                             />
                             {member.is_active ? 'Active' : 'Inactive'}

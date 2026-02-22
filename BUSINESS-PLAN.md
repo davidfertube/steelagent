@@ -10,9 +10,11 @@
 
 **Market opportunity:** The global materials testing market is valued at ~$2.4 billion. There are 50,000+ materials engineers in oil & gas alone, with additional demand from QA/QC inspectors, procurement teams, and compliance officers across EPC contractors, steel mills, and pipe manufacturers.
 
-**Revenue model:** SaaS subscriptions -- Free (10 queries/month), Pro ($49/month), Enterprise ($199/month). Break-even at ~14 Pro customers or ~8 mixed Pro/Enterprise customers. Infrastructure costs are near-zero until scale (free-tier Vercel, Supabase, Upstash).
+**Revenue model:** SaaS subscriptions -- Free (10 queries/month), Pro ($49/month), Enterprise ($199/month). Break-even at ~14 Pro customers or ~8 mixed Pro/Enterprise customers. Infrastructure costs are near-zero until scale (free-tier Vercel, Supabase, Upstash). Stripe billing (checkout, portal, webhooks) is fully integrated.
 
 **Competitive advantage:** Domain-specific RAG with cross-spec contamination prevention, human-in-the-loop for safety-critical queries, and a feedback loop for continuous improvement. Not a generic AI wrapper -- a purpose-built compliance tool.
+
+**Product readiness:** Live at [steelagent.ai](https://steelagent.ai). Full auth (email, OAuth, API keys), Stripe billing, multi-tenant workspaces, production security (CSP, HSTS, CSRF, RLS, rate limiting), 15 API endpoints, 113 passing unit tests. Ready for first paying customers.
 
 ---
 
@@ -189,6 +191,8 @@ Infrastructure costs are near-zero until scale. The primary cost is the Anthropi
 3. **Evaluation framework** -- 80 golden queries, RAGAS metrics, confusion matrix testing
 4. **Feedback loop** -- Production feedback drives continuous pipeline improvements
 5. **Data lock-in** -- Once customers upload their spec library, switching costs are high
+6. **Production-ready billing** -- Stripe checkout, portal, webhooks, and quota enforcement already shipped
+7. **Enterprise security** -- CSP, HSTS, CSRF, RLS, rate limiting, audit logging, webhook signature verification
 
 ---
 
@@ -206,12 +210,15 @@ SteelAgent works like a very smart, very careful search engine for technical doc
 
 ### For Technical Stakeholders
 
-- **Stack:** Next.js 16, React 19, TypeScript, Supabase (PostgreSQL + pgvector), Vercel
+- **Stack:** Next.js 16, React 19, TypeScript (~27,500 LOC), Supabase (PostgreSQL + pgvector), Vercel
 - **LLM:** Claude Opus 4.6 (primary) with 4 fallback providers (Groq, Cerebras, SambaNova, OpenRouter)
 - **Search:** Hybrid BM25 + vector search with Voyage AI cross-encoder reranking
 - **Verification:** Regex-based numerical grounding, LLM coherence judge, confidence gating
-- **Security:** Supabase Auth, RLS, CSRF protection, rate limiting, audit logging
+- **Billing:** Stripe integration (checkout, portal, webhooks, subscription management)
+- **Auth:** Supabase Auth (email/password, OAuth), API keys, JWT sessions
+- **Security:** RLS, CSRF, CSP, HSTS, rate limiting (Upstash Redis), audit logging
 - **Infrastructure cost:** ~$35-80/month (all free tier except Anthropic API)
+- **API:** 15 endpoints including RAG, document management, billing, auth, feedback
 
 Full technical documentation: [AGENTS.md](AGENTS.md), [CLAUDE.md](CLAUDE.md)
 
@@ -311,14 +318,17 @@ SteelAgent provides **AI-assisted lookup**, not **professional engineering advic
 
 ### Compliance Roadmap
 
-| Milestone | Timeline | Cost Estimate |
-|-----------|----------|---------------|
-| Terms of Service + Privacy Policy | Q1 2026 | $1,500-3,000 (lawyer) |
-| AI Disclaimer implementation | Q1 2026 | $0 (code change) |
-| Data Processing Agreement template | Q2 2026 | $1,000-2,000 (lawyer) |
-| Trademark registration | Q2 2026 | $500-1,000 |
-| SOC 2 Type I audit | Q4 2026 | $10,000-20,000 |
-| SOC 2 Type II audit | Q2 2027 | $15,000-30,000 |
+| Milestone | Timeline | Cost Estimate | Status |
+|-----------|----------|---------------|--------|
+| Terms of Service + Privacy Policy | Q1 2026 | $1,500-3,000 (lawyer) | Pages live (`/privacy`, `/terms`), needs legal review |
+| AI Disclaimer implementation | Q1 2026 | $0 (code change) | Pending UI integration |
+| Stripe billing + webhook security | Q1 2026 | $0 (code) | Done (`lib/stripe.ts`, HMAC verification) |
+| OAuth + account management | Q1 2026 | $0 (code) | Done (signup, login, password reset, deletion) |
+| Security headers (CSP, HSTS) | Q1 2026 | $0 (code) | Done (`middleware.ts`) |
+| Data Processing Agreement template | Q2 2026 | $1,000-2,000 (lawyer) | Pending |
+| Trademark registration | Q2 2026 | $500-1,000 | Pending |
+| SOC 2 Type I audit | Q4 2026 | $10,000-20,000 | Pending |
+| SOC 2 Type II audit | Q2 2027 | $15,000-30,000 | Pending |
 
 ---
 
@@ -396,8 +406,8 @@ At scale, HITL adds ~$150/month in human reviewer costs -- easily covered by Ent
 ### Current
 
 **David Fernandez** -- Founder, Full-Stack Engineer + ML
-- Built entire platform (25,000+ lines of TypeScript)
-- 7-stage agentic RAG pipeline
+- Built entire platform (~27,500 lines of TypeScript across 131 files)
+- 7-stage agentic RAG pipeline with 15 API endpoints
 - 91.3% accuracy on golden dataset
 - Production deployment with zero-downtime
 
@@ -425,15 +435,46 @@ At scale, HITL adds ~$150/month in human reviewer costs -- easily covered by Ent
 
 ---
 
+## Current Product Status (Feb 2026)
+
+### Shipped
+
+| Category | What's Built | Key Files |
+|----------|-------------|-----------|
+| **RAG Pipeline** | 7-stage agentic pipeline, 91.3% accuracy, ~0% hallucinations | `app/api/chat/route.ts`, `lib/multi-query-rag.ts` |
+| **Document Ingestion** | PDF upload, OCR, semantic chunking, vector embedding | `app/api/documents/*/route.ts`, `lib/semantic-chunking.ts` |
+| **Search** | Hybrid BM25 + vector, Voyage AI reranking, document filtering | `lib/hybrid-search.ts`, `lib/reranker.ts` |
+| **Verification** | Answer grounding, anti-refusal, coherence validation, confidence gate | `lib/answer-grounding.ts`, `lib/response-validator.ts` |
+| **Auth** | Email/password, OAuth, password reset, API keys, sessions | `lib/auth.ts`, `app/auth/*/page.tsx` |
+| **Billing** | Stripe checkout, portal, webhooks, subscription management | `lib/stripe.ts`, `app/api/billing/*/route.ts` |
+| **Account** | Profile management, API key CRUD, account deletion | `app/account/page.tsx`, `app/api/account/delete/route.ts` |
+| **Workspaces** | Multi-tenant, RLS, quota enforcement, workspace settings | `app/workspace/page.tsx`, `lib/quota.ts` |
+| **Security** | CSP, HSTS, CSRF, rate limiting, RLS, audit logging | `middleware.ts`, `lib/rate-limit.ts` |
+| **Observability** | Langfuse tracing, feedback loop, diagnostic reporting | `lib/langfuse.ts`, `scripts/feedback-report.ts` |
+| **Testing** | 113 unit tests, 80 golden queries, 11 scripts, RAGAS evaluation | `tests/`, `scripts/` |
+| **Landing Page** | Hero, RAG demo, side-by-side comparison, lead capture | `app/page.tsx`, `components/realtime-comparison.tsx` |
+
+### Not Yet Shipped
+
+| Category | What's Needed | Effort |
+|----------|--------------|--------|
+| **Quota-Stripe sync** | Tie plan limits to Stripe subscription tier dynamically | Low |
+| **AI Disclaimer** | Show on every response in the UI | Low |
+| **Human-in-the-Loop** | Review queue, reviewer dashboard, email notifications | Medium |
+| **Email Notifications** | Resend integration for billing, quota, HITL | Low (lib exists) |
+| **Legal Review** | Lawyer review of ToS/Privacy (pages exist) | External |
+
+---
+
 ## Next Steps (Priority Order)
 
-1. **Stripe SDK + Webhook Handler** -- Install `stripe`, create webhook routes, handle subscription lifecycle
-2. **Checkout Flow** -- Create Stripe Checkout sessions for Pro/Enterprise upgrade
-3. **Billing UI** -- Pricing table, upgrade modals, usage dashboard
-4. **Terms of Service + Privacy Policy** -- Legal foundation before accepting payments
+1. ~~**Stripe SDK + Webhook Handler**~~ -- Done: `lib/stripe.ts`, `app/api/webhooks/stripe/route.ts`, `app/api/billing/checkout/route.ts`, `app/api/billing/portal/route.ts`, `app/api/billing/subscription/route.ts`
+2. ~~**Checkout Flow**~~ -- Done: Stripe Checkout sessions for Pro/Enterprise upgrade
+3. **Billing UI Polish** -- Finalize pricing table, upgrade modals, usage dashboard (`components/account/billing-section.tsx`, `components/upgrade-modal.tsx` exist)
+4. **Terms of Service + Privacy Policy** -- Legal foundation before accepting payments (pages exist at `/privacy` and `/terms`)
 5. **AI Disclaimer** -- Add to every response in the UI
 6. **Human-in-the-Loop** -- Confidence-gated routing, review queue, email notifications
-7. **Email Service** -- Resend for billing, quota warnings, HITL notifications
-8. **Team Management UI** -- Workspace invitations, member list, role management
+7. **Email Service** -- Resend for billing, quota warnings, HITL notifications (`lib/email.ts` exists)
+8. **Team Management UI** -- Workspace invitations, member list, role management (`app/workspace/page.tsx` exists)
 9. **Content Marketing** -- Blog, YouTube, LinkedIn (start building audience)
 10. **First Paying Customer** -- Direct outreach, free trial, convert to Pro

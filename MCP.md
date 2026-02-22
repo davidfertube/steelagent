@@ -2,7 +2,7 @@
 
 ## Overview
 
-MCP (Model Context Protocol) servers extend Claude Code with tools for file access, GitHub integration, database queries, and documentation lookup. This is a large codebase (~140+ TypeScript files, 45 library modules) so MCP tools are essential for efficient development.
+MCP (Model Context Protocol) servers extend Claude Code with tools for file access, GitHub integration, database queries, and documentation lookup. This is a large codebase (~131 TypeScript files, 42 library modules, 15 API routes) so MCP tools are essential for efficient development.
 
 Configuration: `.mcp/config.json`
 

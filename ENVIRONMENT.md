@@ -121,6 +121,11 @@ Go to SQL Editor and run these migrations in order:
 | 9 | `003_add_user_tables.sql` | Users, workspaces, API keys, invitations |
 | 10 | `004_add_subscription_tables.sql` | Stripe customers, quotas, invoices, payments |
 | 11 | `006_update_rls_policies.sql` | RLS policies, audit logs, triggers |
+| 12 | `007_add_oauth_user_trigger.sql` | OAuth user auto-provisioning |
+| 13 | `008_atomic_quota_check.sql` | Atomic quota enforcement |
+| 14 | `009_fix_quota_and_stripe.sql` | Quota and Stripe fixes |
+
+**Alternative**: Run `COMBINED_003_to_009_run_in_supabase.sql` instead of steps 9-14 for a single combined migration.
 
 **Additional standalone migrations** (run after the above):
 - `supabase/feedback-migration.sql` -- Feedback table

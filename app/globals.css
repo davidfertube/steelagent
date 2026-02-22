@@ -284,6 +284,63 @@
   .animate-pulse-glow {
     animation: pulseGlow 3s ease-in-out infinite;
   }
+
+  /* Shimmer sweep across progress bars */
+  .animate-shimmer {
+    animation: shimmer 2.5s ease-in-out infinite;
+  }
+
+  /* Vertical scanline for tables */
+  .animate-scanline {
+    animation: scanline 4s linear infinite;
+  }
+
+  /* Pulsing green border glow */
+  .animate-border-glow {
+    animation: borderGlow 3s ease-in-out infinite;
+  }
+
+  /* Pulsing amber border glow */
+  .animate-border-glow-amber {
+    animation: borderGlowAmber 3s ease-in-out infinite;
+  }
+
+  /* Subtle bar width oscillation */
+  .animate-bar-pulse {
+    animation: barPulse 3s ease-in-out infinite;
+    transform-origin: left;
+  }
+
+  /* Blinking cursor */
+  .animate-cursor-blink {
+    animation: cursorBlink 1s step-end infinite;
+  }
+
+  /* Breathing scale + opacity */
+  .animate-breathe {
+    animation: breathe 3s ease-in-out infinite;
+  }
+
+  /* Expanding ring outward */
+  .animate-expanding-ring {
+    animation: expandingRing 2s ease-out infinite;
+  }
+}
+
+/* Accessibility: disable continuous animations for reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  .animate-shimmer,
+  .animate-scanline,
+  .animate-border-glow,
+  .animate-border-glow-amber,
+  .animate-bar-pulse,
+  .animate-breathe,
+  .animate-expanding-ring,
+  .animate-float,
+  .animate-pulse-glow,
+  .animate-rotate-slow {
+    animation: none !important;
+  }
 }
 
 @keyframes fadeIn {
@@ -326,6 +383,60 @@
 @keyframes pulseGlow {
   0%, 100% { opacity: 0.6; }
   50% { opacity: 1; }
+}
+
+@keyframes shimmer {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(100%); }
+}
+
+@keyframes scanline {
+  0% { top: 0%; opacity: 0; }
+  10% { opacity: 1; }
+  90% { opacity: 1; }
+  100% { top: 100%; opacity: 0; }
+}
+
+@keyframes borderGlow {
+  0%, 100% {
+    border-color: rgba(34, 197, 94, 0.2);
+    box-shadow: 0 0 0 0 rgba(34, 197, 94, 0);
+  }
+  50% {
+    border-color: rgba(34, 197, 94, 0.5);
+    box-shadow: 0 0 15px 2px rgba(34, 197, 94, 0.15);
+  }
+}
+
+@keyframes borderGlowAmber {
+  0%, 100% {
+    border-color: rgba(245, 158, 11, 0.2);
+    box-shadow: 0 0 0 0 rgba(245, 158, 11, 0);
+  }
+  50% {
+    border-color: rgba(245, 158, 11, 0.5);
+    box-shadow: 0 0 12px 2px rgba(245, 158, 11, 0.1);
+  }
+}
+
+@keyframes barPulse {
+  0%, 100% { transform: scaleX(1); }
+  50% { transform: scaleX(1.02); }
+}
+
+@keyframes cursorBlink {
+  0%, 49% { opacity: 1; }
+  50%, 100% { opacity: 0; }
+}
+
+@keyframes breathe {
+  0%, 100% { transform: scale(1); opacity: 0.8; }
+  50% { transform: scale(1.15); opacity: 1; }
+}
+
+@keyframes expandingRing {
+  0% { transform: scale(1); opacity: 0.6; }
+  100% { transform: scale(2.5); opacity: 0; }
 }
 
 /* ===== BUTTON VARIANTS ===== */

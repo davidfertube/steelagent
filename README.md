@@ -115,7 +115,7 @@ graph LR
 | **Storage** | Supabase Storage | 1GB free | PDF document storage |
 | **Cache** | Upstash Redis | Free tier | Rate limiting (10K commands/day) |
 | **Auth** | Supabase Auth | Email/password | Session cookies, API keys, JWT |
-| **Payments** | Stripe | SaaS billing | Subscriptions, checkout, customer portal (planned) |
+| **Payments** | Stripe | SaaS billing | Subscriptions, checkout, customer portal, webhooks |
 | **Observability** | Langfuse | RAG tracing | Pipeline debugging, latency tracking |
 
 ---
@@ -266,16 +266,24 @@ app/
     documents/process/route.ts  # PDF extraction -> chunking -> embedding
     documents/upload/route.ts   # Upload confirmation
     documents/upload-url/route.ts # Signed URL for direct upload
-    documents/pdf/route.ts      # PDF retrieval
     feedback/route.ts           # User feedback collection + retrieval
     leads/route.ts             # Lead capture
+    health/route.ts            # Health check endpoint
     auth/api-keys/route.ts     # API key management
     auth/api-keys/[id]/route.ts # API key deletion
+    billing/checkout/route.ts   # Stripe checkout session
+    billing/portal/route.ts     # Stripe customer portal
+    billing/subscription/route.ts # Subscription + quota status
+    webhooks/stripe/route.ts    # Stripe webhook handler
+    account/delete/route.ts     # Account deletion
   auth/callback/route.ts       # OAuth callback
   dashboard/page.tsx           # User dashboard
   account/page.tsx             # Account settings + API keys
+  workspace/page.tsx           # Workspace settings + team
   auth/login/page.tsx          # Login
   auth/signup/page.tsx         # Registration
+  auth/forgot-password/page.tsx # Password reset request
+  auth/reset-password/page.tsx  # Password reset completion
   privacy/page.tsx             # Privacy policy
   terms/page.tsx               # Terms of service
 components/
@@ -283,11 +291,18 @@ components/
   realtime-comparison.tsx      # Side-by-side RAG vs generic LLM
   response-feedback.tsx        # Feedback widget (thumbs up/down + issue types)
   document-upload.tsx          # PDF upload component
+  anonymous-quota-banner.tsx   # Anonymous usage limit banner
+  upgrade-modal.tsx            # Plan upgrade modal
   auth/login-form.tsx          # Login form
   auth/signup-form.tsx         # Signup form
   dashboard/usage-stats.tsx    # Usage statistics
   dashboard/document-list.tsx  # Uploaded documents
   account/api-key-manager.tsx  # API key CRUD
+  account/billing-section.tsx  # Subscription management
+  account/profile-form.tsx     # Profile settings
+  account/delete-account-button.tsx # Account deletion
+  layout/user-menu.tsx         # Navigation user menu
+  ui/button.tsx, card.tsx, separator.tsx, logo.tsx  # Base UI components
 lib/
   multi-query-rag.ts           # Query decomposition + parallel retrieval
   hybrid-search.ts             # BM25 + vector fusion search
@@ -314,20 +329,38 @@ lib/
   embeddings.ts                # Embedding generation
   vectorstore.ts               # Vector database operations
   query-cache.ts               # Query result caching
-middleware.ts                  # Security (auth, CSRF, rate limiting)
+  embedding-cache.ts           # In-memory embedding cache
+  latency-optimizer.ts         # Cache + early termination + parallel execution
+  query-decomposition.ts       # Sub-query decomposition (Zod validated)
+  query-enhancement.ts         # Document hints + technical term expansion
+  formula-detector.ts          # Formula request detection
+  llm-judge.ts                 # LLM-as-judge for RAGAS evaluation
+  stripe.ts                    # Stripe billing client + plan config
+  email.ts                     # Email service via Resend
+  errors.ts                    # Standardized error handling
+  schemas.ts                   # Zod schemas for LLM output validation
+  validation.ts                # PDF file validation (magic bytes, 50MB)
+middleware.ts                  # Security (auth, CSRF, rate limiting, headers)
 tests/
   golden-dataset/              # 8 spec files, 80+ golden queries
   evaluation/                  # Accuracy + confusion tests
   helpers/                     # Shared test utilities
   performance/                 # Bottleneck profiling
-  stress/                      # k6 load testing
+  security/                    # Rate limit + validation attack tests
 scripts/
+  accuracy-test.ts             # 80-query accuracy test
   production-smoke-test.ts     # 8-query end-to-end validation
   mvp-10-query-test.ts         # 10-query post-improvement validation
+  mvp-accuracy-test.ts         # 50-query accuracy suite
+  extended-smoke-test.ts       # 10 complex material engineer queries
+  demo-5-query-test.ts         # 5-query demo suite
+  verification-test-v2.ts      # Post-improvement verification
+  run-rag-evaluation.ts        # RAGAS-style evaluation
   feedback-report.ts           # Feedback diagnostic report
+  generate-report.ts           # Evaluation report generator
   dedup-documents.ts           # Document deduplication
 supabase/
-  migrations/                  # 11 SQL migration files
+  migrations/                  # 15 SQL migration files
 ```
 
 ---
@@ -341,20 +374,16 @@ supabase/
 | POST | `/api/documents/upload` | Confirm PDF upload |
 | POST | `/api/documents/upload-url` | Get signed upload URL |
 | POST | `/api/documents/process` | Process PDF -> extract, chunk, embed, store |
-| GET | `/api/documents/pdf` | Retrieve uploaded PDF |
 | POST | `/api/feedback` | Submit user feedback on response quality |
 | GET | `/api/feedback` | Retrieve feedback (admin key required) |
 | POST | `/api/auth/api-keys` | Create API key |
 | DELETE | `/api/auth/api-keys/[id]` | Revoke API key |
 | POST | `/api/leads` | Lead capture form |
-
-### Planned Endpoints (Stripe Billing)
-
-| Method | Endpoint | Description |
-|--------|----------|-------------|
+| GET | `/api/health` | Health check endpoint |
+| DELETE | `/api/account/delete` | Account deletion |
 | POST | `/api/billing/checkout` | Create Stripe Checkout session |
 | POST | `/api/billing/portal` | Open Stripe Customer Portal |
-| GET | `/api/billing/subscription` | Get current subscription status |
+| GET | `/api/billing/subscription` | Get subscription + quota status |
 | POST | `/api/webhooks/stripe` | Handle Stripe webhook events |
 
 ---
@@ -393,11 +422,13 @@ Break-even: ~14 Pro customers or ~8 mixed Pro/Enterprise customers cover infrast
 - [x] **Rate limiting** -- Per-endpoint limits with Upstash Redis + in-memory fallback
 - [x] **Usage quotas** -- Per-workspace query/document/API call limits with auto-reset
 
-### In Progress -- Payment Gateway (Stripe)
-- [ ] **Stripe SDK integration** -- Checkout sessions, subscription management
-- [ ] **Webhook handler** -- Process subscription lifecycle events
-- [ ] **Billing portal** -- Stripe-hosted subscription management
-- [ ] **Billing UI** -- Pricing table, usage dashboard, upgrade modals
+### Shipped -- Payment Gateway (Stripe)
+- [x] **Stripe SDK integration** -- `lib/stripe.ts` with plan configuration
+- [x] **Checkout flow** -- `app/api/billing/checkout/route.ts` creates Stripe sessions
+- [x] **Webhook handler** -- `app/api/webhooks/stripe/route.ts` with signature verification
+- [x] **Billing portal** -- `app/api/billing/portal/route.ts` for subscription management
+- [x] **Subscription status** -- `app/api/billing/subscription/route.ts` with quota info
+- [x] **Billing UI** -- `components/account/billing-section.tsx`, `components/upgrade-modal.tsx`
 - [ ] **Quota-Stripe sync** -- Dynamic limits tied to subscription tier
 
 ### In Progress -- Enterprise Hardening
@@ -465,9 +496,9 @@ SteelAgent provides AI-assisted lookup, not professional engineering advice. The
 
 **David Fernandez** -- [Portfolio](https://davidfernandez.dev) | [GitHub](https://github.com/davidfertube)
 
-Solo build over 3 months (Nov 2025 - Feb 2026). ~25,000 lines of TypeScript across 45 library modules, 11 API routes, 20 components, and comprehensive test infrastructure.
+Solo build over 3 months (Nov 2025 - Feb 2026). ~27,500 lines of TypeScript across 42 library modules, 15 API routes, 21 components, and comprehensive test infrastructure.
 
-**Technical Achievement**: 7-stage agentic RAG pipeline achieving **91.3% accuracy** on 80-query golden dataset with **zero hallucinations**. Shipped 15+ pipeline improvements in February 2026 alone (dedup, Voyage AI reranking, confidence reweighting, feedback loop, dynamic topK).
+**Technical Achievement**: 7-stage agentic RAG pipeline achieving **91.3% accuracy** on 80-query golden dataset with **zero hallucinations**. Stripe billing integration, OAuth support, atomic quota enforcement, and full account lifecycle management. Shipped 15+ pipeline improvements in February 2026 alone (dedup, Voyage AI reranking, confidence reweighting, feedback loop, dynamic topK).
 
 **Test Infrastructure**: 113 unit tests, 80-query golden dataset, 8 production smoke tests, 10 post-improvement validation queries, RAGAS evaluation, A789/A790 confusion matrix, performance profiling.
 

@@ -7,6 +7,7 @@
 
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
+import { motion } from 'framer-motion';
 import { createAuthClient } from '@/lib/auth';
 
 interface UsageData {
@@ -97,55 +98,115 @@ export function UsageStats({ workspaceId }: { workspaceId: string }) {
           <h3 className="text-lg font-semibold text-white">Usage This Month</h3>
           <p className="text-sm text-gray-400">Resets on {periodEnd}</p>
         </div>
-        <span className="px-3 py-1 bg-blue-600/20 text-blue-400 rounded-full text-sm font-medium uppercase">
+        <motion.span
+          className="px-3 py-1 bg-blue-600/20 text-blue-400 rounded-full text-sm font-medium uppercase"
+          animate={{ opacity: [1, 0.7, 1] }}
+          transition={{ duration: 3, repeat: Infinity }}
+        >
           {usage.plan} Plan
-        </span>
+        </motion.span>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {/* Queries Usage */}
-        <div className="p-6 bg-[#16213e]/50 backdrop-blur-sm border border-gray-800 rounded-lg">
+        <motion.div
+          className="p-6 bg-[#16213e]/50 backdrop-blur-sm border border-gray-800 rounded-lg"
+          whileHover={{
+            y: -4,
+            borderColor: "rgba(59, 130, 246, 0.5)",
+            boxShadow: "0 0 20px 2px rgba(59, 130, 246, 0.1)"
+          }}
+          transition={{ duration: 0.25 }}
+        >
           <div className="flex items-center justify-between mb-4">
             <h4 className="text-white font-medium">Queries</h4>
-            <span className={`px-2 py-1 rounded text-sm font-medium ${getColorClass(queriesPercent)}`}>
+            <motion.span
+              className={`px-2 py-1 rounded text-sm font-medium ${getColorClass(queriesPercent)}`}
+              whileHover={{ scale: 1.1 }}
+            >
               {usage.queries_used} / {usage.queries_limit}
-            </span>
+            </motion.span>
           </div>
-          <div className="w-full bg-gray-700 rounded-full h-3">
-            <div
-              className={`h-3 rounded-full transition-all ${getProgressColor(queriesPercent)}`}
-              style={{ width: `${Math.min(queriesPercent, 100)}%` }}
-            />
-          </div>
-        </div>
+          <motion.div
+            className="w-full bg-gray-700 rounded-full h-3 overflow-hidden cursor-pointer"
+            whileHover={{ scaleY: 1.6 }}
+            transition={{ type: "spring", stiffness: 400, damping: 25 }}
+          >
+            <motion.div
+              className={`h-full rounded-full relative overflow-hidden ${getProgressColor(queriesPercent)}`}
+              initial={{ width: "0%" }}
+              animate={{ width: `${Math.min(queriesPercent, 100)}%` }}
+              transition={{ duration: 1, ease: "easeOut" }}
+            >
+              <div className="absolute inset-0 animate-shimmer">
+                <div className="h-full w-1/2 bg-gradient-to-r from-transparent via-white/20 to-transparent" />
+              </div>
+              <div className="absolute inset-0 animate-bar-pulse origin-left" />
+            </motion.div>
+          </motion.div>
+        </motion.div>
 
         {/* Documents Usage */}
-        <div className="p-6 bg-[#16213e]/50 backdrop-blur-sm border border-gray-800 rounded-lg">
+        <motion.div
+          className="p-6 bg-[#16213e]/50 backdrop-blur-sm border border-gray-800 rounded-lg"
+          whileHover={{
+            y: -4,
+            borderColor: "rgba(59, 130, 246, 0.5)",
+            boxShadow: "0 0 20px 2px rgba(59, 130, 246, 0.1)"
+          }}
+          transition={{ duration: 0.25 }}
+        >
           <div className="flex items-center justify-between mb-4">
             <h4 className="text-white font-medium">Documents</h4>
-            <span className={`px-2 py-1 rounded text-sm font-medium ${getColorClass(documentsPercent)}`}>
+            <motion.span
+              className={`px-2 py-1 rounded text-sm font-medium ${getColorClass(documentsPercent)}`}
+              whileHover={{ scale: 1.1 }}
+            >
               {usage.documents_used} / {usage.documents_limit}
-            </span>
+            </motion.span>
           </div>
-          <div className="w-full bg-gray-700 rounded-full h-3">
-            <div
-              className={`h-3 rounded-full transition-all ${getProgressColor(documentsPercent)}`}
-              style={{ width: `${Math.min(documentsPercent, 100)}%` }}
-            />
-          </div>
-        </div>
+          <motion.div
+            className="w-full bg-gray-700 rounded-full h-3 overflow-hidden cursor-pointer"
+            whileHover={{ scaleY: 1.6 }}
+            transition={{ type: "spring", stiffness: 400, damping: 25 }}
+          >
+            <motion.div
+              className={`h-full rounded-full relative overflow-hidden ${getProgressColor(documentsPercent)}`}
+              initial={{ width: "0%" }}
+              animate={{ width: `${Math.min(documentsPercent, 100)}%` }}
+              transition={{ duration: 1, ease: "easeOut" }}
+            >
+              <div className="absolute inset-0 animate-shimmer">
+                <div className="h-full w-1/2 bg-gradient-to-r from-transparent via-white/20 to-transparent" />
+              </div>
+              <div className="absolute inset-0 animate-bar-pulse origin-left" />
+            </motion.div>
+          </motion.div>
+        </motion.div>
       </div>
 
       {/* Upgrade CTA */}
       {usage.plan === 'free' && (queriesPercent >= 75 || documentsPercent >= 75) && (
         <div className="p-4 bg-blue-500/10 border border-blue-500/50 rounded-lg text-center">
           <p className="text-white mb-2">Running low on quota?</p>
-          <Link
-            href="/#contact"
-            className="inline-block px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white rounded-lg transition-colors"
+          <motion.div
+            animate={{
+              boxShadow: [
+                "0 0 0 0 rgba(37, 99, 235, 0)",
+                "0 0 15px 3px rgba(37, 99, 235, 0.3)",
+                "0 0 0 0 rgba(37, 99, 235, 0)"
+              ]
+            }}
+            transition={{ duration: 2, repeat: Infinity }}
+            className="inline-block rounded-lg"
           >
-            Upgrade to Pro
-          </Link>
+            <Link
+              href="/#contact"
+              className="inline-block px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white rounded-lg transition-colors"
+            >
+              Upgrade to Pro
+            </Link>
+          </motion.div>
         </div>
       )}
     </div>
