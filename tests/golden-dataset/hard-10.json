@@ -1,0 +1,90 @@
+{
+  "name": "Hard 10-Query Multi-Document Test Suite",
+  "description": "Deliberately difficult queries requiring cross-document reasoning, multi-spec comparison, complex table extraction, and nuanced refusal. Designed to stress-test the full RAG pipeline.",
+  "version": "1.0",
+  "total_queries": 10,
+  "coverage": {
+    "specs": ["A789", "A790", "A312", "A872", "A1049", "API 6A", "API 5CT", "API 16C"],
+    "types": {
+      "cross_spec_comparison": 3,
+      "multi_value_extraction": 2,
+      "complex_reasoning": 2,
+      "nuanced_refusal": 2,
+      "deep_table_lookup": 1
+    }
+  },
+  "qa_pairs": [
+    {
+      "id": "HARD-001",
+      "question": "Compare the minimum yield strength of S32205 (UNS) across ASTM A789, A790, and A872. Which specification requires the highest yield strength and why might they differ?",
+      "expected_values": ["70 ksi", "65 ksi", "A789", "A790", "A872"],
+      "difficulty": "hard",
+      "tags": ["cross-spec", "comparison", "S32205", "yield", "multi-doc"]
+    },
+    {
+      "id": "HARD-002",
+      "question": "What is the complete chemical composition range for chromium, molybdenum, and nitrogen in UNS S31803 per ASTM A790? Include both min and max percentages for each element.",
+      "expected_values": ["21.0", "23.0", "2.5", "3.5", "0.08", "0.20"],
+      "difficulty": "hard",
+      "tags": ["chemical-composition", "multi-element", "S31803", "detailed-extraction"]
+    },
+    {
+      "id": "HARD-003",
+      "question": "For API 6A wellhead equipment rated at 15,000 psi working pressure, what material class requirements apply and what are the corresponding temperature ratings?",
+      "expected_values": ["15000", "psi"],
+      "difficulty": "hard",
+      "tags": ["API-6A", "pressure-rating", "material-class", "temperature"]
+    },
+    {
+      "id": "HARD-004",
+      "question": "Compare the heat treatment requirements for duplex stainless steel between A789 tubing and A790 pipe. Are the solution annealing temperature ranges identical?",
+      "expected_values": ["solution", "anneal"],
+      "difficulty": "hard",
+      "tags": ["cross-spec", "heat-treatment", "A789", "A790", "comparison"]
+    },
+    {
+      "id": "HARD-005",
+      "question": "What is the minimum tensile strength for L80 grade casing per API 5CT, and how does this compare to the yield-to-tensile ratio requirements?",
+      "expected_values": ["95 ksi", "L80"],
+      "difficulty": "hard",
+      "tags": ["API-5CT", "L80", "tensile", "ratio", "mechanical"]
+    },
+    {
+      "id": "HARD-006",
+      "question": "What is the maximum allowable carbon content for S31803 duplex stainless steel according to both A789 and A790? Are they consistent across both specifications?",
+      "expected_values": ["0.030", "carbon"],
+      "difficulty": "hard",
+      "tags": ["cross-spec", "chemical", "carbon", "S31803", "A789", "A790"]
+    },
+    {
+      "id": "HARD-NEG-001",
+      "question": "What is the creep rupture strength of S32205 duplex at 600°C per ASTM A790?",
+      "expected_answer": "REFUSE - Creep rupture data is not included in ASTM A790. A790 covers mechanical properties at room temperature only. Elevated temperature properties would be found in ASME or specialized materials handbooks.",
+      "expect_refusal": true,
+      "difficulty": "hard",
+      "tags": ["nuanced-refusal", "creep", "elevated-temperature", "out-of-scope"]
+    },
+    {
+      "id": "HARD-NEG-002",
+      "question": "According to API 5CT, what is the recommended torque for making up L80 casing connections in the field?",
+      "expected_answer": "REFUSE - API 5CT covers casing and tubing specifications but field makeup torque values are typically provided by connection manufacturers (e.g., VAM, Tenaris), not in the base 5CT specification.",
+      "expect_refusal": true,
+      "difficulty": "hard",
+      "tags": ["nuanced-refusal", "field-application", "torque", "out-of-scope"]
+    },
+    {
+      "id": "HARD-007",
+      "question": "What product forms and manufacturing methods are covered by ASTM A1049, and what is the minimum yield strength for the F51 grade designation?",
+      "expected_values": ["forgings", "65 ksi", "450 MPa", "F51"],
+      "difficulty": "hard",
+      "tags": ["A1049", "product-form", "manufacturing", "yield", "multi-part"]
+    },
+    {
+      "id": "HARD-008",
+      "question": "List all the PSL (Product Specification Level) categories defined in API 6A and explain what distinguishes PSL-1 from higher levels in terms of quality requirements.",
+      "expected_values": ["PSL"],
+      "difficulty": "hard",
+      "tags": ["API-6A", "PSL", "quality", "classification"]
+    }
+  ]
+}

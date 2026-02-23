@@ -62,7 +62,7 @@ USER QUESTION: ${cleanedQuery}
 Provide a helpful answer based on your general training knowledge. You may mention typical values or standards, but note that you cannot verify these against specific documents.`;
 
     // Generate response with timeout protection and automatic model fallback
-    // Primary: Claude Sonnet 4.5, falls back to Groq/Cerebras/OpenRouter
+    // Primary: Claude Sonnet 4.6, falls back to Groq/Cerebras/OpenRouter
     const { text: responseText, modelUsed } = await withTimeout(
       fallbackClient.generateContent(genericPrompt),
       TIMEOUTS.LLM_GENERATION,

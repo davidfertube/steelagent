@@ -194,6 +194,8 @@ export class ModelFallbackClient {
   private enableFallback: boolean;
   private logRetries: boolean;
   private availableProviders: ProviderConfig[] = [];
+  /** Token usage from the last Anthropic API call (null for other providers) */
+  private _lastUsage: { inputTokens: number; outputTokens: number } | null = null;
 
   constructor(config: ModelFallbackConfig = {}) {
     this.maxRetries = config.maxRetries ?? 3;
@@ -261,7 +263,18 @@ export class ModelFallbackClient {
         throw new Error(`${response.status}: ${await response.text()}`);
       }
 
-      const data = await response.json() as { content: Array<{ text: string }> };
+      const data = await response.json() as {
+        content: Array<{ text: string }>;
+        usage?: { input_tokens: number; output_tokens: number };
+      };
+
+      if (data.usage) {
+        this._lastUsage = {
+          inputTokens: data.usage.input_tokens,
+          outputTokens: data.usage.output_tokens,
+        };
+      }
+
       return data.content[0]?.text || "";
     } else {
       return await callOpenAICompatible(
@@ -311,13 +324,16 @@ export class ModelFallbackClient {
 
           // LangFuse generation tracking (opt-in)
           try {
+            const usage = this._lastUsage;
             getLangfuse()?.generation({
               name: "llm-call",
               model: `${provider.name}/${model}`,
               input: prompt.slice(0, 2000),
               output: cleanText.slice(0, 2000),
+              usage: usage ? { input: usage.inputTokens, output: usage.outputTokens, total: usage.inputTokens + usage.outputTokens } : undefined,
               metadata: { provider: provider.name, fullModel: model, promptLength: prompt.length, outputLength: cleanText.length },
             });
+            this._lastUsage = null;
           } catch { /* tracing should never block generation */ }
 
           return { text: cleanText, modelUsed: `${provider.name}/${model}` };

@@ -8,6 +8,7 @@ import { extractTextWithOCR, shouldAttemptOCR } from "@/lib/ocr";
 import { semanticChunk, DEFAULT_CHUNK_OPTIONS } from "@/lib/semantic-chunking";
 import { serverAuth, createServiceAuthClient } from "@/lib/auth";
 import { isAnonymousDocument } from "@/lib/rate-limit";
+import { getLangfuse, flushLangfuse } from "@/lib/langfuse";
 
 /**
  * Document Processing API Route
@@ -138,6 +139,9 @@ function _chunkText(
 export async function POST(request: NextRequest) {
   // Store documentId for status updates in error handlers
   let documentId: number | undefined;
+  const langfuse = getLangfuse();
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  let trace: any = null;
 
   try {
     // ========================================
@@ -145,6 +149,13 @@ export async function POST(request: NextRequest) {
     // ========================================
     const body = await request.json();
     documentId = body.documentId;
+
+    // Create Langfuse trace for document processing pipeline
+    trace = langfuse?.trace({
+      name: "document-processing",
+      input: { documentId },
+      metadata: { timestamp: new Date().toISOString() },
+    }) ?? null;
 
     if (!documentId || typeof documentId !== "number") {
       const error = createValidationError("Valid document ID is required.");
@@ -232,6 +243,8 @@ export async function POST(request: NextRequest) {
     // ========================================
     // Step 5: Extract Text from PDF (Page by Page)
     // ========================================
+    const extractionStart = Date.now();
+    const extractionSpan = trace?.span({ name: "pdf-text-extraction", input: { documentId, fileSize: fileData.size } }) ?? null;
     const arrayBuffer = await fileData.arrayBuffer();
 
     // Extract text per page for accurate page numbers
@@ -290,11 +303,14 @@ export async function POST(request: NextRequest) {
     }
 
     console.log(`[Process API] Extracted ${pageTexts.length} pages from document ${documentId}${usedOCR ? " (via OCR)" : ""}`);
+    extractionSpan?.end({ output: { pages: pageTexts.length, usedOCR, elapsedMs: Date.now() - extractionStart } });
 
     // ========================================
     // Step 6: Semantic Chunking (Preserves Structure)
     // ========================================
     console.log(`[Process API] Starting semantic chunking for document ${documentId}...`);
+    const chunkingStart = Date.now();
+    const chunkingSpan = trace?.span({ name: "semantic-chunking", input: { pages: pageTexts.length } }) ?? null;
 
     const allChunks = semanticChunk(pageTexts, DEFAULT_CHUNK_OPTIONS);
 
@@ -307,6 +323,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json(error, { status: getErrorStatusCode("VALIDATION_ERROR") });
     }
 
+    chunkingSpan?.end({ output: { chunkCount: allChunks.length, elapsedMs: Date.now() - chunkingStart } });
     console.log(`[Process API] Generated ${allChunks.length} semantic chunks for document ${documentId}`);
     console.log(`[Process API] Chunk type breakdown:`, {
       text: allChunks.filter(c => c.metadata.chunk_type === 'text').length,
@@ -321,15 +338,19 @@ export async function POST(request: NextRequest) {
     // ========================================
     const chunkContents = allChunks.map(c => c.content);
     let embeddings: number[][];
+    const embeddingStart = Date.now();
+    const embeddingSpan = trace?.span({ name: "embedding-generation", input: { chunkCount: chunkContents.length } }) ?? null;
     try {
       // Generate embeddings in batches
       embeddings = await generateEmbeddings(chunkContents);
     } catch (embeddingError) {
+      embeddingSpan?.end({ output: { error: String(embeddingError) } });
       console.error("[Process API] Embedding generation failed:", embeddingError);
       await updateDocumentStatus(documentId, "error");
       const error = createEmbeddingError(embeddingError);
       return NextResponse.json(error, { status: getErrorStatusCode(error.code) });
     }
+    embeddingSpan?.end({ output: { embeddingCount: embeddings.length, elapsedMs: Date.now() - embeddingStart } });
 
     // Verify embeddings count matches chunks
     if (embeddings.length !== allChunks.length) {
@@ -357,9 +378,12 @@ export async function POST(request: NextRequest) {
       embedding: embeddings[index],
     }));
 
+    const storageStart = Date.now();
+    const storageSpan = trace?.span({ name: "chunk-storage", input: { chunkCount: chunks.length } }) ?? null;
     try {
       await storeChunks(chunks, db);
     } catch (storageError) {
+      storageSpan?.end({ output: { error: String(storageError) } });
       // Log full error for debugging (server-side only)
       const errorMessage = storageError instanceof Error ? storageError.message : "Unknown database error";
       console.error(`[Process API] Chunk storage failed for document ${documentId}:`, errorMessage);
@@ -369,12 +393,18 @@ export async function POST(request: NextRequest) {
       return NextResponse.json(error, { status: getErrorStatusCode("INTERNAL_ERROR") });
     }
 
+    storageSpan?.end({ output: { elapsedMs: Date.now() - storageStart } });
+
     // ========================================
     // Step 9: Update Status to Indexed
     // ========================================
     await updateDocumentStatus(documentId, "indexed");
 
     console.log(`[Process API] Successfully processed document ${documentId}: ${chunks.length} chunks`);
+
+    // Finalize Langfuse trace
+    trace?.update({ output: { success: true, chunks: chunks.length, pages: pageTexts.length } });
+    await flushLangfuse();
 
     // ========================================
     // Step 10: Return Success Response

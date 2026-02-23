@@ -28,7 +28,9 @@
     "test:confusion": "INTEGRATION_TEST=true vitest run tests/evaluation/ --testNamePattern='Confusion'",
     "test:core20": "tsx scripts/core-20-test.ts",
     "test:core20:verbose": "tsx scripts/core-20-test.ts --verbose",
-    "precompute:dspy": "tsx scripts/precompute-chunks-for-dspy.ts"
+    "precompute:dspy": "tsx scripts/precompute-chunks-for-dspy.ts",
+    "test:hard10": "tsx scripts/hard-10-test.ts",
+    "test:hard10:verbose": "tsx scripts/hard-10-test.ts --verbose"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.37.0",

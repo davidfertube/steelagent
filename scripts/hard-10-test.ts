@@ -1,25 +1,15 @@
 /**
- * Core 20-Query Accuracy Test
+ * Hard 10-Query Multi-Document Test
  *
- * Focused accuracy validation using the reduced golden dataset (core-20.json).
- * Covers all 8 specs, all difficulty levels, and all query types with 20 queries
- * instead of 80 for faster iteration during DSPy optimization cycles.
- *
- * Coverage:
- * - 4x ASTM A789 (tubing) — including critical S32205 confusion test
- * - 3x ASTM A790 (pipe) — yield, chemical, trap
- * - 2x ASTM A312 (austenitic stainless) — tensile, trap
- * - 2x ASTM A872 (centrifugally cast) — manufacturing, yield
- * - 2x ASTM A1049 (forgings) — product form, yield
- * - 2x API 6A (wellhead) — pressure ratings, material classes
- * - 2x API 5CT (casing/tubing) — yield, scope
- * - 1x API 16C (choke/kill) — scope
- * - 1x Duplex General (PREN formula)
- * - 1x Real document trap (Inconel 625 rejection)
+ * Stress-tests the RAG pipeline with deliberately difficult queries:
+ * - Cross-spec comparisons (A789 vs A790 vs A872)
+ * - Multi-value extractions (chemical compositions with ranges)
+ * - Complex reasoning (yield-to-tensile ratios, heat treatment comparison)
+ * - Nuanced refusals (out-of-scope but plausible questions)
  *
  * Usage:
- *   npx tsx scripts/core-20-test.ts
- *   npx tsx scripts/core-20-test.ts --verbose
+ *   npx tsx scripts/hard-10-test.ts
+ *   npx tsx scripts/hard-10-test.ts --verbose
  *
  * Requires: dev server running on localhost:3000
  */
@@ -31,7 +21,7 @@ import * as path from "path";
 
 const BASE_URL = process.env.TEST_BASE_URL || "http://localhost:3000";
 const QUERY_TIMEOUT = 180_000;
-const DELAY_BETWEEN_QUERIES = 2_000;
+const DELAY_BETWEEN_QUERIES = 3_000; // Slightly longer for complex queries
 const VERBOSE = process.argv.includes("--verbose");
 
 interface Source {
@@ -58,16 +48,8 @@ interface GoldenQuery {
   expected_values?: string[];
   expected_answer?: string;
   expect_refusal?: boolean;
-  allow_general_knowledge?: boolean;
-  source_table?: string;
-  source_section?: string;
   difficulty: string;
   tags: string[];
-  verification?: {
-    numerical_value: number;
-    unit: string;
-    property: string;
-  };
 }
 
 interface GoldenDataset {
@@ -84,23 +66,21 @@ interface TestResult {
   issues: string[];
   notes: string[];
   hasCitations: boolean;
-  hasCorrectSource: boolean;
+  sourceCount: number;
 }
 
-// Load the core-20 golden dataset
-const datasetPath = path.join(__dirname, "..", "tests", "golden-dataset", "core-20.json");
+const datasetPath = path.join(__dirname, "..", "tests", "golden-dataset", "hard-10.json");
 const dataset: GoldenDataset = JSON.parse(fs.readFileSync(datasetPath, "utf-8"));
 
 /**
- * Normalize Unicode characters for robust comparison.
- * Converts em/en dashes to hyphens, smart quotes to straight, normalizes whitespace.
+ * Normalize Unicode for robust comparison.
  */
 function normalizeForComparison(text: string): string {
   return text
-    .replace(/[\u2013\u2014\u2015]/g, "-")       // en dash, em dash, horizontal bar → hyphen
-    .replace(/[\u2018\u2019]/g, "'")              // smart single quotes → straight
-    .replace(/[\u201C\u201D]/g, '"')              // smart double quotes → straight
-    .replace(/[\u00A0\u2009\u200A\u202F]/g, " ")  // non-breaking/thin spaces → regular space
+    .replace(/[\u2013\u2014\u2015]/g, "-")
+    .replace(/[\u2018\u2019]/g, "'")
+    .replace(/[\u201C\u201D]/g, '"')
+    .replace(/[\u00A0\u2009\u200A\u202F]/g, " ")
     .replace(/\s+/g, " ")
     .trim();
 }
@@ -110,13 +90,11 @@ function validateResponse(query: GoldenQuery, data: RAGResponse): { pass: boolea
   const notes: string[] = [];
   const resp = normalizeForComparison(data.response || "");
 
-  // Check for refusal tests
   if (query.expect_refusal) {
-    const isRefusal = /I cannot|not (available|provided|included|found|covered)|does not (contain|cover|specify)|unable to|not applicable|is not covered|cannot provide a confident answer/i.test(resp);
+    const isRefusal = /I cannot|not (available|provided|included|found|covered)|does not (contain|cover|specify)|unable to|is not covered|cannot provide a confident answer|not included in/i.test(resp);
     if (isRefusal) {
       notes.push("Correctly refused");
     } else {
-      // Also pass if confidence is very low — auto-refuse gate may not have triggered but model is uncertain
       const confidence = data.confidence?.overall ?? 100;
       if (confidence < 45) {
         notes.push(`Low confidence (${confidence}%) — treated as implicit refusal`);
@@ -127,12 +105,12 @@ function validateResponse(query: GoldenQuery, data: RAGResponse): { pass: boolea
     return { pass: issues.length === 0, issues, notes };
   }
 
-  // Non-refusal queries: check for false refusals
-  if (/I cannot (provide|answer|find|determine)/i.test(resp) && !query.allow_general_knowledge) {
+  // Non-refusal: check for false refusals
+  if (/I cannot (provide|answer|find|determine)/i.test(resp)) {
     issues.push("False refusal");
   }
 
-  // Check expected values (with Unicode normalization + flexible whitespace)
+  // Check expected values with flexible matching
   if (query.expected_values && query.expected_values.length > 0) {
     const matchedValues: string[] = [];
     const missedValues: string[] = [];
@@ -148,25 +126,12 @@ function validateResponse(query: GoldenQuery, data: RAGResponse): { pass: boolea
       }
     }
 
-    // Need at least 1 expected value to match
-    if (matchedValues.length > 0) {
-      notes.push(`Values found: ${matchedValues.join(", ")}`);
+    // For hard queries, require at least half the expected values
+    const threshold = Math.ceil(query.expected_values.length / 2);
+    if (matchedValues.length >= threshold) {
+      notes.push(`Values found: ${matchedValues.join(", ")} (${matchedValues.length}/${query.expected_values.length})`);
     } else {
-      issues.push(`No expected values found (expected: ${query.expected_values.join(", ")})`);
-    }
-  }
-
-  // Check numerical verification
-  if (query.verification) {
-    const { numerical_value, unit } = query.verification;
-    const numStr = String(numerical_value);
-    const unitPattern = unit.replace("%", "\\s*%");
-    const hasValue = new RegExp(`${numStr}\\s*${unitPattern}`, "i").test(resp) ||
-                     new RegExp(`${numStr}`, "i").test(resp);
-    if (hasValue) {
-      notes.push(`Verified: ${numerical_value} ${unit}`);
-    } else {
-      issues.push(`Missing verified value: ${numerical_value} ${unit}`);
+      issues.push(`Insufficient values found: ${matchedValues.length}/${query.expected_values.length} (need ${threshold}+). Found: [${matchedValues.join(", ")}], Missing: [${missedValues.join(", ")}]`);
     }
   }
 
@@ -177,9 +142,18 @@ function validateResponse(query: GoldenQuery, data: RAGResponse): { pass: boolea
     issues.push("No citations");
   }
 
-  // Check for substantive response
-  if (resp.length < 50 && !query.expect_refusal) {
-    issues.push("Response too short");
+  // For cross-spec queries, check that multiple documents are referenced
+  if (query.tags.includes("cross-spec") || query.tags.includes("multi-doc")) {
+    const docCount = data.sources?.length ?? 0;
+    if (docCount >= 2) {
+      notes.push(`Multi-doc: ${docCount} sources`);
+    } else {
+      notes.push(`Warning: Only ${docCount} source(s) for cross-spec query`);
+    }
+  }
+
+  if (resp.length < 80) {
+    issues.push("Response too short for complex query");
   }
 
   return { pass: issues.length === 0, issues, notes };
@@ -212,8 +186,8 @@ async function queryRAG(query: string): Promise<{ data: RAGResponse; latencyMs: 
 
 async function runTest(): Promise<void> {
   console.log("=".repeat(70));
-  console.log("  SteelAgent Core 20-Query Accuracy Test");
-  console.log("  Focused validation across all specs + DSPy optimization baseline");
+  console.log("  SteelAgent Hard 10-Query Multi-Document Test");
+  console.log("  Cross-spec comparisons, complex reasoning, nuanced refusals");
   console.log("=".repeat(70));
   console.log();
 
@@ -232,7 +206,7 @@ async function runTest(): Promise<void> {
   for (let i = 0; i < queries.length; i++) {
     const q = queries[i];
     console.log(`  [${i + 1}/${queries.length}] ${q.id} (${q.difficulty})`);
-    console.log(`  Query: "${q.question.slice(0, 90)}${q.question.length > 90 ? "..." : ""}"`);
+    console.log(`  Query: "${q.question.slice(0, 100)}${q.question.length > 100 ? "..." : ""}"`);
     console.log();
 
     try {
@@ -240,15 +214,16 @@ async function runTest(): Promise<void> {
       const { pass, issues, notes } = validateResponse(q, data);
 
       const hasCitations = /\[\d+\]/.test(data.response || "");
-      const hasCorrectSource = true; // simplified — sources checked in validate
+      const sourceCount = data.sources?.length ?? 0;
 
       if (VERBOSE) {
-        const preview = (data.response || "").replace(/\n/g, " ").slice(0, 300);
+        const preview = (data.response || "").replace(/\n/g, " ").slice(0, 400);
         console.log(`  Response: ${preview}...`);
         console.log(`  Sources:  ${data.sources?.map(s => `${s.ref} ${s.document} p.${s.page}`).join(" | ") || "none"}`);
       }
       console.log(`  Confidence: ${data.confidence?.overall || "N/A"}% (R:${data.confidence?.retrieval || "?"}% G:${data.confidence?.grounding || "?"}% C:${data.confidence?.coherence || "?"}%)`);
       console.log(`  Latency:  ${(latencyMs / 1000).toFixed(1)}s`);
+      console.log(`  Sources:  ${sourceCount}`);
       console.log(`  Result:   ${pass ? "PASS" : "FAIL"}`);
 
       if (issues.length > 0) for (const issue of issues) console.log(`    ISSUE: ${issue}`);
@@ -263,7 +238,7 @@ async function runTest(): Promise<void> {
         issues,
         notes,
         hasCitations,
-        hasCorrectSource,
+        sourceCount,
       });
     } catch (err) {
       const msg = err instanceof Error ? err.message : String(err);
@@ -277,7 +252,7 @@ async function runTest(): Promise<void> {
         issues: [msg.slice(0, 200)],
         notes: [],
         hasCitations: false,
-        hasCorrectSource: false,
+        sourceCount: 0,
       });
     }
 
@@ -300,56 +275,42 @@ async function runTest(): Promise<void> {
   const p95 = latencies[Math.floor(latencies.length * 0.95)] || 0;
   const avgConfidence = results.reduce((s, r) => s + r.confidence, 0) / Math.max(results.length, 1);
   const citationRate = results.filter((r) => r.hasCitations).length / total;
+  const avgSourceCount = results.reduce((s, r) => s + r.sourceCount, 0) / Math.max(results.length, 1);
 
-  // By difficulty
-  const byDifficulty: Record<string, { pass: number; total: number }> = {};
-  for (const r of results) {
-    if (!byDifficulty[r.difficulty]) byDifficulty[r.difficulty] = { pass: 0, total: 0 };
-    byDifficulty[r.difficulty].total++;
-    if (r.pass) byDifficulty[r.difficulty].pass++;
-  }
-
-  // By type
   const refusalResults = results.filter((r) => dataset.qa_pairs.find((q) => q.id === r.id)?.expect_refusal);
   const nonRefusalResults = results.filter((r) => !dataset.qa_pairs.find((q) => q.id === r.id)?.expect_refusal);
 
   console.log("=".repeat(70));
-  console.log("  CORE 20-QUERY TEST RESULTS");
+  console.log("  HARD 10-QUERY TEST RESULTS");
   console.log("=".repeat(70));
   console.log();
-  console.log(`  Overall Accuracy:   ${passed}/${total} (${((passed / total) * 100).toFixed(1)}%)`);
-  console.log(`  Citation Rate:      ${((citationRate) * 100).toFixed(1)}%`);
-  console.log(`  Avg Confidence:     ${avgConfidence.toFixed(0)}%`);
-  console.log(`  Avg Latency:        ${(avgLatency / 1000).toFixed(1)}s`);
-  console.log(`  P50 Latency:        ${(p50 / 1000).toFixed(1)}s`);
-  console.log(`  P95 Latency:        ${(p95 / 1000).toFixed(1)}s`);
-  console.log();
-
-  console.log("  By Difficulty:");
-  for (const [diff, stats] of Object.entries(byDifficulty)) {
-    console.log(`    ${diff.padEnd(8)} ${stats.pass}/${stats.total} (${((stats.pass / stats.total) * 100).toFixed(0)}%)`);
-  }
+  console.log(`  Overall Accuracy:     ${passed}/${total} (${((passed / total) * 100).toFixed(1)}%)`);
+  console.log(`  Citation Rate:        ${((citationRate) * 100).toFixed(1)}%`);
+  console.log(`  Avg Confidence:       ${avgConfidence.toFixed(0)}%`);
+  console.log(`  Avg Source Count:     ${avgSourceCount.toFixed(1)}`);
+  console.log(`  Avg Latency:          ${(avgLatency / 1000).toFixed(1)}s`);
+  console.log(`  P50 Latency:          ${(p50 / 1000).toFixed(1)}s`);
+  console.log(`  P95 Latency:          ${(p95 / 1000).toFixed(1)}s`);
   console.log();
 
   console.log("  By Type:");
   const refusalPassed = refusalResults.filter((r) => r.pass).length;
   const nonRefusalPassed = nonRefusalResults.filter((r) => r.pass).length;
+  console.log(`    Substantive:   ${nonRefusalPassed}/${nonRefusalResults.length} (${((nonRefusalPassed / Math.max(nonRefusalResults.length, 1)) * 100).toFixed(0)}%)`);
   console.log(`    Refusal/Trap:  ${refusalPassed}/${refusalResults.length} (${((refusalPassed / Math.max(refusalResults.length, 1)) * 100).toFixed(0)}%)`);
-  console.log(`    Standard:      ${nonRefusalPassed}/${nonRefusalResults.length} (${((nonRefusalPassed / Math.max(nonRefusalResults.length, 1)) * 100).toFixed(0)}%)`);
   console.log();
 
   // Per-query table
-  console.log("  ID             Diff     Pass  Latency  Confidence");
-  console.log("  " + "\u2500".repeat(56));
+  console.log("  ID               Pass  Latency  Confidence  Sources");
+  console.log("  " + "\u2500".repeat(58));
   for (const r of results) {
     const pass = r.pass ? " OK " : "FAIL";
     const lat = r.latencyMs > 0 ? `${(r.latencyMs / 1000).toFixed(1)}s` : "N/A";
     const conf = r.confidence > 0 ? `${r.confidence}%` : "N/A";
-    console.log(`  ${r.id.padEnd(15)} ${r.difficulty.padEnd(8)} ${pass}  ${lat.padStart(7)}  ${conf.padStart(10)}`);
+    console.log(`  ${r.id.padEnd(17)} ${pass}  ${lat.padStart(7)}  ${conf.padStart(10)}  ${r.sourceCount}`);
   }
   console.log();
 
-  // Failure analysis
   const failures = results.filter((r) => !r.pass);
   if (failures.length > 0) {
     console.log("  FAILURE ANALYSIS:");
@@ -359,20 +320,8 @@ async function runTest(): Promise<void> {
     console.log();
   }
 
-  // KPI summary (for DSPy baseline comparison)
-  console.log("  " + "=".repeat(50));
-  console.log("  KPI SUMMARY (for DSPy baseline)");
-  console.log("  " + "=".repeat(50));
-  console.log(`  accuracy:       ${((passed / total) * 100).toFixed(1)}%`);
-  console.log(`  citation_rate:  ${((citationRate) * 100).toFixed(1)}%`);
-  console.log(`  hallucination:  ~0%`);
-  console.log(`  p50_latency:    ${(p50 / 1000).toFixed(1)}s`);
-  console.log(`  p95_latency:    ${(p95 / 1000).toFixed(1)}s`);
-  console.log(`  avg_confidence: ${avgConfidence.toFixed(0)}%`);
-  console.log();
-
   if (passed === total) {
-    console.log("  ALL 20 QUERIES PASSED!");
+    console.log("  ALL 10 HARD QUERIES PASSED!");
   } else {
     console.log(`  ${failures.length} QUERIES FAILED -- see analysis above`);
   }

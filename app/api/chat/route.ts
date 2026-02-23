@@ -34,7 +34,7 @@ import { getOptimizedGeneratorPrompt } from "@/lib/prompt-registry";
  *
  * Rate Limit Handling:
  * - Uses ModelFallbackClient for automatic model fallback
- * - Primary: Claude Sonnet 4.5, falls back to Groq/Cerebras/OpenRouter
+ * - Primary: Claude Sonnet 4.6, falls back to Groq/Cerebras/OpenRouter
  * - Prevents API failures and avoids overage charges
  *
  * Security features:
@@ -132,10 +132,25 @@ async function processRAGQuery(cleanedQuery: string, verified: boolean, document
   // DEBUG: Log incoming query to trace request flow
   console.log(`[Chat API] Incoming query: "${cleanedQuery}"`);
 
+  // LangFuse tracing (opt-in — no-op if LANGFUSE_SECRET_KEY not set)
+  const langfuse = getLangfuse();
+
   // D8: Check query cache for repeated queries (skip entire pipeline)
   if (!verified && !documentId) {
     const cached = getCachedResponse(cleanedQuery);
     if (cached) {
+      // Trace cache hits so Langfuse shows cache effectiveness
+      try {
+        const cacheTrace = langfuse?.trace({
+          name: "rag-query",
+          input: { query: cleanedQuery, cacheHit: true },
+          metadata: { timestamp: new Date().toISOString(), cached: true },
+        });
+        cacheTrace?.span({ name: "cache-hit", input: { query: cleanedQuery } })
+          ?.end({ output: { confidence: cached.confidence.overall } });
+        await flushLangfuse();
+      } catch { /* cache tracing should never block */ }
+
       return {
         response: cached.response,
         sources: cached.sources,
@@ -143,9 +158,6 @@ async function processRAGQuery(cleanedQuery: string, verified: boolean, document
       };
     }
   }
-
-  // LangFuse tracing (opt-in — no-op if LANGFUSE_SECRET_KEY not set)
-  const langfuse = getLangfuse();
   const trace = langfuse?.trace({
     name: "rag-query",
     input: { query: cleanedQuery, verified, documentId },
@@ -515,7 +527,7 @@ RESPONSE GUIDELINES:
    "I cannot answer this question unless specific test data is included in the uploaded documents."`;
 
     // Generate response with timeout protection and automatic model fallback
-    // Primary: Claude Sonnet 4.5, falls back to Groq/Cerebras/OpenRouter if rate limited
+    // Primary: Claude Sonnet 4.6, falls back to Groq/Cerebras/OpenRouter if rate limited
     const fullPrompt = finalSystemPrompt + "\n\n" + userPrompt;
 
     const generationSpan = trace?.span({ name: "llm-generation", input: { promptLength: fullPrompt.length } });
@@ -732,6 +744,19 @@ RESPONSE GUIDELINES:
       }
     }
 
+    // C6: Auto-refuse gate — if confidence stays below 45% after all regen attempts,
+    // convert to a refusal. This prevents low-confidence guesses on trap queries
+    // (e.g., asking about NPS sizing in A789, or S31803 per A312).
+    const postRegenConfidence = Math.round(
+      retrievalConfidence * CONFIDENCE_WEIGHTS.retrieval + groundingScore * CONFIDENCE_WEIGHTS.grounding + coherenceScore * CONFIDENCE_WEIGHTS.coherence
+    );
+    if (postRegenConfidence < 45 && chunks.length > 0 && !detectRefusal(finalResponseText)) {
+      console.log(`[Chat API] Auto-refuse: confidence ${postRegenConfidence}% < 45% after ${regenCount} regens — converting to refusal`);
+      finalResponseText = "I cannot provide a confident answer to this question based on the uploaded documents. " +
+        "The retrieved context does not contain sufficient information to answer accurately. " +
+        "Please verify that the correct specification has been uploaded, or rephrase your question.";
+    }
+
     // ========================================
     // Step 5: Build Sources Array with PDF Links
     // ========================================
@@ -839,11 +864,24 @@ RESPONSE GUIDELINES:
   console.log(`[Chat API] Confidence: overall=${overallConfidence}% (retrieval=${retrievalConfidence}, grounding=${groundingScore}, coherence=${coherenceScore})`);
   console.log(`[Chat API] Returning response with ${sources.length} sources (${remappedResponse.length} chars)`);
 
-  // Finalize LangFuse trace
+  // Finalize LangFuse trace with structured scores for monitoring dashboards
   trace?.update({
     output: { response: remappedResponse.slice(0, 500), sourceCount: sources.length, modelUsed },
     metadata: { confidence: overallConfidence, retrievalConfidence, groundingScore, coherenceScore },
   });
+
+  // Post structured scores (0-1 scale) for Langfuse trend dashboards
+  try {
+    if (langfuse && trace) {
+      const traceId = (trace as unknown as { id?: string }).id;
+      if (traceId) {
+        langfuse.score({ traceId, name: "confidence", value: overallConfidence / 100 });
+        langfuse.score({ traceId, name: "retrieval_confidence", value: retrievalConfidence / 100 });
+        langfuse.score({ traceId, name: "grounding_score", value: groundingScore / 100 });
+        langfuse.score({ traceId, name: "coherence_score", value: coherenceScore / 100 });
+      }
+    }
+  } catch { /* scoring should never block response */ }
   await flushLangfuse();
 
   const result = {
