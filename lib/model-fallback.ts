@@ -3,13 +3,13 @@
  * ===================================
  *
  * Provides reliable LLM access by falling back across multiple providers:
- * 1. Anthropic Claude Opus 4.6 - Primary (best accuracy for technical RAG)
+ * 1. Anthropic Claude Sonnet 4.6 - Primary (best cost/accuracy for technical RAG)
  * 2. Groq - Llama 3.3 70B (free tier fallback, ultra-fast)
  * 3. Cerebras - Llama 3.3 70B (free tier fallback)
  * 4. OpenRouter - Free models (last resort)
  *
  * Best models for steel specification RAG:
- * - Claude Opus 4.6: Best accuracy for technical documents, low hallucination
+ * - Claude Sonnet 4.6: Best cost/accuracy balance for technical documents
  * - Claude Haiku 4.5: Fast fallback for simpler queries
  * - Llama 3.3 70B: Best free option for technical accuracy
  */
@@ -34,12 +34,12 @@ interface ProviderConfig {
 }
 
 const PROVIDERS: ProviderConfig[] = [
-  // Anthropic Claude - Primary provider (best technical accuracy)
+  // Anthropic Claude - Primary provider (best cost/accuracy for technical RAG)
   {
     name: "Anthropic",
     baseUrl: "https://api.anthropic.com/v1",
     envKey: "ANTHROPIC_API_KEY",
-    models: ["claude-opus-4-6", "claude-haiku-4-5-20251001"],
+    models: ["claude-sonnet-4-6", "claude-haiku-4-5-20251001"],
     maxInputTokens: 100000, // 200K context window
   },
   // Fallback providers (free tiers — low TPM limits)
@@ -314,9 +314,9 @@ export class ModelFallbackClient {
             getLangfuse()?.generation({
               name: "llm-call",
               model: `${provider.name}/${model}`,
-              input: prompt.slice(0, 200),
-              output: cleanText.slice(0, 200),
-              metadata: { provider: provider.name, fullModel: model },
+              input: prompt.slice(0, 2000),
+              output: cleanText.slice(0, 2000),
+              metadata: { provider: provider.name, fullModel: model, promptLength: prompt.length, outputLength: cleanText.length },
             });
           } catch { /* tracing should never block generation */ }
 
@@ -461,16 +461,17 @@ export function getEmbeddingRateLimiter(): EmbeddingRateLimiter {
  * Best models for steel specification RAG tasks:
  *
  * PRIMARY (Current):
- * 1. Claude Sonnet 4.5 - Best accuracy for technical docs, excellent citation following
+ * 1. Claude Sonnet 4.6 - Best cost/accuracy balance for technical docs, excellent citations
  * 2. Claude Haiku 4.5 - Fast fallback, good for simpler queries
  *
  * FREE TIER FALLBACKS:
  * 1. Llama 3.3 70B (Groq/Cerebras) - Best free option for technical accuracy
  * 2. Llama 3.1 8B - Fast but less accurate, emergency fallback
  *
- * Claude Sonnet 4.5 is recommended for steel RAG because:
+ * Claude Sonnet 4.6 is recommended for steel RAG because:
  * - Superior numerical value extraction (yield strength, PREN, etc.)
  * - Excellent at following citation instructions
  * - Very low hallucination rate on technical content
  * - Better table interpretation and data extraction from context
+ * - ~5x cheaper than Opus with comparable accuracy for RAG tasks
  */

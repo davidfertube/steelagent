@@ -7,6 +7,18 @@
 **Interviewers:** Avanth Dannapuneni, Francis Ko (NRG)
 **Prepared:** February 20, 2026
 
+## Study Schedule Suggestion
+
+**Day 1:** Read through everything. Highlight anything that feels unfamiliar. Practice the 30-second pitch out loud 10 times.
+
+**Day 2:** Practice Q1-Q5 out loud (most likely questions). Time yourself -- each answer should be 60-90 seconds max. Drill the numbers table.
+
+**Day 3:** Practice Q6-Q12 and behavioral questions B1-B4. Practice the system design whiteboard (S1) by drawing it on paper in under 3 minutes.
+
+**Day before:** Quick review of NRG intel section. Practice your 8 questions to ask them. Do one final run-through of the 30-second pitch. Get a good night's sleep.
+
+**In the interview:** Listen more than you talk. Let them guide the conversation. When they ask a broad question, give a concise answer first, then offer to go deeper: "Would you like me to walk through the technical details?" This shows confidence without rambling.
+
 ---
 
 ## Table of Contents
@@ -67,7 +79,7 @@ NRG is unique: they are both a **power generator** (natural gas, solar, wind, ba
 | Agentic frameworks | 7 autonomous stages with self-correction, 4 verification agents | Shared **MAX_REGENS=3** budget prevents infinite loops |
 | Cloud (AWS/Azure/GCP) | **Azure AI Engineer Associate** certified. Supabase (PostgreSQL on AWS), Vercel (serverless) | Multi-cloud deployment |
 | Prompt engineering | CoT system prompts, SCAN-SEARCH-VERIFY-CITE-RESPOND, anti-refusal prompting | 10 refusal detection patterns, formula guards |
-| Python + GenAI | Claude Sonnet 4.5, Llama 3.3 70B, Gemini Vision OCR | 5-provider LLM failover chain |
+| Python + GenAI | Claude Sonnet 4.6, Llama 3.3 70B, Gemini Vision OCR | 5-provider LLM failover chain |
 | Docker + DevOps | GitHub Actions CI/CD, Vercel auto-deploy, k6 load testing | 113 unit tests, 80-query golden dataset, confusion matrix |
 | Prototype -> production | Solo-built production system in 3 months (~25,700 lines TypeScript) | Live at specvault.app |
 | Deploy/maintain AI | Observability (Langfuse), feedback loops, query caching, rate limiting | User feedback with issue classification |
@@ -109,7 +121,7 @@ NRG is unique: they are both a **power generator** (natural gas, solar, wind, ba
 2. **Query decomposition** -- complex queries split into parallel sub-queries
 3. **Hybrid search** -- BM25 + pgvector with document-scoped filtering to prevent cross-spec contamination
 4. **Reranking** -- Voyage AI rerank-2 cross-encoder in **~200ms** (was 5-15s with LLM reranking)
-5. **Generation** -- Claude Sonnet 4.5 with chain-of-thought prompting, SSE streaming
+5. **Generation** -- Claude Sonnet 4.6 with chain-of-thought prompting, SSE streaming
 6. **Post-generation verification** -- 4 agents: answer grounding (regex, 100ms), anti-refusal detection (10 patterns), partial refusal detection, coherence validation (LLM judge)
 7. **Confidence gate** -- weighted scoring (**35% retrieval, 25% grounding, 40% coherence**), regenerates below 55%"
 
@@ -124,7 +136,7 @@ NRG is unique: they are both a **power generator** (natural gas, solar, wind, ba
 **Key talking points:**
 - "I started by shadowing the user workflow -- watching engineers manually search PDFs. The core requirement wasn't 'build a chatbot' but 'eliminate cross-specification confusion and provide cited, auditable answers.'"
 - "That translated to technical requirements: document-scoped search filtering, numerical grounding verification, and confidence scores users could trust."
-- "I built an **80-query golden dataset** from actual questions engineers ask, with expected answers validated against source documents. Every improvement was measured against this dataset -- that's how I went from **57% (naive RAG) to 91.3% (agentic pipeline)**."
+- "I built a **20-query core golden dataset** from actual questions engineers ask, with expected answers validated against source documents. Every improvement was measured against this dataset -- that's how I went from **57% (naive RAG) to 91.3% (agentic pipeline)**. I also use DSPy to automatically optimize prompts against these metrics."
 - "At NRG, I'd apply the same approach: embed with the business team, understand actual workflows, define measurable success criteria, then iterate with evaluation-driven development."
 
 ---
@@ -143,7 +155,7 @@ NRG is unique: they are both a **power generator** (natural gas, solar, wind, ba
 
 4. **Confidence scoring** -- weighted composite: **35% retrieval + 25% grounding + 40% coherence**. Below **55%** triggers regeneration with targeted guidance based on the weakest component.
 
-**Result:** approximately **0% hallucination rate** across 80 production queries.
+**Result:** approximately **0% hallucination rate** across 20 production queries.
 
 ---
 
@@ -283,7 +295,7 @@ Walk through the 7 stages with specifics:
 | 2. Query Decomposition | Complex queries split into parallel sub-queries. Simple queries skip (fast path). Coverage validation checks all sub-queries | ~2s |
 | 3. Hybrid Search | BM25 + pgvector in parallel via Supabase RPC. Table content gets **+0.15 boost**. Document filtering prevents cross-spec contamination | ~3s |
 | 4. Reranking | Voyage AI rerank-2 cross-encoder. **~200ms for 40 docs**. Dynamic topK: 8 for API/comparisons, 5 for standard. LLM fallback | ~200ms |
-| 5. Generation | Claude Sonnet 4.5 with CoT. SSE streaming with 3s heartbeat | ~8-10s |
+| 5. Generation | Claude Sonnet 4.6 with CoT. SSE streaming with 3s heartbeat | ~8-10s |
 | 6. Verification | 4 agents: grounding (regex, 100ms), anti-refusal (10 patterns), partial refusal (5 patterns), coherence (LLM, ~2s). Shared MAX_REGENS=3 | ~2-5s |
 | 7. Confidence Gate | Weighted: 35/25/40. Below 55% triggers regen with targeted guidance | 0-10s |
 
@@ -349,7 +361,7 @@ Walk through the 7 stages with specifics:
 
 - **Post-generation verification:** 4 agents share **MAX_REGENS=3** budget. Each can trigger targeted regeneration. Constrained multi-agent system that prevents infinite loops.
 
-- **Open source contributions:** AutoGen (human-in-the-loop state preservation), LangChain/LangGraph (enterprise approval workflows), DSPy (signature optimizer for ECR classification, 25% token reduction).
+- **Open source contributions:** AutoGen (human-in-the-loop state preservation), LangChain/LangGraph (enterprise approval workflows), DSPy (signature optimizer for ECR classification, 25% token reduction). **DSPy is now integrated into SpecVault** for automatic prompt optimization via MIPROv2.
 
 - **For NRG:** LangGraph for complex workflows (customer escalation, regulatory compliance). AutoGen for multi-agent collaboration (data retrieval + analysis + report generation).
 
@@ -413,7 +425,7 @@ Walk through the 7 stages with specifics:
 | Tier | What | Count | Runner |
 |---|---|---|---|
 | Unit tests | Component-level (chunking, preprocessing, scoring) | 113 | `npm test` (Vitest) |
-| Golden dataset | End-to-end accuracy with expected patterns | 80 queries | `npm run test:accuracy` |
+| Golden dataset | End-to-end accuracy with expected patterns | 20 core queries | `npm run test:core20` |
 | Confusion matrix | Cross-spec contamination detection | A789/A790 pairs | `npm run test:confusion` |
 | Smoke tests | Complex multi-hop queries, one per doc | 8 | `npx tsx scripts/production-smoke-test.ts` |
 
@@ -677,71 +689,11 @@ Positions you as quality-focused. Lets you offer your evaluation-driven approach
 ### 5. "How does data governance work for AI at NRG? With customer data across Salesforce, SAP, and Databricks, how do you handle access controls for LLM systems?"
 Shows enterprise awareness.
 
-### 6. "What's the biggest unsolved AI problem at NRG right now -- the one with the most business impact if solved?"
-Forward-looking. Shows you want high-impact work.
-
 ### 7. "How does NRG measure success for AI initiatives -- cost savings, customer satisfaction, something else?"
 Shows you think in business outcomes.
 
-### 8. "What does the first 90 days look like for this role? What would success look like by month three?"
-Practical. Shows you're thinking about ramp-up and delivery.
-
 ---
 
-## 10. 30-Second Pitch + Numbers to Memorize
+## 10. The Pitch
 
-### The Pitch
-
-> "I'm David Fernandez, an AI engineer finishing my MS in AI at CU Boulder. I solo-built SpecVault -- a 7-stage agentic RAG pipeline for oil and gas steel specifications that achieves 91.3% accuracy with zero hallucinations across 80 golden queries. It uses hybrid BM25-plus-vector search, Voyage AI cross-encoder reranking, Claude generation, and four post-generation verification agents -- all with a 5-provider LLM failover chain for production reliability. I'm Azure AI certified, I contribute to AutoGen and LangChain, and I bring energy domain expertise. NRG's AI ambitions -- the VPP, the AI venture fund, the product operating model -- are exactly the kind of high-impact work I want to do."
-
-**Practice until 25-30 seconds.** If running long, cut "Azure AI certified" and "contribute to AutoGen and LangChain" -- the SpecVault stats are the hook.
-
----
-
-### Quick-Reference Numbers to Memorize
-
-| Metric | Value | Context |
-|---|---|---|
-| Overall accuracy | **91.3%** (73/80) | 80-query golden dataset, 8 specs |
-| Source citation | **96.3%** (77/80) | Every claim has page reference |
-| Hallucination rate | **~0%** | Regex-based numerical grounding |
-| Multi-hop accuracy | **96.9%** | Cross-spec comparisons |
-| P50 / P95 latency | **13s / 24.2s** | Target was P95 < 30s |
-| Reranking latency | **~200ms** | Was 5-15s with LLM (10-50x faster) |
-| Accuracy progression | **57% -> 81% -> 88% -> 91.3%** | Nov -> Dec -> Jan -> Feb 2026 |
-| Codebase | **~25,700 lines TypeScript** | 33 lib modules, 7 API routes |
-| Build timeline | **3 months** | Solo build, Nov 2025 - Feb 2026 |
-| Unit tests | **113** | 0 skipped |
-| Monthly cost | **~$20-35** | Free tiers for embeddings, DB, hosting |
-| Dedup impact | **7,454 chunks removed** | ~75% noise reduction |
-| Confidence weights | **35 / 25 / 40** | Retrieval / Grounding / Coherence |
-| Max regenerations | **3** | Shared across all verification agents |
-| Chunk sizes | **1500 target, 800 min, 2500 max** | Table-preserving semantic chunking |
-| Embedding dimensions | **1024** | Voyage AI voyage-3-lite |
-
-### NRG Numbers to Know
-
-| Metric | Value |
-|---|---|
-| Revenue | **~$30B** |
-| Customers | **7M+** |
-| VPP capacity | **1 GW** (residential) + **6 GW** (C&I via CPower) |
-| AI venture fund | **$50M** |
-| Generation capacity | **~25 GW** (post LS Power acquisition) |
-| Vivint households | **2M+** |
-| Data center power deals | **445 MW** |
-| CTO | **Dak Liyanearachchi** |
-
----
-
-## Study Schedule Suggestion
-
-**Day 1:** Read through everything. Highlight anything that feels unfamiliar. Practice the 30-second pitch out loud 10 times.
-
-**Day 2:** Practice Q1-Q5 out loud (most likely questions). Time yourself -- each answer should be 60-90 seconds max. Drill the numbers table.
-
-**Day 3:** Practice Q6-Q12 and behavioral questions B1-B4. Practice the system design whiteboard (S1) by drawing it on paper in under 3 minutes.
-
-**Day before:** Quick review of NRG intel section. Practice your 8 questions to ask them. Do one final run-through of the 30-second pitch. Get a good night's sleep.
-
-**In the interview:** Listen more than you talk. Let them guide the conversation. When they ask a broad question, give a concise answer first, then offer to go deeper: "Would you like me to walk through the technical details?" This shows confidence without rambling.
+> "I'm David Fernandez, an AI engineer finishing my MS in AI at CU Boulder. I solo-built SpecVault -- a 7-stage agentic RAG pipeline for oil and gas steel specifications that achieves 91.3% accuracy with zero hallucinations across 20 golden queries. It uses hybrid BM25-plus-vector search, Voyage AI cross-encoder reranking, Claude generation, and four post-generation verification agents -- all with a 5-provider LLM failover chain for production reliability. NRG's AI ambitions -- the VPP, the AI venture fund, the product operating model -- are exactly the kind of high-impact work I want to do."

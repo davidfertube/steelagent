@@ -1,0 +1,21 @@
+{
+  "query_id": "5CT-004",
+  "question": "What is the scope of API 5CT?",
+  "chunks": [
+    {
+      "content": "1 Casing and Tubing 1 Scope 1.1 Coverage This standard specifies the technical delivery conditions for steel pipes (casing, tubing, and pup joints)...",
+      "document": "API Spec 5CT.pdf",
+      "page": 11,
+      "combined_score": 0.8
+    },
+    {
+      "content": "162 API S PECIFICATION 5CT Stencil Marking [beginning at least 0.6 m (2 ft) from either externally threaded end] Stamp Marking—Optional [within app...",
+      "document": "API Spec 5CT.pdf",
+      "page": 172,
+      "combined_score": 0.8
+    }
+  ],
+  "response_preview": "**Answer:** The scope of API 5CT includes the technical delivery conditions for steel pipes (casing, tubing, and pup joints), couplings, coupling stock, coupling material, and accessory material [1].\n",
+  "confidence": 82,
+  "retrieved_at": "2026-02-23T01:17:14.964Z"
+}

@@ -11,6 +11,7 @@
 
 import { getModelFallbackClient } from "./model-fallback";
 import { CoherenceValidationSchema, parseJudgeOutput } from "./schemas";
+import { type TraceSpan, createSpan, endSpan } from "./langfuse";
 
 export interface ValidationResult {
   /** Coherence score 0-100 */
@@ -35,8 +36,10 @@ export interface ValidationResult {
  */
 export async function validateResponseCoherence(
   query: string,
-  response: string
+  response: string,
+  parentSpan?: TraceSpan | null,
 ): Promise<ValidationResult> {
+  const span = createSpan(parentSpan, "coherence-validation", { queryLength: query.length, responseLength: response.length });
   const client = getModelFallbackClient();
 
   const truncatedResponse = response.slice(0, 800);
@@ -68,25 +71,23 @@ IMPORTANT: If the response says "I cannot answer" or "I cannot provide", score i
     const parsed = parseJudgeOutput(text, CoherenceValidationSchema, "Response Validator");
 
     if (!parsed) {
-      return {
-        coherenceScore: 70,
-        passed: true,
-        reason: "Parse/validation failed, proceeding with response",
-      };
+      const result: ValidationResult = { coherenceScore: 70, passed: true, reason: "Parse/validation failed, proceeding with response" };
+      endSpan(span, result);
+      return result;
     }
 
-    return {
+    const result: ValidationResult = {
       coherenceScore: parsed.score,
       passed: parsed.score >= 60,
       reason: parsed.reason,
       missingAspects: parsed.score < 60 && parsed.missing ? parsed.missing : undefined,
     };
+    endSpan(span, result);
+    return result;
   } catch (error) {
     console.warn("[Response Validator] Validation failed, assuming coherent:", error);
-    return {
-      coherenceScore: 70,
-      passed: true,
-      reason: "Validation failed, proceeding with response",
-    };
+    const result: ValidationResult = { coherenceScore: 70, passed: true, reason: "Validation failed, proceeding with response" };
+    endSpan(span, result);
+    return result;
   }
 }

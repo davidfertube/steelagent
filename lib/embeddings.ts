@@ -15,6 +15,7 @@
 import { VoyageAIClient } from "voyageai";
 import { sleep } from "@/lib/utils/sleep";
 import { isRateLimitError } from "@/lib/utils/error-detection";
+import { type TraceSpan, createSpan, endSpan } from "@/lib/langfuse";
 
 // Lazy-initialized Voyage AI client
 // IMPORTANT: Must use lazy init to ensure env var is read at request time, not module load time
@@ -58,7 +59,9 @@ const BASE_RETRY_DELAY = 1000;
  * @param text - The text to embed
  * @returns Vector embedding (array of 1024 numbers)
  */
-export async function generateEmbedding(text: string): Promise<number[]> {
+export async function generateEmbedding(text: string, parentSpan?: TraceSpan | null): Promise<number[]> {
+  const span = createSpan(parentSpan, "embedding-generation", { textLength: text.length, model: EMBEDDING_MODEL });
+  const startTime = Date.now();
   const client = getVoyageClient();
   let lastError: Error | null = null;
 
@@ -69,6 +72,7 @@ export async function generateEmbedding(text: string): Promise<number[]> {
         model: EMBEDDING_MODEL,
       });
 
+      endSpan(span, { dimensions: 1024, elapsedMs: Date.now() - startTime, retries: attempt });
       return result.data?.[0]?.embedding || [];
     } catch (error) {
       lastError = error instanceof Error ? error : new Error(String(error));

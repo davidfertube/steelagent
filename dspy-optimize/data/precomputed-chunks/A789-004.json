@@ -1,0 +1,33 @@
+{
+  "query_id": "A789-004",
+  "question": "What heat treatment does A789 require for S31803?",
+  "chunks": [
+    {
+      "content": "10.",
+      "document": "ASTM A789 Seamless & Welded Duplex Tubing For General Service 2014.pdf",
+      "page": 3,
+      "combined_score": 0.8
+    },
+    {
+      "content": "9 Special requirements.",
+      "document": "ASTM A789 Seamless & Welded Duplex Stainless Steel Tubing 2013.pdf",
+      "page": 1,
+      "combined_score": 0.8
+    },
+    {
+      "content": "specification shall conform to the applicable requirements of Specification A1016/ A1016M, unless otherwise provided herein.",
+      "document": "ASTM A789 Seamless & Welded Duplex Tubing For General Service 2014.pdf",
+      "page": 1,
+      "combined_score": 0.8
+    },
+    {
+      "content": "9.5 When more than one heat is involved, the tension, flaring, flanging, and hardness test requirements shall apply to each heat.",
+      "document": "ASTM A789 Seamless & Welded Duplex Stainless Steel Tubing 2013.pdf",
+      "page": 3,
+      "combined_score": 0.8
+    }
+  ],
+  "response_preview": "**Answer:** The heat treatment required for S31803 by A789 is \"1870–2010 [1020–1100] rapid cooling in air or water\" [1].\n\n**Details:** This heat treatment is specified in Table 2 of the ASTM A789 spec",
+  "confidence": 75,
+  "retrieved_at": "2026-02-23T01:09:16.883Z"
+}

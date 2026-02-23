@@ -12,6 +12,7 @@
 
 import { getModelFallbackClient } from "./model-fallback";
 import { HybridSearchResult } from "./hybrid-search";
+import { type TraceSpan, createSpan, endSpan } from "./langfuse";
 
 export interface RankedChunk {
   chunk: HybridSearchResult;
@@ -33,10 +34,15 @@ export async function rerankChunks(
   query: string,
   chunks: HybridSearchResult[],
   topK: number = 5,
-  subQueries?: string[]
+  subQueries?: string[],
+  parentSpan?: TraceSpan | null,
 ): Promise<RankedChunk[]> {
+  const span = createSpan(parentSpan, "reranking", { query: query.slice(0, 100), candidateCount: chunks.length, topK });
+  const startTime = Date.now();
+
   // If we have fewer chunks than topK, just return them all
   if (chunks.length <= topK) {
+    endSpan(span, { selectedCount: chunks.length, method: "passthrough", elapsedMs: Date.now() - startTime });
     return chunks.map(chunk => ({
       chunk,
       relevance_score: 8,
@@ -50,6 +56,7 @@ export async function rerankChunks(
     try {
       const result = await voyageRerank(query, chunks, topK, subQueries);
       console.log(`[Re-ranker] Voyage AI rerank-2: ${chunks.length} → top ${topK}`);
+      endSpan(span, { selectedCount: result.length, method: "voyage", topScore: result[0]?.relevance_score, elapsedMs: Date.now() - startTime });
       return result;
     } catch (error) {
       console.warn(`[Re-ranker] Voyage AI failed, falling back to LLM:`, error instanceof Error ? error.message : error);
@@ -57,7 +64,9 @@ export async function rerankChunks(
   }
 
   // Fallback: LLM-based reranking
-  return llmRerank(query, chunks, topK, subQueries);
+  const result = await llmRerank(query, chunks, topK, subQueries);
+  endSpan(span, { selectedCount: result.length, method: "llm", topScore: result[0]?.relevance_score, elapsedMs: Date.now() - startTime });
+  return result;
 }
 
 // ============================================================================

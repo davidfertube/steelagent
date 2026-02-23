@@ -1,0 +1,21 @@
+{
+  "query_id": "A790-NEG-002",
+  "question": "What is the impact test requirement for A790 pipe at -50°C?",
+  "chunks": [
+    {
+      "content": "13.2.2 Where final heat treatment is obtained, consistent with the requirements of 6.3, in a batch-type heat-treatment furnace equipped with record...",
+      "document": "ASTM A790 Seamless & Welded Duplex Pipe 2014.pdf",
+      "page": 4,
+      "combined_score": 0.8
+    },
+    {
+      "content": "13.2.2 Where final heat treatment is obtained, consistent with the requirements of 6.3, in a batch-type heat-treatment furnace equipped with record...",
+      "document": "ASTM A790 Seamless & Welded Duplex Stainless Steel Pipe 2014.pdf",
+      "page": 4,
+      "combined_score": 0.8
+    }
+  ],
+  "response_preview": "**Answer:** I cannot answer this question because it's not in the uploaded documents.\n\n**Details:** The provided context does not mention the impact test requirement for A790 pipe at -50°C. The contex",
+  "confidence": 35,
+  "retrieved_at": "2026-02-23T01:12:50.505Z"
+}

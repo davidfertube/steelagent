@@ -1,0 +1,15 @@
+{
+  "query_id": "A872-001",
+  "question": "What manufacturing method does A872 cover?",
+  "chunks": [
+    {
+      "content": "Designation: A872/A872M − 14 Standard Specification for Centrifugally Cast Ferritic/Austenitic Stainless Steel Pipe for Corrosive Environments 1 Th...",
+      "document": "ASTM A872 Centrifugally Cast Duplex Stainless Steel Pipe 2014.pdf",
+      "page": 1,
+      "combined_score": 0.8
+    }
+  ],
+  "response_preview": "**Answer:** The manufacturing method covered by A872 is centrifugally cast [1].\n\n**Details:** This specification covers centrifugally cast ferritic/austenitic steel pipe intended for general corrosive",
+  "confidence": 46,
+  "retrieved_at": "2026-02-23T01:15:05.994Z"
+}

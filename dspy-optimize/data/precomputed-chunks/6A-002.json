@@ -1,0 +1,15 @@
+{
+  "query_id": "6A-002",
+  "question": "What pressure ratings are defined in API 6A?",
+  "chunks": [
+    {
+      "content": "API S PECIFICATION 6A/ISO 10423 425 Table 83 — Maximum hanger outside diameter for wellheads .........................................................",
+      "document": "API Spec 6A Wellhead & Xmas Tree Equipment 20th Edition Errata At 2016.pdf",
+      "page": 437,
+      "combined_score": 0.8
+    }
+  ],
+  "response_preview": "**Answer:** The pressure ratings defined in API 6A include \"13,8 MPa; 20,7 MPa; 34,5 MPa; 69,0 MPa; 103,5 MPa and 138,0 MPa\" [1][1].\n\n**Details:** These pressure ratings are mentioned in the context o",
+  "confidence": 71,
+  "retrieved_at": "2026-02-23T01:16:14.512Z"
+}

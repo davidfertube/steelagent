@@ -1,0 +1,27 @@
+{
+  "query_id": "A789-NEG-001",
+  "question": "What is the minimum wall thickness for NPS 6 A789 tubing?",
+  "chunks": [
+    {
+      "content": "SUPPLEMENTARY REQUIREMENTS The following supplementary requirement shall apply only when specified by the purchaser in the inquiry, contract, or or...",
+      "document": "ASTM A789 Seamless & Welded Duplex Stainless Steel Tubing 2013.pdf",
+      "page": 5,
+      "combined_score": 0.8
+    },
+    {
+      "content": "Designation: A789/A789M − 14 Standard Specification for Seamless and Welded Ferritic/Austenitic Stainless Steel Tubing for General Service 1 This s...",
+      "document": "ASTM A789 Seamless & Welded Duplex Tubing For General Service 2014.pdf",
+      "page": 1,
+      "combined_score": 0.8
+    },
+    {
+      "content": "Designation: A789/A789M − 13a´1 Standard Specification for Seamless and Welded Ferritic/Austenitic Stainless Steel Tubing for General Service 1 Thi...",
+      "document": "ASTM A789 Seamless & Welded Duplex Stainless Steel Tubing 2013.pdf",
+      "page": 1,
+      "combined_score": 0.8
+    }
+  ],
+  "response_preview": "**Answer:** The minimum wall thickness for A789 tubing is specified based on the outside diameter and the type of wall thickness specified (average or minimum) [1]. For NPS 6, which falls into the ran",
+  "confidence": 49,
+  "retrieved_at": "2026-02-23T01:10:23.156Z"
+}

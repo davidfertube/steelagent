@@ -3,7 +3,7 @@
 ## Quick Reference
 
 - **Framework**: Next.js 16, React 19, Tailwind CSS
-- **Primary LLM**: Claude Opus 4.6 via Anthropic API
+- **Primary LLM**: Claude Sonnet 4.6 via Anthropic API
 - **Fallback LLMs**: Groq -> Cerebras -> SambaNova -> OpenRouter (Llama 3.3 70B)
 - **Embeddings**: Voyage AI voyage-3-lite (1024 dim, 200M tokens FREE/month)
 - **Re-ranker**: Voyage AI rerank-2 (cross-encoder, ~200ms)
@@ -114,7 +114,7 @@ The full pipeline is documented in **[AGENTS.md](AGENTS.md)**. Summary:
 2. **Query Decomposition** -- `multi-query-rag.ts` decomposes complex queries into parallel sub-queries
 3. **Hybrid Search** -- `hybrid-search.ts` runs BM25 + vector search with document filtering
 4. **Re-ranking** -- `reranker.ts` Voyage AI rerank-2 (primary, ~200ms) + LLM fallback, dynamic topK (8 API/comparison, 5 standard)
-5. **Generation** -- Claude Opus 4.6 with CoT system prompt, SSE streaming
+5. **Generation** -- Claude Sonnet 4.6 with CoT system prompt, SSE streaming
 6. **Post-Generation Verification** -- answer grounding + false refusal detection + coherence validation
 7. **Confidence Gate** -- weighted score (retrieval 35% + grounding 25% + coherence 40%), regenerates if < 55%
 
@@ -172,6 +172,11 @@ The full pipeline is documented in **[AGENTS.md](AGENTS.md)**. Summary:
 | `lib/errors.ts` | Standardized error handling |
 | `lib/supabase.ts` | Supabase client configuration |
 | `middleware.ts` | Security middleware (auth, CSRF, rate limiting, security headers) |
+| `lib/prompt-registry.ts` | DSPy-optimized prompt loader (feature flag: `DSPY_OPTIMIZED`) |
+| `lib/optimized-prompts.json` | Exported DSPy-optimized prompts (generated artifact) |
+| `dspy-optimize/` | Python DSPy optimization scripts and modules |
+| `tests/golden-dataset/core-20.json` | Reduced 20-query golden dataset for fast iteration |
+| `scripts/core-20-test.ts` | Core 20-query accuracy test (`npm run test:core20`) |
 | `components/realtime-comparison.tsx` | Side-by-side RAG vs generic LLM display (demo section) |
 
 ---
@@ -205,7 +210,7 @@ Post-generation agents share a budget of `MAX_REGENS = 3` to prevent infinite lo
 Total across all checks is capped at 3. Each regen adds ~10-15s latency.
 
 ### Groq TPM Limits (Fallback Only)
-Groq is now a fallback provider (primary is Claude Opus 4.6).
+Groq is now a fallback provider (primary is Claude Sonnet 4.6).
 Free tier: 6000 TPM. Chunks limited to 3 to stay under limit.
 If 429 errors occur, `model-fallback.ts` auto-switches providers.
 
@@ -226,7 +231,7 @@ See `app/api/chat/route.ts` lines 70-107.
 
 ```bash
 # Required
-ANTHROPIC_API_KEY=xxx             # Claude Opus 4.6 -- primary LLM (console.anthropic.com)
+ANTHROPIC_API_KEY=xxx             # Claude Sonnet 4.6 -- primary LLM (console.anthropic.com)
 VOYAGE_API_KEY=xxx                # Voyage AI (voyageai.com)
 NEXT_PUBLIC_SUPABASE_URL=xxx      # Supabase project URL
 NEXT_PUBLIC_SUPABASE_ANON_KEY=xxx # Supabase anon key
@@ -291,7 +296,8 @@ RESEND_API_KEY=xxx                # Resend (resend.com) -- billing notifications
 | Category | Count | Runner |
 |----------|-------|--------|
 | Unit tests | 113 | `npm test` (vitest) |
-| Accuracy (golden) | 80 | `npm run test:accuracy` |
+| Core-20 (golden) | 20 | `npm run test:core20` |
+| Accuracy (full) | 80 | `npm run test:accuracy` |
 | Production smoke | 8 | `npx tsx scripts/production-smoke-test.ts` |
 | Quick validation | 10 | `npx tsx scripts/mvp-10-query-test.ts` |
 | Integration | varies | `npm run test:evaluation:full` |

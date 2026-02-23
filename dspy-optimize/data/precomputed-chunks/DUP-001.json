@@ -1,0 +1,33 @@
+{
+  "query_id": "DUP-001",
+  "question": "What is the typical PREN formula?",
+  "chunks": [
+    {
+      "content": "0.60 0.80 0.80 1.00 0.80 0.80 1.00 1.00 Nickel 5.5-6.5 4.5-6.5 3.5-5.2 6.0-8.0 6.0-8.0 6.0-8.0 6.5-8.0 5.5-8.0 4.5-6.5 4.5-6.5 Chromium 24.0-26.0 2...",
+      "document": "ASTM A1049 Duplex Stainless Steel Forgings For Pressure Vessels R 2015.pdf",
+      "page": 2,
+      "combined_score": 0.8
+    },
+    {
+      "content": "30 0.005 0.50 24.0– 25.0 21.0– 23.0 7.0– 8.0 .",
+      "document": "877794297-A312-A312M-25.pdf",
+      "page": 5,
+      "combined_score": 0.8
+    },
+    {
+      "content": "3.02 3 ⁄ 8 0.675 17.15 .",
+      "document": "ASTM A790 Seamless & Welded Duplex Pipe 2014.pdf",
+      "page": 9,
+      "combined_score": 0.8
+    },
+    {
+      "content": "031 0.015 2.00 0.020 0.010 0.3 26.0– 28.0 30.0– 32.0 6.0– 7.0 .",
+      "document": "877794297-A312-A312M-25.pdf",
+      "page": 6,
+      "combined_score": 0.8
+    }
+  ],
+  "response_preview": "**Answer:** The typical PREN formula is \"A PREN = Cr + 3.3(Mo) + 16(N)\" and \"B PREN = Cr + 3.3(Mo + 1 ⁄ 2 W) + 16(N)\" [1].\n\n**Details:** These formulas are mentioned in the context of ASTM A1049 Duple",
+  "confidence": 63,
+  "retrieved_at": "2026-02-23T01:17:30.250Z"
+}

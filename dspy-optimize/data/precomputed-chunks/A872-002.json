@@ -1,0 +1,15 @@
+{
+  "query_id": "A872-002",
+  "question": "What is the minimum yield strength for UNS J93183 cast duplex pipe per A872?",
+  "chunks": [
+    {
+      "content": "subject to the purchaser’s approval.",
+      "document": "ASTM A872 Centrifugally Cast Duplex Stainless Steel Pipe 2014.pdf",
+      "page": 3,
+      "combined_score": 0.8
+    }
+  ],
+  "response_preview": "**Answer:** The minimum yield strength for UNS J93183 cast duplex pipe per A872 is 65 ksi (450 MPa) [1].\n\n**Details:** This value is specified in Table 3 of ASTM A872, which outlines the Tensile and H",
+  "confidence": 83,
+  "retrieved_at": "2026-02-23T01:15:12.627Z"
+}

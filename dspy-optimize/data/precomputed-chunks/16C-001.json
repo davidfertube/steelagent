@@ -1,0 +1,33 @@
+{
+  "query_id": "16C-001",
+  "question": "What is the scope of API 16C?",
+  "chunks": [
+    {
+      "content": "- .",
+      "document": "API Spec 16C Choke & Kill Systems 1993.pdf",
+      "page": 9,
+      "combined_score": 0.8
+    },
+    {
+      "content": "A P I SPEC*lJbC 93 W 0732290 0503956 417 W Spec 16C Choke and Kill Systems __-.",
+      "document": "API Spec 16C Choke & Kill Systems 1993.pdf",
+      "page": 8,
+      "combined_score": 0.8
+    },
+    {
+      "content": "A P I S P E C * l b C 9 3 W 0732290 0503986 154 W ~-~ connector size date of manafacture (month & year) flow direction - mfg.",
+      "document": "API Spec 16C Choke & Kill Systems 1993.pdf",
+      "page": 38,
+      "combined_score": 0.8
+    },
+    {
+      "content": "A P I S P E C * L b C 9 3 m 0732290 0503958 2 9 T m Spec 16C: Choke and Kill Systems TABLE 1.5.3 REFERENCED STANDARDS 9 - - _-_- The Standards refe...",
+      "document": "API Spec 16C Choke & Kill Systems 1993.pdf",
+      "page": 10,
+      "combined_score": 0.8
+    }
+  ],
+  "response_preview": "**Answer:** The scope of API 16C is to \"provide for safe and functionally interchangeable surface and subsea choke and kill systems equipment utilized for drilling oil and gas wells\" [1].\n\n**Details:*",
+  "confidence": 85,
+  "retrieved_at": "2026-02-23T01:17:23.792Z"
+}

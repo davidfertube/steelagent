@@ -1,0 +1,27 @@
+{
+  "query_id": "6A-003",
+  "question": "What material classes are in API 6A?",
+  "chunks": [
+    {
+      "content": "API S PECIFICATION 6A/ISO 10423 239 Wellhead equipment data sheet — Christmas tree and choke Christmas tree – Single ___ Dual ___ Solid block ___ S...",
+      "document": "API Spec 6A Wellhead & Xmas Tree Equipment 20th Edition Errata At 2016.pdf",
+      "page": 251,
+      "combined_score": 0.8
+    },
+    {
+      "content": "API S PECIFICATION 6A/ISO 10423 23 4.2.2.3 Temperature rating considerations Choosing the temperature rating is ultimately the responsibility of th...",
+      "document": "API Spec 6A Wellhead & Xmas Tree Equipment 20th Edition Errata At 2016.pdf",
+      "page": 35,
+      "combined_score": 0.8
+    },
+    {
+      "content": "API S PECIFICATION 6A/ISO 10423 109 Table 39 — Marking requirements and locations Marking Location Wellhead equipment Connectors and fittings Casin...",
+      "document": "API Spec 6A Wellhead & Xmas Tree Equipment 20th Edition Errata At 2016.pdf",
+      "page": 121,
+      "combined_score": 0.8
+    }
+  ],
+  "response_preview": "**Answer:** The material classes in API 6A include AA, BB, DD, EE, FF, and HH [1].\n\n**Details:** These material classes are defined for various levels of severity of service conditions and relative co",
+  "confidence": 72,
+  "retrieved_at": "2026-02-23T01:16:53.289Z"
+}

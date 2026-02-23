@@ -1,0 +1,27 @@
+{
+  "query_id": "A1049-001",
+  "question": "What product form does A1049 cover?",
+  "chunks": [
+    {
+      "content": "Alloys and is the direct responsibility of Subcommittee A01.06 on Steel Forgings and Billets.",
+      "document": "ASTM A1049 Duplex Stainless Steel Forgings For Pressure Vessels R 2015.pdf",
+      "page": 1,
+      "combined_score": 0.8
+    },
+    {
+      "content": "8 [815] 85 [585] 25 50 .",
+      "document": "ASTM A1049 Duplex Stainless Steel Forgings For Pressure Vessels R 2015.pdf",
+      "page": 3,
+      "combined_score": 0.8
+    },
+    {
+      "content": "ts of NACE MR0175/ISO15156, hardness testing of forgings shall be done as specified in that document.",
+      "document": "ASTM A1049 Duplex Stainless Steel Forgings For Pressure Vessels R 2015.pdf",
+      "page": 4,
+      "combined_score": 0.8
+    }
+  ],
+  "response_preview": "**Answer:** A1049 covers \"Stainless Steel Forgings, Ferritic/Austenitic (Duplex), for Pressure Vessels\" [1].\n\n**Details:** The specification is for forgings, which are distinct from other product form",
+  "confidence": 89,
+  "retrieved_at": "2026-02-23T01:15:22.698Z"
+}

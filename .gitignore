@@ -52,3 +52,12 @@ next-env.d.ts
 
 # Data files (PDFs for ingestion)
 data/*.pdf
+
+# DSPy optimization artifacts
+dspy-optimize/.venv/
+dspy-optimize/runs/
+dspy-optimize/__pycache__/
+dspy-optimize/**/__pycache__/
+
+# Local test results
+/results/

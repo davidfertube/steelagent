@@ -10,6 +10,7 @@
 import { getModelFallbackClient } from "./model-fallback";
 import type { HybridSearchResult } from "./hybrid-search";
 import { RetrievalEvaluationSchema, parseJudgeOutput } from "./schemas";
+import { type TraceSpan, createSpan, endSpan } from "./langfuse";
 
 export type RetryStrategy = 'broader_search' | 'section_lookup' | 'more_candidates';
 
@@ -37,14 +38,13 @@ export interface EvaluationResult {
 export async function evaluateRetrieval(
   query: string,
   chunks: HybridSearchResult[],
+  parentSpan?: TraceSpan | null,
 ): Promise<EvaluationResult> {
+  const span = createSpan(parentSpan, "retrieval-evaluation", { query: query.slice(0, 100), chunkCount: chunks.length });
   if (chunks.length === 0) {
-    return {
-      isRelevant: false,
-      confidence: 0,
-      reason: "No chunks retrieved",
-      suggestedRetryStrategy: 'broader_search',
-    };
+    const result: EvaluationResult = { isRelevant: false, confidence: 0, reason: "No chunks retrieved", suggestedRetryStrategy: 'broader_search' };
+    endSpan(span, result);
+    return result;
   }
 
   const client = getModelFallbackClient();
@@ -90,14 +90,12 @@ Set retry_strategy to suggest how to improve retrieval if confidence < 60:
     const parsed = parseJudgeOutput(text, RetrievalEvaluationSchema, "Retrieval Evaluator");
 
     if (!parsed) {
-      return {
-        isRelevant: true,
-        confidence: 50,
-        reason: "Parse/validation failed, proceeding with available chunks",
-      };
+      const result: EvaluationResult = { isRelevant: true, confidence: 50, reason: "Parse/validation failed, proceeding with available chunks" };
+      endSpan(span, result);
+      return result;
     }
 
-    return {
+    const result: EvaluationResult = {
       isRelevant: parsed.confidence >= 60,
       confidence: parsed.confidence,
       reason: parsed.reason,
@@ -105,12 +103,12 @@ Set retry_strategy to suggest how to improve retrieval if confidence < 60:
         ? (parsed.retry_strategy as RetryStrategy || 'broader_search')
         : undefined,
     };
+    endSpan(span, result);
+    return result;
   } catch (error) {
     console.warn("[Retrieval Evaluator] Evaluation failed, assuming relevant:", error);
-    return {
-      isRelevant: true,
-      confidence: 50,
-      reason: "Evaluation failed, proceeding with available chunks",
-    };
+    const result: EvaluationResult = { isRelevant: true, confidence: 50, reason: "Evaluation failed, proceeding with available chunks" };
+    endSpan(span, result);
+    return result;
   }
 }

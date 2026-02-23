@@ -1,0 +1,21 @@
+{
+  "query_id": "5CT-001",
+  "question": "What is the minimum yield strength for L80 casing per API 5CT?",
+  "chunks": [
+    {
+      "content": "CASING AND T UBING 109 Table C.5—Tensile and Hardness Requirements Grade Type Total Elongation Under Load % Yield Strength MPa Tensile Strength min...",
+      "document": "API Spec 5CT.pdf",
+      "page": 119,
+      "combined_score": 0.8
+    },
+    {
+      "content": "CASING AND T UBING 245 The difference of yield strength between the deformed area (and nascent strain area, when applicable) versus unaffected pipe...",
+      "document": "API Spec 5CT.pdf",
+      "page": 255,
+      "combined_score": 0.8
+    }
+  ],
+  "response_preview": "**Answer:** The minimum yield strength for L80 casing per API 5CT is \"552 MPa\" [1].\n\n**Details:** This value is specified in Table C.5 of API Spec 5CT, which outlines the tensile and hardness requirem",
+  "confidence": 97,
+  "retrieved_at": "2026-02-23T01:17:07.205Z"
+}

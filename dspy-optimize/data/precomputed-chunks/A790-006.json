@@ -1,0 +1,27 @@
+{
+  "query_id": "A790-006",
+  "question": "What chromium content range is specified for UNS S31803 per A790?",
+  "chunks": [
+    {
+      "content": "0–26.0 2.5–3.5 0.24–0.32 0.20–0.80 W 1.50– 2.50 S39277 0.025 0.80 0.025 0.002 0.80 6.5–8.0 24.0–26.0 3.0–4.0 0.23–0.33 1.20–2.00 W 0.8– 1.2 S81921 ...",
+      "document": "ASTM A790 Seamless & Welded Duplex Pipe 2014.pdf",
+      "page": 4,
+      "combined_score": 0.8
+    },
+    {
+      "content": "13.2.2 Where final heat treatment is obtained, consistent with the requirements of 6.3, in a batch-type heat-treatment furnace equipped with record...",
+      "document": "ASTM A790 Seamless & Welded Duplex Stainless Steel Pipe 2014.pdf",
+      "page": 4,
+      "combined_score": 0.8
+    },
+    {
+      "content": "2.50 0.040 0.010 1.00 2.00–4.00 21.0–23.0 0.30–1.30 0.15–0.25 0.20–1.20 .",
+      "document": "ASTM-A790-A790M-24.pdf",
+      "page": 4,
+      "combined_score": 0.8
+    }
+  ],
+  "response_preview": "**Answer:** The chromium content range for UNS S31803 per A790 is \"21.0–23.0\" [1].\n\n**Details:** This value is specified in Table 2 of ASTM A790, which outlines the chemical requirements for various U",
+  "confidence": 75,
+  "retrieved_at": "2026-02-23T01:11:31.253Z"
+}

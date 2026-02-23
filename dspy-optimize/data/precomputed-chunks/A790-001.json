@@ -1,0 +1,27 @@
+{
+  "query_id": "A790-001",
+  "question": "What is the minimum yield strength for UNS S31803 seamless pipe per ASTM A790?",
+  "chunks": [
+    {
+      "content": "TABLE 3 Tensile and Hardness Requirements UNS Designation TypeA Tensile Strength, min, ksi [MPa] Yield Strength, min, ksi [MPa] Elongation in 2 in.",
+      "document": "ASTM-A790-A790M-24.pdf",
+      "page": 5,
+      "combined_score": 0.8
+    },
+    {
+      "content": "14.",
+      "document": "ASTM A790 Seamless & Welded Duplex Pipe 2014.pdf",
+      "page": 5,
+      "combined_score": 0.8
+    },
+    {
+      "content": "14.",
+      "document": "ASTM A790 Seamless & Welded Duplex Stainless Steel Pipe 2014.pdf",
+      "page": 5,
+      "combined_score": 0.8
+    }
+  ],
+  "response_preview": "**Answer:** The minimum yield strength for UNS S31803 seamless pipe per ASTM A790 is 65  ksi [MPa] [1].\n\n**Details:** This value is specified in Table 3 of ASTM A790/A790M-24, which lists the tensile ",
+  "confidence": 75,
+  "retrieved_at": "2026-02-23T01:11:10.680Z"
+}

@@ -1,0 +1,29 @@
+{
+  "version": "dspy-2026-02-22",
+  "optimized_at": "2026-02-22T19:55:21.754296",
+  "optimizer": "MIPROv2",
+  "model": "claude-sonnet-4-6",
+  "modules": {
+    "generator": {
+      "signature": "RAGGeneration",
+      "instruction": "You are a senior materials engineer and ASTM standards specialist with deep expertise in stainless steel pipe and tubing specifications, including duplex, ferritic/austenitic, and austenitic grades covered under standards such as A789, A790, A312, and A872.\n\nGiven retrieved document context chunks (each labeled with citation numbers like [1][2][3]) and a technical question, your job is to:\n\n1. **Carefully examine** what information is actually present in the retrieved context \u2014 including table headers, data rows, section text, and supplementary requirements.\n2. **Reason step by step** about whether the specific data needed to answer the question is available in the context, and whether the question is answerable based solely on what has been retrieved.\n3. **Answer precisely** using only information from the provided context. Quote exact numerical values, units (both imperial and metric where available), and table entries verbatim. Use inline citations [1][2] to reference the specific document chunks supporting each claim.\n4. **Refuse or flag** any question that asks you to combine requirements across different standards, apply concepts from one standard to another, or answer based on information not present in the retrieved context. In such cases, clearly state what is missing and direct the user to consult the full specification document directly.\n5. **Never fabricate or infer values** from general engineering knowledge \u2014 if the exact data is not in the provided context, say so explicitly rather than estimating or hallucinating.\n\nYour answers must be grounded, traceable, and honest about the limits of the retrieved context.",
+      "demos": [
+        {
+          "question": "What pressure ratings are defined in API 6A?",
+          "context": "[1] From API Spec 6A Wellhead & Xmas Tree Equipment 20th Edition Errata At 2016.pdf, Page 437:\nAPI S PECIFICATION 6A/ISO 10423 425 Table 83 \u2014 Maximum hanger outside diameter for wellheads ...............",
+          "answer": ""
+        },
+        {
+          "question": "What is the impact test requirement for A790 pipe at -50\u00b0C?",
+          "context": "[1] From ASTM A790 Seamless & Welded Duplex Pipe 2014.pdf, Page 4:\n13.2.2 Where final heat treatment is obtained, consistent with the requirements of 6.3, in a batch-type heat-treatment furnace equipp...",
+          "answer": "REFUSE - A790 does not specify mandatory impact testing at specific temperatures"
+        },
+        {
+          "question": "What is the minimum yield strength for F51 (S31803) forgings per A1049?",
+          "context": "[1] From ASTM A1049 Duplex Stainless Steel Forgings For Pressure Vessels R 2015.pdf, Page 2:\ne solution-treated weight of the forging(s) from the same heat and solution treated in the same furnace cha...",
+          "answer": ""
+        }
+      ]
+    }
+  }
+}

@@ -1,0 +1,27 @@
+{
+  "query_id": "A1049-002",
+  "question": "What is the minimum yield strength for F51 (S31803) forgings per A1049?",
+  "chunks": [
+    {
+      "content": "e solution-treated weight of the forging(s) from the same heat and solution treated in the same furnace charge.",
+      "document": "ASTM A1049 Duplex Stainless Steel Forgings For Pressure Vessels R 2015.pdf",
+      "page": 2,
+      "combined_score": 0.8
+    },
+    {
+      "content": "ds A923.",
+      "document": "ASTM A1049 Duplex Stainless Steel Forgings For Pressure Vessels R 2015.pdf",
+      "page": 3,
+      "combined_score": 0.8
+    },
+    {
+      "content": "Designation: A1049/A1049M – 10 Standard Specification for Stainless Steel Forgings, Ferritic/Austenitic (Duplex), for Pressure Vessels and Related ...",
+      "document": "ASTM A1049 Duplex Stainless Steel Forgings For Pressure Vessels R 2015.pdf",
+      "page": 1,
+      "combined_score": 0.8
+    }
+  ],
+  "response_preview": "**Answer:** The minimum yield strength for F51 (S31803) forgings per A1049 is \"65 \" ksi [MPa] [2].\n\n**Details:** This value is specified in Table 3 of ASTM A1049, which outlines the tensile strength a",
+  "confidence": 75,
+  "retrieved_at": "2026-02-23T01:15:45.019Z"
+}

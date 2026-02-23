@@ -11,6 +11,7 @@
  */
 
 import { extractNumericalValues } from "./structured-output";
+import { type TraceSpan, createSpan, endSpan } from "./langfuse";
 
 export interface GroundingResult {
   /** Percentage of response numbers found in chunks (0-100) */
@@ -39,8 +40,10 @@ export interface GroundingResult {
  */
 export function groundResponse(
   responseText: string,
-  chunks: { content: string }[]
+  chunks: { content: string }[],
+  parentSpan?: TraceSpan | null,
 ): GroundingResult {
+  const span = createSpan(parentSpan, "answer-grounding", { responseLength: responseText.length, chunkCount: chunks.length });
   // Extract numbers from response
   const responseNumbers = extractNumericalValues(responseText);
 
@@ -48,13 +51,9 @@ export function groundResponse(
     // No numerical claims to verify — neutral score (not perfect)
     // A score of 100 falsely inflates confidence for text-only responses;
     // 70 represents "no evidence of hallucination, but nothing verified either"
-    return {
-      score: 70,
-      passed: true,
-      totalNumbers: 0,
-      groundedNumbers: 0,
-      ungroundedNumbers: [],
-    };
+    const result: GroundingResult = { score: 70, passed: true, totalNumbers: 0, groundedNumbers: 0, ungroundedNumbers: [] };
+    endSpan(span, result);
+    return result;
   }
 
   // Collect all numbers from all source chunks into a flat set
@@ -87,13 +86,15 @@ export function groundResponse(
 
   const score = Math.round((groundedCount / responseNumbers.length) * 100);
 
-  return {
+  const result: GroundingResult = {
     score,
     passed: score >= 50,
     totalNumbers: responseNumbers.length,
     groundedNumbers: groundedCount,
     ungroundedNumbers: ungrounded,
   };
+  endSpan(span, { score, passed: result.passed, totalNumbers: result.totalNumbers, groundedNumbers: groundedCount });
+  return result;
 }
 
 /**

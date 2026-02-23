@@ -1,0 +1,21 @@
+{
+  "query_id": "A312-002",
+  "question": "What is the minimum tensile strength for 304 stainless per A312?",
+  "chunks": [
+    {
+      "content": "11.5 HCW pipe shall be capable of passing the weld decay tests listed in Supplementary S9 with a weld metal to base TABLE 4 Tensile Requirements Gr...",
+      "document": "A312-A312M-25.pdf",
+      "page": 9,
+      "combined_score": 0.8
+    },
+    {
+      "content": "11.5 HCW pipe shall be capable of passing the weld decay tests listed in Supplementary S9 with a weld metal to base TABLE 4 Tensile Requirements Gr...",
+      "document": "877794297-A312-A312M-25.pdf",
+      "page": 9,
+      "combined_score": 0.8
+    }
+  ],
+  "response_preview": "**Answer:** The minimum tensile strength for TP304 (304 stainless) per A312 is \"75 \" ksi [MPa] [1][2].\n\n**Details:** This value is specified in Table 4 of the provided A312 documents, which lists the ",
+  "confidence": 89,
+  "retrieved_at": "2026-02-23T01:13:20.543Z"
+}

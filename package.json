@@ -25,7 +25,10 @@
     "test:accuracy:verbose": "tsx scripts/accuracy-test.ts --verbose",
     "test:mvp": "tsx scripts/mvp-accuracy-test.ts",
     "test:mvp:verbose": "tsx scripts/mvp-accuracy-test.ts --verbose",
-    "test:confusion": "INTEGRATION_TEST=true vitest run tests/evaluation/ --testNamePattern='Confusion'"
+    "test:confusion": "INTEGRATION_TEST=true vitest run tests/evaluation/ --testNamePattern='Confusion'",
+    "test:core20": "tsx scripts/core-20-test.ts",
+    "test:core20:verbose": "tsx scripts/core-20-test.ts --verbose",
+    "precompute:dspy": "tsx scripts/precompute-chunks-for-dspy.ts"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.37.0",

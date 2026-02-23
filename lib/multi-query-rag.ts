@@ -26,7 +26,7 @@ import {
 } from "./latency-optimizer";
 import { evaluateRetrieval } from "./retrieval-evaluator";
 import { validateCoverage } from "./coverage-validator";
-import { getLangfuse } from "./langfuse";
+import { type TraceSpan, createSpan, endSpan } from "./langfuse";
 import { withTimeout, TIMEOUTS } from "./timeout";
 
 export interface MultiQueryRAGResult {
@@ -128,7 +128,8 @@ function extractSectionKeywords(query: string): string[] {
 export async function multiQueryRAG(
   query: string,
   topK: number = 5,
-  filterDocumentId?: number
+  filterDocumentId?: number,
+  parentSpan?: TraceSpan | null,
 ): Promise<MultiQueryRAGResult> {
   const startTime = Date.now();
   console.log(`[Multi-Query RAG] Processing query: "${query}"`);
@@ -197,9 +198,8 @@ export async function multiQueryRAG(
     console.log(`[Multi-Query RAG] Section refs detected: [${sectionRefs.join(", ")}]`);
   }
 
-  // LangFuse tracing (opt-in)
-  const langfuse = getLangfuse();
-  const ragTrace = langfuse?.span({ name: "multi-query-rag-internal", input: { query, topK, documentIds } });
+  // LangFuse tracing — use parent span from chat/route.ts if available
+  const ragTrace = createSpan(parentSpan, "multi-query-rag-internal", { query, topK, documentIds });
 
   // Step 1: Decompose query (skip for simple queries)
   let decomposition: DecomposedQuery;
@@ -231,7 +231,7 @@ export async function multiQueryRAG(
   const allResults = await Promise.all(
     decomposition.subqueries.map(async (subquery) => {
       // Pass document filter and section refs to ensure relevant search
-      const results = await searchWithFallback(subquery, candidatesPerSubquery, documentIds, sectionRefs);
+      const results = await searchWithFallback(subquery, candidatesPerSubquery, documentIds, sectionRefs, ragTrace);
       console.log(`[Multi-Query RAG] Sub-query "${subquery}" returned ${results.length} results`);
       return results;
     })
@@ -280,7 +280,7 @@ export async function multiQueryRAG(
     try {
       console.log(`[Multi-Query RAG] Re-ranking ${merged.length} candidates for ${decomposition.intent} query`);
       const rankedResults = await withTimeout(
-        rerankChunks(query, merged, topK, decomposition.subqueries),
+        rerankChunks(query, merged, topK, decomposition.subqueries, ragTrace),
         TIMEOUTS.RERANKING,
         "Initial chunk reranking"
       );
@@ -344,7 +344,7 @@ export async function multiQueryRAG(
   // Step 5: Evaluate retrieval quality and retry if needed (agentic loop)
   // ========================================
   const evaluation = await withTimeout(
-    evaluateRetrieval(query, finalChunks),
+    evaluateRetrieval(query, finalChunks, ragTrace),
     TIMEOUTS.RETRIEVAL_EVALUATION,
     "Retrieval evaluation"
   ).catch(() => ({
@@ -457,14 +457,12 @@ export async function multiQueryRAG(
   const totalTime = Date.now() - startTime;
   console.log(`[Multi-Query RAG] Total pipeline time: ${totalTime}ms`);
 
-  ragTrace?.end({
-    output: {
-      chunkCount: finalChunks.length,
-      totalCandidates: merged.length,
-      reranked,
-      evaluationConfidence: evaluation.confidence,
-      totalTimeMs: totalTime,
-    },
+  endSpan(ragTrace, {
+    chunkCount: finalChunks.length,
+    totalCandidates: merged.length,
+    reranked,
+    evaluationConfidence: evaluation.confidence,
+    totalTimeMs: totalTime,
   });
 
   return {

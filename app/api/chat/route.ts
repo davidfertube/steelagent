@@ -16,6 +16,7 @@ import { validateResponseCoherence } from "@/lib/response-validator";
 import { getLangfuse, flushLangfuse } from "@/lib/langfuse";
 import { getCachedResponse, setCachedResponse } from "@/lib/query-cache";
 import { CONFIDENCE_WEIGHTS } from "@/lib/schemas";
+import { getOptimizedGeneratorPrompt } from "@/lib/prompt-registry";
 
 /**
  * Chat API Route - RAG-powered Q&A (with Streaming)
@@ -24,7 +25,7 @@ import { CONFIDENCE_WEIGHTS } from "@/lib/schemas";
  * 1. Validates the user query
  * 2. Searches for relevant document chunks
  * 3. Builds context from retrieved documents
- * 4. Generates a response with citations using Claude Sonnet 4.5
+ * 4. Generates a response with citations using Claude Sonnet 4.6
  *
  * Streaming:
  * - Uses SSE to keep connection alive during long RAG operations
@@ -148,6 +149,7 @@ async function processRAGQuery(cleanedQuery: string, verified: boolean, document
   const trace = langfuse?.trace({
     name: "rag-query",
     input: { query: cleanedQuery, verified, documentId },
+    metadata: { timestamp: new Date().toISOString() },
   });
 
   // ========================================
@@ -216,11 +218,14 @@ async function processRAGQuery(cleanedQuery: string, verified: boolean, document
       // Use agentic multi-query RAG (query decomposition + hybrid search + re-ranking)
       const ragSpan = trace?.span({ name: "multi-query-rag", input: { searchQuery, topK: dynamicTopK, documentId } });
       const ragResult = await withTimeout(
-        multiQueryRAG(searchQuery, dynamicTopK, documentId),
+        multiQueryRAG(searchQuery, dynamicTopK, documentId, ragSpan),
         TIMEOUTS.MULTI_QUERY_RAG,
         "Multi-query RAG"
       );
       ragSpan?.end({ output: { chunkCount: ragResult.chunks.length, metadata: ragResult.searchMetadata, evaluationConfidence: ragResult.evaluationConfidence } });
+
+      // Flush early traces in case request crashes during generation
+      langfuse?.flushAsync().catch(() => {});
 
       chunks = ragResult.chunks;
       retrievalConfidence = ragResult.evaluationConfidence;
@@ -462,8 +467,12 @@ A: I cannot answer this question because the PREN calculation formula is not pro
 
 (The specification may reference PREN threshold values, but does not include the formula itself. Formulas are typically found in corrosion handbooks, not ASTM mechanical specifications.)`;
 
+    // Use DSPy-optimized prompt if available, otherwise use default
+    const optimizedPrompt = getOptimizedGeneratorPrompt();
+    const activeSystemPrompt = optimizedPrompt || systemPrompt;
+
     // Prepend formula refusal instruction if needed
-    const finalSystemPrompt = formulaRefusalPrefix + systemPrompt;
+    const finalSystemPrompt = formulaRefusalPrefix + activeSystemPrompt;
 
     // Escape the query to prevent prompt injection
     // Triple quotes delimit the user input clearly
@@ -528,7 +537,7 @@ RESPONSE GUIDELINES:
     const MAX_REGENS = 3; // Budget: up to 3 regeneration attempts across all checks
 
     // C1: Answer Grounding — verify numerical claims against source chunks
-    const grounding = groundResponse(responseText, chunks);
+    const grounding = groundResponse(responseText, chunks, verificationSpan);
     let groundingScore = grounding.score;
     console.log(`[Chat API] Grounding: ${groundingScore}% (${grounding.groundedNumbers}/${grounding.totalNumbers} numbers verified)`);
 
@@ -643,7 +652,7 @@ RESPONSE GUIDELINES:
       for (let attempt = 1; attempt <= MAX_COHERENCE_ATTEMPTS; attempt++) {
         try {
           const validation = await withTimeout(
-            validateResponseCoherence(cleanedQuery, finalResponseText),
+            validateResponseCoherence(cleanedQuery, finalResponseText, verificationSpan),
             TIMEOUTS.COHERENCE_VALIDATION,
             "Response coherence validation"
           ).catch(() => ({

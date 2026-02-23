@@ -1,0 +1,21 @@
+{
+  "query_id": "A312-NEG-002",
+  "question": "What is the yield strength of S31803 duplex per A312?",
+  "chunks": [
+    {
+      "content": "11.5 HCW pipe shall be capable of passing the weld decay tests listed in Supplementary S9 with a weld metal to base TABLE 4 Tensile Requirements Gr...",
+      "document": "A312-A312M-25.pdf",
+      "page": 9,
+      "combined_score": 0.8
+    },
+    {
+      "content": "11.5 HCW pipe shall be capable of passing the weld decay tests listed in Supplementary S9 with a weld metal to base TABLE 4 Tensile Requirements Gr...",
+      "document": "877794297-A312-A312M-25.pdf",
+      "page": 9,
+      "combined_score": 0.8
+    }
+  ],
+  "response_preview": "**Answer:** The yield strength of S31803 duplex per A312 is not explicitly stated in the provided context [1][2].\n\n**Details:** The provided context includes tables with tensile and yield strength req",
+  "confidence": 39,
+  "retrieved_at": "2026-02-23T01:14:23.948Z"
+}

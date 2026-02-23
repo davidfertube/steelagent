@@ -1,0 +1,27 @@
+{
+  "query_id": "A789-006",
+  "question": "What is the minimum elongation for S31803 tubing per A789?",
+  "chunks": [
+    {
+      "content": "15.",
+      "document": "ASTM A789 Seamless & Welded Duplex Tubing For General Service 2014.pdf",
+      "page": 4,
+      "combined_score": 0.8
+    },
+    {
+      "content": "TABLE 4 Tensile and Hardness RequirementsA UNS Designation Tensile Strength, min, ksi [MPa] Yield Strength, min, ksi [MPa] Elongation in 2 in.",
+      "document": "ASTM A789 Seamless & Welded Duplex Stainless Steel Tubing 2013.pdf",
+      "page": 4,
+      "combined_score": 0.8
+    },
+    {
+      "content": "than the specified minimum solution treatment temperature, tubes may be individually quenched in water or rapidly cooled by other means.",
+      "document": "ASTM A789 Seamless & Welded Duplex Stainless Steel Tubing 2013.pdf",
+      "page": 2,
+      "combined_score": 0.8
+    }
+  ],
+  "response_preview": "**Answer:** The minimum elongation for S31803 tubing per A789 is 25% [1].\n\n**Details:** This value is specified in Table 4 of ASTM A789/A789M-14, which lists the tensile and hardness requirements for ",
+  "confidence": 97,
+  "retrieved_at": "2026-02-23T01:08:51.620Z"
+}

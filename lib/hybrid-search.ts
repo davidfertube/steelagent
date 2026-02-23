@@ -18,6 +18,7 @@ import {
   formatExtractedCodes,
   type ProcessedQuery,
 } from "./query-preprocessing";
+import { type TraceSpan, createSpan, endSpan } from "./langfuse";
 
 // ============================================================================
 // Types
@@ -155,8 +156,10 @@ export async function hybridSearchChunks(
   query: string,
   matchCount: number = 5,
   documentIds: number[] | null = null,
-  sectionRefs: string[] | null = null
+  sectionRefs: string[] | null = null,
+  parentSpan?: TraceSpan | null,
 ): Promise<HybridSearchResult[]> {
+  const span = createSpan(parentSpan, "hybrid-search", { query, matchCount, documentIds });
   const startTime = Date.now();
 
   // Step 1: Preprocess query to extract codes and determine strategy
@@ -233,6 +236,7 @@ export async function hybridSearchChunks(
     );
   }
 
+  endSpan(span, { resultCount: boostedResults.length, searchTimeMs: Date.now() - startTime, topScore: boostedResults[0]?.combined_score });
   return boostedResults;
 }
 
@@ -251,10 +255,11 @@ export async function searchWithFallback(
   query: string,
   matchCount: number = 5,
   documentIds: number[] | null = null,
-  sectionRefs: string[] | null = null
+  sectionRefs: string[] | null = null,
+  parentSpan?: TraceSpan | null,
 ): Promise<HybridSearchResult[]> {
   try {
-    return await hybridSearchChunks(query, matchCount, documentIds, sectionRefs);
+    return await hybridSearchChunks(query, matchCount, documentIds, sectionRefs, parentSpan);
   } catch (error) {
     console.warn(
       "[Hybrid Search] Falling back to vector-only search:",

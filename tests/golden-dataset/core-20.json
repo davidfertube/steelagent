@@ -1,0 +1,212 @@
+{
+  "name": "Core 20-Query Golden Dataset",
+  "description": "Reduced golden dataset covering all 8 specs, all difficulty levels, and all query types (numerical, lookup, list, formula, refusal/trap). Designed for fast iteration with DSPy optimization.",
+  "version": "1.0",
+  "total_queries": 20,
+  "coverage": {
+    "specs": ["A789", "A790", "A312", "A872", "A1049", "API 6A", "API 5CT", "API 16C", "Duplex General"],
+    "types": {
+      "numerical": 8,
+      "lookup": 4,
+      "list": 2,
+      "formula": 1,
+      "technical": 1,
+      "refusal_trap": 4
+    }
+  },
+  "qa_pairs": [
+    {
+      "id": "A789-008",
+      "question": "What is the minimum yield strength for S32205 duplex tubing per ASTM A789?",
+      "expected_values": ["70 ksi", "485 MPa"],
+      "source_table": "Table 4",
+      "difficulty": "medium",
+      "tags": ["S32205", "yield", "tubing", "critical-confusion-test"],
+      "verification": {
+        "numerical_value": 70,
+        "unit": "ksi",
+        "property": "yield_strength"
+      }
+    },
+    {
+      "id": "A789-006",
+      "question": "What is the minimum elongation for S31803 tubing per A789?",
+      "expected_values": ["25%", "25"],
+      "source_table": "Table 4",
+      "difficulty": "easy",
+      "tags": ["elongation", "S31803"],
+      "verification": {
+        "numerical_value": 25,
+        "unit": "%",
+        "property": "elongation"
+      }
+    },
+    {
+      "id": "A789-004",
+      "question": "What heat treatment does A789 require for S31803?",
+      "expected_values": ["solution annealed", "solution-annealed", "1870-2010", "1020-1100"],
+      "source_table": "Table 2",
+      "difficulty": "medium",
+      "tags": ["heat-treatment"]
+    },
+    {
+      "id": "A789-NEG-001",
+      "question": "What is the minimum wall thickness for NPS 6 A789 tubing?",
+      "expected_answer": "REFUSE - A789 tubing uses OD and wall thickness dimensions, not NPS sizing (NPS is for pipe, see A790)",
+      "expect_refusal": true,
+      "difficulty": "trap",
+      "tags": ["negative-test", "sizing", "wrong-standard"]
+    },
+    {
+      "id": "A790-001",
+      "question": "What is the minimum yield strength for UNS S31803 seamless pipe per ASTM A790?",
+      "expected_values": ["65 ksi", "450 MPa"],
+      "source_table": "Table 2",
+      "difficulty": "easy",
+      "tags": ["tensile", "S31803", "seamless", "yield"],
+      "verification": {
+        "numerical_value": 65,
+        "unit": "ksi",
+        "property": "yield_strength"
+      }
+    },
+    {
+      "id": "A790-006",
+      "question": "What chromium content range is specified for UNS S31803 per A790?",
+      "expected_values": ["21.0-23.0%", "21.0", "23.0"],
+      "source_table": "Table 1",
+      "difficulty": "medium",
+      "tags": ["chemical", "composition", "chromium", "S31803"]
+    },
+    {
+      "id": "A790-NEG-002",
+      "question": "What is the impact test requirement for A790 pipe at -50\u00b0C?",
+      "expected_answer": "REFUSE - A790 does not specify mandatory impact testing at specific temperatures",
+      "expect_refusal": true,
+      "difficulty": "trap",
+      "tags": ["negative-test", "impact", "temperature"]
+    },
+    {
+      "id": "A312-002",
+      "question": "What is the minimum tensile strength for 304 stainless per A312?",
+      "expected_values": ["75 ksi", "515 MPa"],
+      "source_table": "Table 4",
+      "difficulty": "easy",
+      "tags": ["304", "tensile", "mechanical"],
+      "verification": {
+        "numerical_value": 75,
+        "unit": "ksi",
+        "property": "tensile_strength"
+      }
+    },
+    {
+      "id": "A312-NEG-002",
+      "question": "What is the yield strength of S31803 duplex per A312?",
+      "expected_answer": "REFUSE - S31803 (duplex) is not covered by A312 (austenitic grades only)",
+      "expect_refusal": true,
+      "difficulty": "trap",
+      "tags": ["negative-test", "wrong-standard"]
+    },
+    {
+      "id": "A872-001",
+      "question": "What manufacturing method does A872 cover?",
+      "expected_values": ["centrifugally cast", "centrifugal casting", "cast"],
+      "source_section": "Section 1",
+      "difficulty": "easy",
+      "tags": ["manufacturing", "casting"]
+    },
+    {
+      "id": "A872-002",
+      "question": "What is the minimum yield strength for UNS J93183 cast duplex pipe per A872?",
+      "expected_values": ["65 ksi", "450 MPa"],
+      "source_table": "Table 3",
+      "difficulty": "medium",
+      "tags": ["yield", "mechanical", "J93183"],
+      "verification": {
+        "numerical_value": 65,
+        "unit": "ksi",
+        "property": "yield_strength"
+      }
+    },
+    {
+      "id": "A1049-001",
+      "question": "What product form does A1049 cover?",
+      "expected_values": ["forgings", "forged", "pressure vessel"],
+      "source_section": "Section 1",
+      "difficulty": "easy",
+      "tags": ["product-form", "forgings"]
+    },
+    {
+      "id": "A1049-002",
+      "question": "What is the minimum yield strength for F51 (S31803) forgings per A1049?",
+      "expected_values": ["65 ksi", "450 MPa"],
+      "source_table": "Table 3",
+      "difficulty": "easy",
+      "tags": ["S31803", "yield", "forgings", "F51"],
+      "verification": {
+        "numerical_value": 65,
+        "unit": "ksi",
+        "property": "yield_strength"
+      }
+    },
+    {
+      "id": "6A-002",
+      "question": "What pressure ratings are defined in API 6A?",
+      "expected_values": ["2000", "3000", "5000", "10000", "15000", "20000", "psi"],
+      "difficulty": "medium",
+      "tags": ["pressure", "ratings"]
+    },
+    {
+      "id": "6A-003",
+      "question": "What material classes are in API 6A?",
+      "expected_values": ["AA", "BB", "CC", "DD", "EE", "FF", "HH"],
+      "difficulty": "medium",
+      "tags": ["material", "classes"]
+    },
+    {
+      "id": "5CT-001",
+      "question": "What is the minimum yield strength for L80 casing per API 5CT?",
+      "expected_values": ["80 ksi", "552 MPa"],
+      "source_table": "Table C.6",
+      "difficulty": "medium",
+      "tags": ["L80", "yield", "mechanical"],
+      "verification": {
+        "numerical_value": 80,
+        "unit": "ksi",
+        "property": "yield_strength"
+      }
+    },
+    {
+      "id": "5CT-004",
+      "question": "What is the scope of API 5CT?",
+      "expected_values": ["casing", "tubing", "oil", "gas", "well"],
+      "source_section": "Section 1",
+      "difficulty": "medium",
+      "tags": ["scope", "product-form"]
+    },
+    {
+      "id": "16C-001",
+      "question": "What is the scope of API 16C?",
+      "expected_values": ["choke", "kill", "equipment", "BOP", "well control"],
+      "source_section": "Section 1",
+      "difficulty": "medium",
+      "tags": ["scope", "choke", "kill"]
+    },
+    {
+      "id": "DUP-001",
+      "question": "What is the typical PREN formula?",
+      "expected_answer": "PREN = %Cr + (3.3 x %Mo) + (16 x %N)",
+      "allow_general_knowledge": true,
+      "difficulty": "easy",
+      "tags": ["PREN", "formula", "corrosion"]
+    },
+    {
+      "id": "REAL-NEG-001",
+      "question": "What is the yield strength of Inconel 625 per ASTM A790?",
+      "expected_answer": "REFUSE - Inconel 625 (N06625) is a nickel alloy, not covered by A790 which covers ferritic/austenitic (duplex) stainless steel",
+      "expect_refusal": true,
+      "difficulty": "trap",
+      "tags": ["negative-test", "out-of-scope"]
+    }
+  ]
+}
