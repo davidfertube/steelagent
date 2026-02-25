@@ -75,20 +75,20 @@ function SourceCitation({
       transition={{ delay: index * 0.05 }}
     >
       <div className="flex items-start gap-2 rounded-lg p-2 -m-1">
-        <span className="font-mono text-xs font-bold px-1.5 py-0.5 rounded shrink-0 bg-green-100 text-green-700">
+        <span className="font-mono text-xs font-bold px-1.5 py-0.5 rounded shrink-0 bg-green-100 dark:bg-green-900/50 text-green-700 dark:text-green-300">
           {source.ref}
         </span>
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-1.5 flex-wrap">
-            <FileText className="h-3.5 w-3.5 shrink-0 text-green-600" />
-            <span className="text-xs font-medium truncate text-green-700">
+            <FileText className="h-3.5 w-3.5 shrink-0 text-green-600 dark:text-green-400" />
+            <span className="text-xs font-medium truncate text-green-700 dark:text-white">
               {source.document}
             </span>
-            <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-green-100 text-green-700 shrink-0">
+            <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-green-100 dark:bg-green-900/50 text-green-700 dark:text-green-300 shrink-0">
               Page {source.page}
             </span>
           </div>
-          <p className="text-xs text-muted-foreground leading-relaxed mt-1 ml-5">
+          <p className="text-xs text-muted-foreground dark:text-gray-300 leading-relaxed mt-1 ml-5">
             {source.content_preview}
           </p>
         </div>
@@ -262,7 +262,7 @@ export function RealtimeComparison({
                     initial={{ opacity: 0, y: 10, scale: 0.98 }}
                     animate={{ opacity: 1, y: 0, scale: 1 }}
                     transition={{ delay: 0.3, type: "spring", stiffness: 200 }}
-                    className="mt-4 pt-4 border-t-2 border-green-300 bg-gradient-to-b from-green-50/50 to-transparent rounded-lg p-3 -mx-1"
+                    className="mt-4 pt-4 border-t-2 border-green-300 dark:border-green-700 bg-gradient-to-b from-green-50/50 dark:from-green-950/40 to-transparent rounded-lg p-3 -mx-1"
                   >
                     {/* Header with pulse animation */}
                     <motion.div
@@ -276,9 +276,9 @@ export function RealtimeComparison({
                           animate={{ scale: [1, 1.2, 1] }}
                           transition={{ duration: 0.5, delay: 0.5 }}
                         >
-                          <CheckCircle className="h-4 w-4 text-green-600" />
+                          <CheckCircle className="h-4 w-4 text-green-600 dark:text-green-400" />
                         </motion.div>
-                        <span className="text-sm font-semibold text-green-700">
+                        <span className="text-sm font-semibold text-green-700 dark:text-green-300">
                           {steelAgentSources.length} Verified Source{steelAgentSources.length !== 1 ? "s" : ""}
                         </span>
                       </div>
@@ -299,14 +299,14 @@ export function RealtimeComparison({
                       >
                         <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${
                           confidence.overall >= 80
-                            ? 'bg-green-100 text-green-700 border border-green-300'
+                            ? 'bg-green-100 dark:bg-green-900/50 text-green-700 dark:text-green-300 border border-green-300 dark:border-green-700'
                             : confidence.overall >= 50
-                            ? 'bg-amber-100 text-amber-700 border border-amber-300'
-                            : 'bg-red-100 text-red-700 border border-red-300'
+                            ? 'bg-amber-100 dark:bg-amber-900/50 text-amber-700 dark:text-amber-300 border border-amber-300 dark:border-amber-700'
+                            : 'bg-red-100 dark:bg-red-900/50 text-red-700 dark:text-red-300 border border-red-300 dark:border-red-700'
                         }`}>
                           {confidence.overall}% confident
                         </span>
-                        <span className="text-[10px] text-muted-foreground">
+                        <span className="text-[10px] text-muted-foreground dark:text-gray-400">
                           Retrieval {confidence.retrieval}% | Grounding {confidence.grounding}% | Coherence {confidence.coherence}%
                         </span>
                       </motion.div>
@@ -331,7 +331,7 @@ export function RealtimeComparison({
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
                         transition={{ delay: 0.8 }}
-                        className="mt-3 pt-3 border-t border-green-200 dark:border-green-800"
+                        className="mt-3 pt-3 border-t border-green-200 dark:border-green-700"
                       >
                         <ResponseFeedback
                           query={query}
