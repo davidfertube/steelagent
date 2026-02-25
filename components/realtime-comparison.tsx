@@ -442,17 +442,17 @@ export function RealtimeComparison({
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.5 }}
-          className="p-4 rounded-lg bg-gradient-to-r from-green-50 to-transparent border border-green-200"
+          className="p-4 rounded-lg bg-gradient-to-r from-green-50 dark:from-green-950/40 to-transparent border border-green-200 dark:border-green-700"
         >
           <div className="flex items-start gap-3">
-            <div className="p-2 rounded-full bg-green-100">
-              <CheckCircle className="h-4 w-4 text-green-600" />
+            <div className="p-2 rounded-full bg-green-100 dark:bg-green-900/50">
+              <CheckCircle className="h-4 w-4 text-green-600 dark:text-green-400" />
             </div>
             <div>
-              <p className="text-sm font-medium text-foreground">
+              <p className="text-sm font-medium text-foreground dark:text-white">
                 SpecVault provides traceable, audit-ready answers
               </p>
-              <p className="text-xs text-muted-foreground mt-1">
+              <p className="text-xs text-muted-foreground dark:text-gray-300 mt-1">
                 {steelAgentSources.length > 0 ? (
                   <>
                     This response cites {steelAgentSources.length} source{steelAgentSources.length !== 1 ? "s" : ""} from your uploaded documents.
