@@ -656,11 +656,6 @@ export default function Home() {
 
                   {/* Response Panel */}
                   <div className="rounded-xl bg-green-50/50 dark:bg-green-950/20 border border-green-100 dark:border-green-800/50 p-3 space-y-2 overflow-hidden relative">
-                    <motion.div
-                      className="absolute left-0 right-0 h-px bg-gradient-to-r from-transparent via-green-500/30 to-transparent"
-                      animate={{ top: ["0%", "100%", "0%"] }}
-                      transition={{ duration: 5, repeat: Infinity, ease: "linear" }}
-                    />
                     <div className="flex items-center gap-2 text-[10px] font-semibold text-green-600/60 dark:text-green-400/60 uppercase tracking-wider">
                       <motion.div
                         className="w-1.5 h-1.5 rounded-full bg-green-500"
