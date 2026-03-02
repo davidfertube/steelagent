@@ -23,7 +23,7 @@ import { resolveSpecsToDocuments } from "./document-mapper";
 import {
   analyzeQueryComplexity,
   timedOperation,
-} from "./latency-optimizer";
+} from "./query-complexity";
 import { evaluateRetrieval } from "./retrieval-evaluator";
 import { validateCoverage } from "./coverage-validator";
 import { type TraceSpan, createSpan, endSpan } from "./langfuse";
@@ -133,32 +133,6 @@ export async function multiQueryRAG(
 ): Promise<MultiQueryRAGResult> {
   const startTime = Date.now();
   console.log(`[Multi-Query RAG] Processing query: "${query}"`);
-
-  // CACHE DISABLED: The RAG response cache was causing different queries to return
-  // identical results. The cache was too aggressive in matching queries, leading to
-  // cached chunks from Query A being returned for Query B. The embedding cache
-  // (for Voyage AI API calls) is still active and provides sufficient optimization.
-  // See: https://github.com/anthropics/steelagent/issues/[issue-number]
-  //
-  // const cachedChunks = getCachedRAGResponse(query);
-  // if (cachedChunks) {
-  //   return {
-  //     chunks: cachedChunks.slice(0, topK),
-  //     decomposition: {
-  //       original: query,
-  //       intent: 'lookup',
-  //       subqueries: [query],
-  //       requires_aggregation: false,
-  //       reasoning: 'Cached response',
-  //     },
-  //     searchMetadata: {
-  //       totalCandidates: cachedChunks.length,
-  //       subqueryResults: [cachedChunks.length],
-  //       reranked: false,
-  //       documentFilter: null,
-  //     },
-  //   };
-  // }
 
   // OPTIMIZATION: Analyze complexity for fast path decisions
   const complexity = analyzeQueryComplexity(query);

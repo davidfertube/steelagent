@@ -1,60 +1,163 @@
-# SteelAgent
+# SpecVault
 
-[![Tests](https://github.com/davidfertube/steelagent/actions/workflows/test.yml/badge.svg)](https://github.com/davidfertube/steelagent/actions/workflows/test.yml)
-[![Enterprise](https://img.shields.io/badge/Grade-Enterprise-blue)](https://steelagent.ai)
-[![Stripe](https://img.shields.io/badge/Payments-Stripe-635BFF)](https://stripe.com)
-
-**Enterprise AI for materials compliance.** Upload steel specifications (ASTM, API, NACE), ask technical questions, get cited answers with zero hallucinations. Self-correcting agentic pipeline with answer grounding, false refusal detection, and confidence scoring.
-
-[Live Demo](https://steelagent.ai) | [Agentic Pipeline](AGENTS.md) | [Developer Docs](CLAUDE.md) | [Security](SECURITY.md)
+Enterprise AI for materials compliance. Upload steel specifications (ASTM, API, NACE), ask technical questions, get cited answers with zero hallucinations. Self-correcting agentic pipeline with answer grounding, false refusal detection, and confidence scoring.
 
 ---
 
-## What is SteelAgent?
+## Overview
 
-SteelAgent is an AI-powered search engine for steel and materials specifications. Instead of manually flipping through hundreds of pages of ASTM, API, and NACE standards, engineers can type a question in plain English and get an accurate, cited answer in seconds.
+SpecVault is an AI-powered search engine for steel and materials specifications. Engineers type a question in plain English and get an accurate, cited answer in seconds, instead of manually searching through hundreds of pages of ASTM, API, and NACE standards.
 
-**Who it's for:** Materials engineers, QA/QC inspectors, procurement teams, and compliance officers in the oil & gas industry. Anyone who needs to look up mechanical properties, chemical compositions, testing requirements, or manufacturing tolerances from technical standards.
+**Target users:** Materials engineers, QA/QC inspectors, procurement teams, and compliance officers in oil & gas.
 
-**Why it matters:** In materials compliance, wrong data causes real problems — failed inspections, rejected pipe shipments, or worse, structural failures. Generic AI tools like ChatGPT hallucinate technical data. SteelAgent uses a 7-stage self-correcting pipeline that verifies every numerical claim against the source document before returning an answer. The result: **91.3% accuracy with approximately zero hallucinations** across 80 test queries.
+### Key Metrics
+
+| Metric | Value |
+|--------|-------|
+| **Accuracy** | 91.3% (73/80 golden queries) |
+| **Hallucination Rate** | ~0% |
+| **Citation Rate** | 96.3% (77/80) |
+| **Response Time** | 13s median, 24.2s P95 |
+| **Unit Tests** | 189 passing |
+| **Indexed Specifications** | 15 documents |
+
+### Tech Stack
+
+| Layer | Technology |
+|-------|------------|
+| **Framework** | Next.js 16, React 19, Tailwind CSS |
+| **Primary LLM** | Claude Sonnet 4.6 via Anthropic API |
+| **Fallback LLMs** | Groq -> Cerebras -> SambaNova -> OpenRouter (Llama 3.3 70B) |
+| **Embeddings** | Voyage AI voyage-3-lite (1024-dim, 200M tokens free/month) |
+| **Re-ranker** | Voyage AI rerank-2 (cross-encoder, ~200ms) |
+| **Database** | Supabase PostgreSQL + pgvector (HNSW) |
+| **Hosting** | Vercel |
+| **Auth** | Supabase Auth (email/password, OAuth, API keys) |
+| **Rate Limiting** | Upstash Redis + in-memory fallback |
+| **Payments** | Stripe |
+| **OCR** | Google Gemini Vision |
+| **Observability** | Langfuse |
 
 ---
 
-## Key Numbers
+## Getting Started
 
-| Metric | Value | What It Means |
-|--------|-------|---------------|
-| **Accuracy** | 91.3% (73/80) | 9 out of 10 queries answered correctly |
-| **Hallucination Rate** | ~0% | Every number is verified against the source document |
-| **Citation Rate** | 96.3% (77/80) | Almost every answer includes the exact source reference |
-| **Response Time** | 13s median | Faster than manual lookup (15-30 min per query) |
-| **Post-Dedup Validation** | 100% (10/10) | Perfect score after removing duplicate documents |
-| **Unit Tests** | 113/113 passing | Comprehensive test coverage, zero skipped |
-| **Indexed Specifications** | 15 documents | ASTM A789, A790, A312, A872, A1049 + API 5CT, 6A, 16C + more |
+### Prerequisites
 
----
+- Node.js 22+
+- npm
+- API keys: Anthropic, Voyage AI, Supabase (see [Environment Variables](#environment-variables))
 
-## How It Works
+### Installation
 
-A user asks a question like *"What is the minimum yield strength for S32205 duplex per ASTM A790?"* The system searches across all indexed specifications, finds the relevant sections, verifies the data against the source, and returns a cited answer: **65 ksi (450 MPa), per ASTM A790 Table 2.**
+```bash
+git clone <repo-url>
+cd steelagent
+npm install
+cp .env.example .env.local   # Edit with your API keys
+npm run dev                   # http://localhost:3000
+```
 
-Under the hood, this goes through a 7-stage agentic pipeline that includes query analysis, hybrid search (keyword + semantic), AI-powered reranking, answer generation, and post-generation verification. If the system detects a hallucination, false refusal, or incoherent answer, it automatically regenerates with corrective guidance.
+### Environment Variables
 
-For the full technical pipeline documentation, see **[AGENTS.md](AGENTS.md)**.
+#### Required
 
-```mermaid
-graph LR
-    A[User Query] --> B[Query Analysis<br/>Extract ASTM/API codes]
-    B --> C[Decomposition<br/>Multi-hop expansion]
-    C --> D[Hybrid Search<br/>BM25 + Vector + Filter]
-    D --> E[Voyage AI Rerank<br/>Cross-encoder scoring]
-    E --> F[Claude Generation<br/>CoT with citations]
-    F --> G[Verification Agents<br/>Grounding + Coherence]
-    G --> H[Confidence Gate<br/>35/25/40 weights]
-    H --> I[Cited Response<br/>+ Confidence Score]
+```bash
+ANTHROPIC_API_KEY=sk-ant-...              # Claude Sonnet 4.6 (console.anthropic.com)
+VOYAGE_API_KEY=pa-...                     # Voyage AI (voyageai.com)
+NEXT_PUBLIC_SUPABASE_URL=https://...      # Supabase project URL
+NEXT_PUBLIC_SUPABASE_ANON_KEY=...         # Supabase anon key
+SUPABASE_SERVICE_KEY=...                  # Supabase service role key (quota, admin ops)
+NEXT_PUBLIC_APP_URL=http://localhost:3000  # App URL (production: https://steelagent.ai)
+```
 
-    style A fill:#1a1a2e,color:#fff
-    style I fill:#16213e,color:#fff
+#### Optional (Fallback LLMs + Integrations)
+
+```bash
+GROQ_API_KEY=gsk_...              # Groq fallback (console.groq.com)
+CEREBRAS_API_KEY=csk_...          # Cerebras fallback
+SAMBANOVA_API_KEY=...             # SambaNova fallback
+OPENROUTER_API_KEY=sk-or-...      # OpenRouter fallback (openrouter.ai)
+GOOGLE_API_KEY=...                # Gemini Vision OCR (ai.google.dev)
+UPSTASH_REDIS_REST_URL=...        # Rate limiting (upstash.com)
+UPSTASH_REDIS_REST_TOKEN=...      # Falls back to in-memory if not set
+LANGFUSE_SECRET_KEY=sk-lf-...     # Observability (langfuse.com)
+LANGFUSE_PUBLIC_KEY=pk-lf-...
+LANGFUSE_BASE_URL=https://cloud.langfuse.com
+FEEDBACK_ADMIN_KEY=...            # Required to read feedback via GET /api/feedback
+```
+
+#### Stripe Billing
+
+```bash
+STRIPE_SECRET_KEY=sk_live_...
+NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=pk_live_...
+STRIPE_WEBHOOK_SECRET=whsec_...
+```
+
+#### Email (Planned)
+
+```bash
+RESEND_API_KEY=re_...             # Billing notifications, quota warnings
+```
+
+### Database Setup
+
+#### 1. Create Supabase Project
+
+1. Create a project at https://supabase.com/dashboard
+2. Copy URL and anon key from Settings -> API
+3. Copy service role key from Settings -> API (keep secret)
+
+#### 2. Run Migrations
+
+Run in Supabase SQL Editor, in order:
+
+| Order | File | Purpose |
+|-------|------|---------|
+| 1 | `002_voyage_embeddings.sql` | Voyage AI embedding schema (1024-dim) |
+| 2 | `add-char-offsets.sql` | Character offset tracking for chunks |
+| 3 | `add-chunk-metadata.sql` | Chunk enrichment metadata |
+| 4 | `add-document-filter.sql` | Document filtering for search |
+| 5 | `add-hybrid-search.sql` | BM25 + vector hybrid search functions |
+| 6 | `add_uploading_status.sql` | Document upload status tracking |
+| 7 | `enhance-table-boosting.sql` | Table content score boosting |
+| 8 | `add-section-boost.sql` | Section-level score boosting |
+| 9 | `003_add_user_tables.sql` | Users, workspaces, API keys, invitations |
+| 10 | `004_add_subscription_tables.sql` | Stripe customers, quotas, invoices |
+| 11 | `006_update_rls_policies.sql` | RLS policies, audit logs, triggers |
+| 12 | `007_add_oauth_user_trigger.sql` | OAuth user auto-provisioning |
+| 13 | `008_atomic_quota_check.sql` | Atomic quota enforcement |
+| 14 | `009_fix_quota_and_stripe.sql` | Quota and Stripe fixes |
+
+**Shortcut:** Run `COMBINED_003_to_009_run_in_supabase.sql` instead of steps 9-14.
+
+**Additional standalone migrations:**
+- `supabase/feedback-migration.sql` — Feedback table
+- `supabase/dedup-migration.sql` — Dedup cleanup (run if duplicates exist)
+
+#### 3. Enable Storage
+
+1. Create a storage bucket named `documents` in Supabase Dashboard
+2. Set bucket to **Private** (authenticated access only)
+
+### Deployment (Vercel)
+
+1. Import GitHub repository at https://vercel.com/dashboard
+2. Set all environment variables in Settings -> Environment Variables
+3. Set `NEXT_PUBLIC_APP_URL` to your deployment URL
+4. Push to `main` — auto-deploys via GitHub Actions
+
+**GitHub Secrets for CI/CD:**
+
+```bash
+VERCEL_TOKEN=...
+VERCEL_ORG_ID=...
+VERCEL_PROJECT_ID=...
+NEXT_PUBLIC_SUPABASE_URL=...
+NEXT_PUBLIC_SUPABASE_ANON_KEY=...
+ANTHROPIC_API_KEY=...
+VOYAGE_API_KEY=...
 ```
 
 ---
@@ -63,17 +166,29 @@ graph LR
 
 ### Agentic RAG Pipeline (7 Stages)
 
+```
+User Query
+  -> 1. Query Analysis          (regex, ~1ms)
+  -> 2. Query Decomposition     (LLM, ~2s for complex queries)
+  -> 3. Hybrid Search           (BM25 + vector, ~3s)
+  -> 4. Re-ranking              (Voyage AI rerank-2, ~200ms)
+  -> 5. Generation              (Claude Sonnet 4.6, ~10s)
+  -> 6. Post-Generation Agents  (grounding + refusal + coherence, ~5s)
+  -> 7. Confidence Gate         (score -> return or regenerate)
+       -> Cited Response + Confidence Score
+```
+
 | Stage | Module | Key Features |
 |-------|--------|--------------|
-| **1. Query Analysis** | `query-preprocessing.ts` | Extracts UNS/ASTM/API codes, sets adaptive search weights |
-| **2. Decomposition** | `multi-query-rag.ts` | Expands complex queries into parallel sub-queries |
-| **3. Hybrid Search** | `hybrid-search.ts` | BM25 + vector fusion with document-scoped filtering |
-| **4. Re-ranking** | `reranker.ts` | Voyage AI rerank-2 (primary, ~200ms) + LLM fallback, dynamic topK |
-| **5. Generation** | `chat/route.ts` | Claude Opus 4.6 with chain-of-thought system prompt |
+| **1. Query Analysis** | `query-preprocessing.ts` | Extracts UNS/ASTM/API codes, sets adaptive BM25/vector weights |
+| **2. Decomposition** | `multi-query-rag.ts` | Expands complex queries into parallel sub-queries (skipped for simple lookups) |
+| **3. Hybrid Search** | `hybrid-search.ts` | BM25 + vector fusion with document-scoped filtering, table boosting |
+| **4. Re-ranking** | `reranker.ts` | Voyage AI rerank-2 (primary) + LLM fallback, dynamic topK (8 for API/comparisons, 5 standard) |
+| **5. Generation** | `chat/route.ts` | Claude Sonnet 4.6 with CoT system prompt, SSE streaming |
 | **6. Verification** | `answer-grounding.ts`, `response-validator.ts` | Regex numerical verification + LLM coherence judge |
-| **7. Confidence Gate** | `chat/route.ts` | Weighted score (35/25/40), regenerates if < 55% |
+| **7. Confidence Gate** | `chat/route.ts` | Weighted score (retrieval 35% + grounding 25% + coherence 40%), regenerates if < 55% |
 
-### Post-Generation Agents
+### Post-Generation Verification Agents
 
 | Agent | Method | Purpose | Regen Budget |
 |-------|--------|---------|--------------|
@@ -82,177 +197,203 @@ graph LR
 | **Partial Refusal** | Pattern matching | Catch hedged "limited information" responses | 2 |
 | **Coherence Validation** | LLM judge (fast) | Ensure response addresses the question | 2 |
 
-Shared regeneration budget: **max 3 attempts total** across all agents to prevent infinite loops.
+Shared regeneration budget: **max 3 attempts total** across all agents.
 
-Full pipeline documentation: **[AGENTS.md](AGENTS.md)**
+### Multi-Provider LLM Fallback
 
-### Document Ingestion
+`model-fallback.ts` chains providers with progressive backoff (500ms x 2^n, cap 4s):
 
-```mermaid
-graph LR
-    A[PDF Upload] --> B[Text Extraction]
-    B --> C[Semantic Chunking]
-    C --> D[Embedding]
-    D --> E[pgvector Storage]
+Anthropic (Claude) -> Groq -> Cerebras -> SambaNova -> OpenRouter
 
-    style A fill:#1a1a2e,color:#fff
-    style E fill:#16213e,color:#fff
-```
+### Key Modules
 
-### Tech Stack
-
-| Layer | Technology | Specs | Rationale |
-|-------|------------|-------|-----------|
-| **Primary LLM** | Claude Opus 4.6 | 200K context | Best-in-class technical accuracy, zero hallucinations |
-| **LLM Fallback** | Groq -> Cerebras -> SambaNova -> OpenRouter | Auto-failover | Progressive backoff (500ms x 2^n, cap 4s) |
-| **Embeddings** | Voyage AI voyage-3-lite | 1024-dim | 200M tokens/month free tier |
-| **Re-ranker** | Voyage AI rerank-2 | Cross-encoder | ~200ms latency, 10-50x faster than LLM reranking |
-| **Vector DB** | Supabase PostgreSQL + pgvector | HNSW index | Free tier, managed, metadata filtering |
-| **Chunking** | Semantic + table-aware | 1500/800/2500/200 | Variable-size, preserves table integrity |
-| **OCR** | Google Gemini Vision | Multi-modal | Handles scanned PDFs with embedded tables |
-| **Framework** | Next.js 16 + React 19 | TypeScript | App Router, Server Components, streaming SSE |
-| **Hosting** | Vercel | Free tier | CDN, SSL, Edge functions, auto-deploy |
-| **Storage** | Supabase Storage | 1GB free | PDF document storage |
-| **Cache** | Upstash Redis | Free tier | Rate limiting (10K commands/day) |
-| **Auth** | Supabase Auth | Email/password | Session cookies, API keys, JWT |
-| **Payments** | Stripe | SaaS billing | Subscriptions, checkout, customer portal, webhooks |
-| **Observability** | Langfuse | RAG tracing | Pipeline debugging, latency tracking |
+| File | Purpose |
+|------|---------|
+| `lib/multi-query-rag.ts` | Query decomposition + parallel retrieval |
+| `lib/hybrid-search.ts` | BM25 + vector fusion search |
+| `lib/reranker.ts` | Voyage AI rerank-2 + LLM fallback (800-char window) |
+| `lib/query-preprocessing.ts` | UNS/ASTM code extraction + adaptive weights |
+| `lib/semantic-chunking.ts` | Table-preserving chunking (1500 chars, 200 overlap) |
+| `lib/document-mapper.ts` | Resolves ASTM codes to document IDs |
+| `lib/model-fallback.ts` | Multi-provider LLM fallback chain |
+| `lib/answer-grounding.ts` | Numerical claim verification (regex, no LLM) |
+| `lib/response-validator.ts` | Coherence validation (LLM judge) |
+| `lib/retrieval-evaluator.ts` | Retrieval quality assessment (LLM judge) |
+| `lib/coverage-validator.ts` | Sub-query coverage checking (regex) |
+| `lib/query-complexity.ts` | Query complexity analysis + timed operations |
+| `lib/auth.ts` | Authentication, session management, API keys |
+| `lib/quota.ts` | Usage quota enforcement (per-workspace) |
+| `lib/rate-limit.ts` | Upstash Redis rate limiting + in-memory fallback |
+| `lib/langfuse.ts` | Observability + RAG pipeline tracing |
+| `lib/stripe.ts` | Stripe billing client + plan configuration |
+| `lib/embeddings.ts` | Voyage AI embedding generation |
+| `lib/vectorstore.ts` | Chunk storage + vector search retrieval |
+| `lib/embedding-cache.ts` | In-memory embedding cache (1h TTL, 1000 max) |
+| `middleware.ts` | Security middleware (auth, CSRF, rate limiting, headers) |
 
 ---
 
-## Performance
+## API Reference
 
-### Accuracy by Query Type
-
-| Query Type | Accuracy | Sample Size | Notes |
-|------------|----------|-------------|-------|
-| **Single-spec lookup** | 88.2% | 34/80 | Table lookups, property queries |
-| **Multi-hop reasoning** | 96.9% | 32/80 | Comparisons, multi-part questions |
-| **Cross-spec comparison** | 100% | 10/10 | A789 vs A790 (post-dedup validation) |
-| **API 5CT queries** | 80% | 4/80 | Limited to Purchasing Guidelines only |
-| **Overall** | **91.3%** | 73/80 | Exceeds 90% target |
-
-**Insight**: Multi-hop queries perform **better** than single-lookups due to query decomposition and parallel retrieval.
-
-### Latency Breakdown (P50/P95)
-
-| Stage | P50 | P95 | Optimization |
-|-------|-----|-----|--------------|
-| Query preprocessing | 50ms | 120ms | Regex-based, no LLM |
-| Hybrid search (BM25 + vector) | 800ms | 1.5s | HNSW index, parallel execution |
-| Voyage AI reranking | 200ms | 400ms | Cross-encoder, 800-char window |
-| Claude generation | 8s | 15s | Streaming SSE, early flush |
-| Answer grounding | 100ms | 250ms | Regex verification, no LLM |
-| Coherence validation | 2s | 5s | Fast LLM call with timeout |
-| **Total (P50 / P95)** | **13s** | **24.2s** | Target: <30s P95 |
-
-### Resource Utilization
-
-| Resource | Usage | Cost (Monthly) | Notes |
-|----------|-------|----------------|-------|
-| **Anthropic API** | ~500K tokens/day | ~$30-75 | Primary LLM (Claude Opus 4.6) |
-| **Voyage AI** | ~20M tokens/month | **$0** | Embeddings (200M free tier) |
-| **Voyage AI Rerank** | ~50K rerank calls/month | ~$2.50 | $0.05 per 1000 reranks |
-| **Supabase** | PostgreSQL + pgvector + Auth + Storage | **$0** | Free tier (500MB DB, 1GB storage) |
-| **Vercel** | Hosting + CDN + SSL | **$0** | Free tier (hobby plan) |
-| **Upstash Redis** | Rate limiting | **$0** | Free tier (10K commands/day) |
-| **Stripe Fees** | 2.9% + $0.30/txn | Variable | Only when revenue comes in |
-| **Total** | -- | **~$35-80** | Nearly all free tier |
-
-### Document Corpus (Post-Dedup, Feb 2026)
-
-| Metric | Value | Notes |
-|--------|-------|-------|
-| **Unique Documents** | 15 | ASTM + API specifications |
-| **Total Chunks** | ~8,500 | After removing 7,454 duplicates |
-| **Avg Chunk Size** | 1,420 chars | Target: 1500, min: 800, max: 2500 |
-| **Overlap** | 200 chars | Preserves context across boundaries |
-| **Dedup Savings** | 46.7% | Removed 46 duplicate docs |
-
-### Accuracy Progression
-
-| Date | Accuracy | Key Change |
-|------|----------|------------|
-| Nov 2025 | 57% | Naive RAG baseline |
-| Dec 2025 | 81% | Hybrid search + semantic chunking |
-| Jan 2026 | 88% | LLM reranking + answer grounding |
-| Feb 2026 | **91.3%** | Voyage AI reranking + full agentic pipeline |
-
----
-
-## Engineering Highlights
-
-### Self-Correcting Agentic Pipeline
-
-Post-generation agents detect hallucinated numbers, false refusals, and incoherent responses. Each verification step can trigger targeted regeneration with specific guidance. The system catches errors that would pass through a naive retrieve-and-generate pipeline. Shared regeneration budget (max 3) prevents infinite loops.
-
-### Cross-Spec Contamination Prevention
-
-A789 (tubing) and A790 (pipe) share ~90% content but have **different** mechanical properties. S32205 yields **70 ksi** in A789 but **65 ksi** in A790. `document-mapper.ts` resolves ASTM/API codes to specific document IDs. Cross-spec confusion matrix testing validates separation.
-
-### Table-Preserving Semantic Chunking
-
-Variable-size chunks (1500 target, 800 min, 2500 max, 200 overlap) detect table boundaries and keep them intact. ASTM specification tables are never split mid-row.
-
-### Evaluation-Driven Development
-
-80 golden queries with pattern-based validation across 8 specifications. RAGAS LLM-as-judge metrics. A789/A790 confusion matrix testing. Accuracy progression from 57% to 91.3% through systematic root cause analysis.
-
-### Multi-Provider LLM Failover
-
-`model-fallback.ts` chains Anthropic -> Groq -> Cerebras -> SambaNova -> OpenRouter with progressive backoff (500ms x 2^n, cap 4s). Zero-downtime on any single provider outage.
-
-### Content-Hash Deduplication
-
-Removed 46 duplicate documents (7,454 redundant chunks). ~75% noise reduction while maintaining 100% accuracy on post-dedup validation.
-
-### Production Feedback Loop
-
-In-app feedback (thumbs up/down + issue classification) with automated diagnostic reporting. `scripts/feedback-report.ts` classifies root causes and routes to relevant pipeline modules.
-
----
-
-## Quick Start
-
-```bash
-git clone https://github.com/davidfertube/steelagent.git
-cd steelagent
-
-npm install
-cp .env.example .env.local
-# Edit .env.local with your API keys:
-#   ANTHROPIC_API_KEY     (required — Claude Opus 4.6)
-#   VOYAGE_API_KEY        (required — embeddings + reranking)
-#   NEXT_PUBLIC_SUPABASE_URL
-#   NEXT_PUBLIC_SUPABASE_ANON_KEY
-
-npm run dev    # http://localhost:3000
-```
-
-See [ENVIRONMENT.md](ENVIRONMENT.md) for full environment setup including Supabase project creation, database migrations, and deployment configuration.
+| Method | Endpoint | Request | Response |
+|--------|----------|---------|----------|
+| POST | `/api/chat` | `{ query, stream?, verified?, documentId? }` | SSE stream -> `{ response, sources, confidence }` |
+| POST | `/api/chat/compare` | `{ query }` | `{ response }` (generic LLM, no RAG) |
+| POST | `/api/documents/upload` | `FormData(file)` | `{ success, message }` |
+| POST | `/api/documents/upload-url` | `{ filename, contentType }` | `{ signedUrl }` |
+| POST | `/api/documents/process` | `{ documentId }` | `{ success, chunks }` |
+| POST/GET | `/api/feedback` | `{ query, response, sources, confidence, rating, issue_type?, comment? }` | `{ success }` / `{ data[] }` |
+| POST | `/api/auth/api-keys` | `{ name, expiresAt? }` | `{ key, id }` |
+| DELETE | `/api/auth/api-keys/[id]` | — | `{ success }` |
+| POST | `/api/leads` | `{ firstName, lastName, email, company?, phone? }` | `{ success }` |
+| GET | `/api/health` | — | `{ status: "ok" }` |
+| DELETE | `/api/account/delete` | — | `{ success }` |
+| POST | `/api/billing/checkout` | `{ priceId }` | `{ url }` |
+| POST | `/api/billing/portal` | — | `{ url }` |
+| GET | `/api/billing/subscription` | — | `{ plan, status, periodEnd, quota }` |
+| POST | `/api/webhooks/stripe` | Stripe event payload | `{ received: true }` |
 
 ---
 
 ## Testing
 
 ```bash
-# Unit tests (113 tests, 0 skips)
-npm test
+# Unit tests (fast, no server needed)
+npm test                                # All tests (vitest)
 
-# 80-query accuracy suite (requires running dev server)
-npm run test:accuracy
+# Accuracy tests (requires running dev server on localhost:3000)
+npm run test:accuracy                   # 80-query suite across all 8 documents
+npm run test:accuracy:verbose           # Same, with detailed per-query output
 
-# Production smoke test (8 complex queries, 1 per document)
+# Core golden dataset
+npm run test:core20                     # 20-query golden dataset
+npm run test:hard10                     # 10 hardest queries
+
+# Production smoke test (requires server + API keys)
 npx tsx scripts/production-smoke-test.ts
 
 # RAGAS LLM-as-judge evaluation
 npm run evaluation:rag
+npm run evaluation:rag:verbose
 
 # A789/A790 confusion matrix
 npm run test:confusion
+
+# Performance profiling
+npm run test:performance
+npm run test:bottleneck
+
+# Quick post-improvement validation
+npx tsx scripts/mvp-10-query-test.ts
+
+# Feedback diagnostics
+npx tsx scripts/feedback-report.ts
+
+# Document deduplication
+npx tsx scripts/dedup-documents.ts              # Dry run
+npx tsx scripts/dedup-documents.ts --apply      # Execute
 ```
 
-Golden datasets: `tests/golden-dataset/*.json` — 8 specification files, 80+ queries with expected answers and validation patterns.
+### Build & Deploy
+
+```bash
+npm run build     # Production build (catches type errors)
+npm run lint      # ESLint
+git push origin main  # Auto-deploys to Vercel
+```
+
+### Golden Datasets
+
+Located in `tests/golden-dataset/*.json` — 8 specification files, 80+ queries with expected answers and validation patterns.
+
+---
+
+## Security
+
+### Authentication & Authorization
+
+| Feature | Implementation |
+|---------|---------------|
+| Email/Password Auth | Supabase Auth with email verification |
+| API Key Auth | SK-prefixed, SHA-256 hashed, expiration support |
+| Session Management | Secure cookies, HTTP-only, SameSite |
+| Route Protection | Middleware checks session or API key on protected routes |
+| Role-Based Access | User/Admin/Enterprise roles |
+
+### Rate Limiting & Quotas
+
+| Feature | Implementation |
+|---------|---------------|
+| Rate Limiting | Upstash Redis sliding window + in-memory fallback |
+| Per-Route Limits | `/api/chat`: 30/min, `/api/documents/*`: 5-10/min |
+| Quota Enforcement | Per-workspace query/document/API call limits |
+| Input Validation | Max query length, PDF file size limit (50MB), MIME type checking |
+
+### Data Isolation (RLS)
+
+| Feature | Implementation |
+|---------|---------------|
+| Row Level Security | Workspace-scoped policies on all tables |
+| Document Scoping | Documents/chunks filtered by workspace_id |
+| API Key Scoping | Keys belong to specific workspaces |
+| Anonymous Access | Blocked (`REVOKE ALL FROM anon`) except leads |
+
+### Network Security
+
+| Feature | Implementation |
+|---------|---------------|
+| CSRF Protection | Origin/Referer validation on state-changing requests |
+| CORS | Exact-match origin whitelist |
+| Stripe Webhooks | HMAC-SHA256 signature verification |
+| Error Sanitization | Generic error messages, no stack traces leaked |
+| HTTPS | Enforced by Vercel (auto SSL) |
+| Security Headers | X-Content-Type-Options, X-Frame-Options, HSTS, CSP |
+
+### Middleware Flow
+
+```
+Request -> Security Headers -> Auth Check -> CSRF -> Rate Limit -> Quota -> Route Handler
+```
+
+**Protected routes:** `/api/chat`, `/api/documents/*`, `/api/feedback`, `/dashboard/*`, `/account/*`
+**Public routes:** `/`, `/auth/*`, `/privacy`, `/terms`, `/api/health`, `/api/leads`
+
+### Data Handling
+
+- Documents stored in Supabase Storage (encrypted at rest)
+- No customer data used for model training (Anthropic API data privacy)
+- Customers can request full data deletion via `/api/account/delete`
+
+---
+
+## Development Tools
+
+### MCP Configuration
+
+MCP servers extend Claude Code with tools for file access, GitHub integration, and database queries. Config: `.mcp/config.json`
+
+| Server | Package | Purpose |
+|--------|---------|---------|
+| filesystem | `@anthropic/mcp-server-filesystem` | Read/write project files |
+| github | `@anthropic/mcp-server-github` | PR and issue management |
+
+**Recommended additions:** context7 (library docs), Supabase MCP (direct DB access), sequential-thinking (complex reasoning). See `.mcp/config.json` for configuration.
+
+### Common Gotchas
+
+**A789/A790 Confusion:** A789 (tubing) and A790 (pipe) have DIFFERENT yield strengths for S32205 — A789: 70 ksi, A790: 65 ksi. `document-mapper.ts` resolves specs to document IDs to prevent cross-contamination.
+
+**Reranker Chunk Window:** Truncates to 800 chars — preserves ~6-8 table rows. Wider windows risk slower reranking without accuracy gains.
+
+**Regeneration Budget:** Post-generation agents share max 3 regenerations total. Each adds ~10-15s latency.
+
+**Groq TPM Limits:** Free tier: 6000 TPM. Chunks limited to 3. `model-fallback.ts` auto-switches on 429 errors.
+
+**Chunk Size:** Semantic chunking: 1500 target, 800 min, 2500 max, 200 overlap. Tables preserved intact.
+
+**Vercel Timeout:** 10-second request limit. SSE streaming with 3s heartbeat keeps connection alive.
+
+**`SUPABASE_SERVICE_KEY`:** Not in `.env.example` intentionally — grants full database access. Set manually in `.env.local` and Vercel.
 
 ---
 
@@ -261,253 +402,70 @@ Golden datasets: `tests/golden-dataset/*.json` — 8 specification files, 80+ qu
 ```
 app/
   api/
-    chat/route.ts              # Main RAG endpoint (7-stage agentic pipeline)
+    chat/route.ts              # Main RAG endpoint (7-stage pipeline)
     chat/compare/route.ts      # Generic LLM comparison (no RAG)
-    documents/process/route.ts  # PDF extraction -> chunking -> embedding
-    documents/upload/route.ts   # Upload confirmation
+    documents/process/route.ts # PDF extraction -> chunking -> embedding
+    documents/upload/route.ts  # Upload confirmation
     documents/upload-url/route.ts # Signed URL for direct upload
-    feedback/route.ts           # User feedback collection + retrieval
+    feedback/route.ts          # User feedback collection
     leads/route.ts             # Lead capture
-    health/route.ts            # Health check endpoint
+    health/route.ts            # Health check
     auth/api-keys/route.ts     # API key management
-    auth/api-keys/[id]/route.ts # API key deletion
-    billing/checkout/route.ts   # Stripe checkout session
-    billing/portal/route.ts     # Stripe customer portal
-    billing/subscription/route.ts # Subscription + quota status
-    webhooks/stripe/route.ts    # Stripe webhook handler
-    account/delete/route.ts     # Account deletion
-  auth/callback/route.ts       # OAuth callback
+    billing/checkout/route.ts  # Stripe checkout
+    billing/portal/route.ts    # Stripe customer portal
+    billing/subscription/route.ts # Subscription status
+    webhooks/stripe/route.ts   # Stripe webhook handler
+    account/delete/route.ts    # Account deletion
+  auth/                        # Login, signup, password reset pages
   dashboard/page.tsx           # User dashboard
   account/page.tsx             # Account settings + API keys
-  workspace/page.tsx           # Workspace settings + team
-  auth/login/page.tsx          # Login
-  auth/signup/page.tsx         # Registration
-  auth/forgot-password/page.tsx # Password reset request
-  auth/reset-password/page.tsx  # Password reset completion
-  privacy/page.tsx             # Privacy policy
-  terms/page.tsx               # Terms of service
+  workspace/page.tsx           # Workspace settings
 components/
   search-form.tsx              # Query input form
   realtime-comparison.tsx      # Side-by-side RAG vs generic LLM
-  response-feedback.tsx        # Feedback widget (thumbs up/down + issue types)
-  document-upload.tsx          # PDF upload component
-  anonymous-quota-banner.tsx   # Anonymous usage limit banner
-  upgrade-modal.tsx            # Plan upgrade modal
-  auth/login-form.tsx          # Login form
-  auth/signup-form.tsx         # Signup form
-  dashboard/usage-stats.tsx    # Usage statistics
-  dashboard/document-list.tsx  # Uploaded documents
-  account/api-key-manager.tsx  # API key CRUD
-  account/billing-section.tsx  # Subscription management
-  account/profile-form.tsx     # Profile settings
-  account/delete-account-button.tsx # Account deletion
-  layout/user-menu.tsx         # Navigation user menu
-  ui/button.tsx, card.tsx, separator.tsx, logo.tsx  # Base UI components
-lib/
-  multi-query-rag.ts           # Query decomposition + parallel retrieval
-  hybrid-search.ts             # BM25 + vector fusion search
-  reranker.ts                  # Voyage AI rerank-2 + LLM fallback (800-char window)
-  query-preprocessing.ts       # Technical code extraction + adaptive weights
-  semantic-chunking.ts         # Table-preserving variable-size chunking
-  document-mapper.ts           # Spec code -> document ID resolution
-  model-fallback.ts            # Multi-provider LLM failover chain
-  answer-grounding.ts          # Numerical claim verification (regex)
-  response-validator.ts        # Coherence validation (LLM judge)
-  retrieval-evaluator.ts       # Retrieval quality assessment
-  coverage-validator.ts        # Sub-query coverage checking
-  verified-generation.ts       # Alternative verified generation pipeline
-  claim-verification.ts        # Claim-level verification engine
-  structured-output.ts         # Structured JSON output parsing
-  auth.ts                      # Authentication + API key management
-  quota.ts                     # Usage quota enforcement
-  rate-limit.ts                # Rate limiting (Upstash + in-memory fallback)
-  timeout.ts                   # Async timeout wrappers
-  langfuse.ts                  # Observability + RAG pipeline tracing
-  evaluation-engine.ts         # Pattern-based RAG evaluation
-  rag-metrics.ts               # RAGAS-style LLM-as-judge metrics
-  supabase.ts                  # Database client
-  embeddings.ts                # Embedding generation
-  vectorstore.ts               # Vector database operations
-  query-cache.ts               # Query result caching
-  embedding-cache.ts           # In-memory embedding cache
-  latency-optimizer.ts         # Cache + early termination + parallel execution
-  query-decomposition.ts       # Sub-query decomposition (Zod validated)
-  query-enhancement.ts         # Document hints + technical term expansion
-  formula-detector.ts          # Formula request detection
-  llm-judge.ts                 # LLM-as-judge for RAGAS evaluation
-  stripe.ts                    # Stripe billing client + plan config
-  email.ts                     # Email service via Resend
-  errors.ts                    # Standardized error handling
-  schemas.ts                   # Zod schemas for LLM output validation
-  validation.ts                # PDF file validation (magic bytes, 50MB)
+  response-feedback.tsx        # Feedback widget
+  document-upload.tsx          # PDF upload
+  auth/                        # Login/signup forms
+  dashboard/                   # Usage stats, document list
+  account/                     # API keys, billing, profile
+  layout/                      # Navigation, user menu
+  ui/                          # Button, card, logo, separator
+lib/                           # 40+ modules (see Key Modules above)
 middleware.ts                  # Security (auth, CSRF, rate limiting, headers)
 tests/
   golden-dataset/              # 8 spec files, 80+ golden queries
   evaluation/                  # Accuracy + confusion tests
   helpers/                     # Shared test utilities
   performance/                 # Bottleneck profiling
-  security/                    # Rate limit + validation attack tests
-scripts/
-  accuracy-test.ts             # 80-query accuracy test
-  production-smoke-test.ts     # 8-query end-to-end validation
-  mvp-10-query-test.ts         # 10-query post-improvement validation
-  mvp-accuracy-test.ts         # 50-query accuracy suite
-  extended-smoke-test.ts       # 10 complex material engineer queries
-  demo-5-query-test.ts         # 5-query demo suite
-  verification-test-v2.ts      # Post-improvement verification
-  run-rag-evaluation.ts        # RAGAS-style evaluation
-  feedback-report.ts           # Feedback diagnostic report
-  generate-report.ts           # Evaluation report generator
-  dedup-documents.ts           # Document deduplication
-supabase/
-  migrations/                  # 15 SQL migration files
+  security/                    # Rate limit + validation tests
+scripts/                       # Accuracy tests, smoke tests, diagnostics
+supabase/migrations/           # 15 SQL migration files
 ```
 
 ---
 
-## API
+## Troubleshooting
 
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| POST | `/api/chat` | RAG query with SSE streaming -> `{ response, sources, confidence }` |
-| POST | `/api/chat/compare` | Generic LLM comparison (no document context) |
-| POST | `/api/documents/upload` | Confirm PDF upload |
-| POST | `/api/documents/upload-url` | Get signed upload URL |
-| POST | `/api/documents/process` | Process PDF -> extract, chunk, embed, store |
-| POST | `/api/feedback` | Submit user feedback on response quality |
-| GET | `/api/feedback` | Retrieve feedback (admin key required) |
-| POST | `/api/auth/api-keys` | Create API key |
-| DELETE | `/api/auth/api-keys/[id]` | Revoke API key |
-| POST | `/api/leads` | Lead capture form |
-| GET | `/api/health` | Health check endpoint |
-| DELETE | `/api/account/delete` | Account deletion |
-| POST | `/api/billing/checkout` | Create Stripe Checkout session |
-| POST | `/api/billing/portal` | Open Stripe Customer Portal |
-| GET | `/api/billing/subscription` | Get subscription + quota status |
-| POST | `/api/webhooks/stripe` | Handle Stripe webhook events |
+**"Unauthorized" errors:** Check `NEXT_PUBLIC_SUPABASE_URL`, verify user is signed in, check RLS policies.
 
----
+**"Quota Exceeded" errors:** Check `usage_quotas` table. Reset manually if needed:
+```sql
+UPDATE usage_quotas
+SET queries_used = 0, documents_used = 0, api_calls_used = 0,
+    period_start = NOW(), period_end = NOW() + INTERVAL '1 month'
+WHERE workspace_id = 'your-workspace-id';
+```
 
-## Pricing
+**Rate limiting not working:** Check Upstash env vars. Falls back to in-memory (resets on deploy).
 
-| Feature | Free | Pro ($49/mo) | Enterprise ($199/mo) |
-|---------|------|--------------|---------------------|
-| Queries/month | 10 | 500 | 5,000 |
-| Documents | 1 | 50 | 500 |
-| API calls/month | 100 | 5,000 | 50,000 |
-| RAG accuracy | Full pipeline | Full pipeline | Full pipeline |
-| API key access | No | Yes | Yes |
-| Workspace members | 1 | 5 | Unlimited |
-| Human review queue | No | No | Yes |
-| Priority support | No | Email | Dedicated |
-| Audit logs | No | 30 days | 1 year |
-| Custom integrations | No | No | Yes |
+**SSE streaming timeout:** Check heartbeat implementation in `app/api/chat/route.ts`.
 
-Break-even: ~14 Pro customers or ~8 mixed Pro/Enterprise customers cover infrastructure costs.
-
----
-
-## Roadmap
-
-### Shipped (Feb 2026)
-- [x] **Voyage AI cross-encoder re-ranking** -- 10-50x faster than LLM (~200ms vs 5-15s)
-- [x] **Content-hash deduplication** -- Removed 46 duplicate docs, 7,454 redundant chunks
-- [x] **User feedback loop** -- Thumbs up/down + issue classification + diagnostic reporting
-- [x] **Confidence reweighting** -- Tuned to 35/25/40 based on production failure analysis
-- [x] **Dynamic topK retrieval** -- 8 chunks for API/comparisons, 5 for standard ASTM
-- [x] **Anti-refusal agent** -- Catches false "I cannot answer" responses
-- [x] **Progressive LLM fallback** -- 5-provider chain with auto-failover
-- [x] **User authentication** -- Supabase Auth (email/password), API keys, JWT sessions
-- [x] **Multi-tenant workspaces** -- Workspace model, RLS policies, quota enforcement
-- [x] **Rate limiting** -- Per-endpoint limits with Upstash Redis + in-memory fallback
-- [x] **Usage quotas** -- Per-workspace query/document/API call limits with auto-reset
-
-### Shipped -- Payment Gateway (Stripe)
-- [x] **Stripe SDK integration** -- `lib/stripe.ts` with plan configuration
-- [x] **Checkout flow** -- `app/api/billing/checkout/route.ts` creates Stripe sessions
-- [x] **Webhook handler** -- `app/api/webhooks/stripe/route.ts` with signature verification
-- [x] **Billing portal** -- `app/api/billing/portal/route.ts` for subscription management
-- [x] **Subscription status** -- `app/api/billing/subscription/route.ts` with quota info
-- [x] **Billing UI** -- `components/account/billing-section.tsx`, `components/upgrade-modal.tsx`
-- [ ] **Quota-Stripe sync** -- Dynamic limits tied to subscription tier
-
-### In Progress -- Enterprise Hardening
-- [ ] **Human-in-the-loop** -- Confidence-gated routing to human review queue
-- [ ] **AI disclaimers** -- "Not a substitute for professional engineering judgment" on all responses
-- [ ] **Audit trail enhancement** -- Full query/response logging for compliance
-- [ ] **Terms of Service + Privacy Policy** -- Legal review for SaaS operation
-- [ ] **Data Processing Agreement (DPA)** -- Enterprise customer requirement
-
-### Near-Term (Accuracy -> 95%+)
-- [ ] Upload actual API 5CT specification (only Purchasing Guidelines currently indexed)
-- [ ] Improve retrieval quality for API 5CT, A872, A1049 (worst-performing specs)
-- [ ] Table-aware chunking v2 (parse table headers into structured metadata)
-- [ ] Citation highlighting in source chunks (highlight exact matched spans)
-
-### Medium-Term (Revenue Growth)
-- [ ] Query analytics dashboard (usage trends, failure patterns, latency distribution)
-- [ ] Team management UI (workspace invitations, member roles, settings)
-- [ ] Email service via Resend (verification, quota warnings, billing notifications)
-- [ ] Admin dashboard (user management, revenue analytics, support tools)
-- [ ] Conversation memory (multi-turn follow-up questions)
-- [ ] Vercel AI SDK migration (replace custom SSE with `ai` package)
-
-### Long-Term (Enterprise Scale)
-- [ ] SSO/SAML for enterprise customers
-- [ ] In-app PDF viewer with citation highlighting
-- [ ] REST API with OpenAPI spec + SDKs
-- [ ] On-premise deployment option (Docker + Kubernetes)
-- [ ] Multi-language specification support (German DIN, Japanese JIS)
-- [ ] Comparative analysis mode (side-by-side spec diff highlighting)
-- [ ] SOC 2 Type II certification
-
----
-
-## Legal & Compliance
-
-### AI Disclaimer (Required)
-
-All AI-generated responses include: *"This information is AI-generated from indexed specifications. It is not a substitute for professional engineering judgment. Always verify critical data against the original specification document."*
-
-### Data Handling
-
-- Customer documents are stored in Supabase Storage (encrypted at rest)
-- Documents are processed for text extraction and embedding only
-- **No customer data is used for model training** -- all LLM calls use the Anthropic API with data privacy guarantees
-- Customers can request full data deletion at any time
-
-### Liability Limitation
-
-SteelAgent provides AI-assisted lookup, not professional engineering advice. The platform includes confidence scoring and human-in-the-loop routing for low-confidence responses to minimize risk. Enterprise customers should designate a qualified materials engineer to review flagged responses.
-
-### Compliance Roadmap
-
-| Milestone | Timeline | Purpose |
-|-----------|----------|---------|
-| Terms of Service + Privacy Policy | Q1 2026 | Legal foundation for SaaS operation |
-| Data Processing Agreement (DPA) | Q2 2026 | Enterprise customer requirement |
-| SOC 2 Type I | Q4 2026 | Security audit baseline |
-| SOC 2 Type II | Q2 2027 | Ongoing security compliance |
-| ISO 27001 | 2027 | International security standard |
-
----
-
-## Built By
-
-**David Fernandez** -- [Portfolio](https://davidfernandez.dev) | [GitHub](https://github.com/davidfertube)
-
-Solo build over 3 months (Nov 2025 - Feb 2026). ~27,500 lines of TypeScript across 42 library modules, 15 API routes, 21 components, and comprehensive test infrastructure.
-
-**Technical Achievement**: 7-stage agentic RAG pipeline achieving **91.3% accuracy** on 80-query golden dataset with **zero hallucinations**. Stripe billing integration, OAuth support, atomic quota enforcement, and full account lifecycle management. Shipped 15+ pipeline improvements in February 2026 alone (dedup, Voyage AI reranking, confidence reweighting, feedback loop, dynamic topK).
-
-**Test Infrastructure**: 113 unit tests, 80-query golden dataset, 8 production smoke tests, 10 post-improvement validation queries, RAGAS evaluation, A789/A790 confusion matrix, performance profiling.
-
-**Production-Ready**: Live at [steelagent.ai](https://steelagent.ai). SSE streaming, multi-provider failover, feedback loop, observability, zero-downtime deployments.
+**Build failing:** Verify all env vars set in Vercel. Check that migrations have run.
 
 ---
 
 ## License
 
-Proprietary -- All Rights Reserved
+Proprietary — All Rights Reserved
 
-Copyright (c) 2025-2026 David Fernandez. This software is proprietary and confidential. Unauthorized copying, distribution, or modification is strictly prohibited.
+Copyright (c) 2025-2026 David Fernandez. Unauthorized copying, distribution, or modification is strictly prohibited.

@@ -108,7 +108,7 @@ Golden datasets: `tests/golden-dataset/*.json` (8 files, 80+ queries total)
 
 ### Agentic RAG Pipeline (7 stages)
 
-The full pipeline is documented in **[AGENTS.md](AGENTS.md)**. Summary:
+Pipeline summary:
 
 1. **Query Analysis** -- `query-preprocessing.ts` extracts UNS/ASTM/API codes, sets adaptive search weights
 2. **Query Decomposition** -- `multi-query-rag.ts` decomposes complex queries into parallel sub-queries
@@ -160,7 +160,7 @@ The full pipeline is documented in **[AGENTS.md](AGENTS.md)**. Summary:
 | `lib/query-enhancement.ts` | Document hints + technical term expansion |
 | `lib/query-cache.ts` | Query result caching |
 | `lib/embedding-cache.ts` | In-memory embedding cache (1h TTL, 1000 max) |
-| `lib/latency-optimizer.ts` | Cache, early termination, parallel execution |
+| `lib/query-complexity.ts` | Query complexity analysis + timed operations |
 | `lib/formula-detector.ts` | Detects formula requests, prevents hallucination |
 | `lib/llm-judge.ts` | LLM-as-judge for RAGAS evaluation |
 | `lib/embeddings.ts` | Voyage AI embedding generation |
@@ -325,8 +325,6 @@ Materials compliance is safety-critical -- AI errors can lead to using incorrect
 
 ## Security Architecture
 
-See **[SECURITY.md](SECURITY.md)** for full details. Summary:
-
 **Middleware flow** (`middleware.ts`):
 1. Security headers (X-Content-Type-Options, X-Frame-Options, HSTS, CSP)
 2. Authentication check (session cookie or API key)
@@ -388,8 +386,4 @@ Additional standalone SQL:
 
 ## Related Documentation
 
-- [README.md](README.md) — Project overview
-- [AGENTS.md](AGENTS.md) — Agentic RAG pipeline architecture
-- [SECURITY.md](SECURITY.md) — Security policy
-- [ENVIRONMENT.md](ENVIRONMENT.md) — Environment setup + deployment configuration
-- [MCP.md](MCP.md) — MCP server configuration
+- [README.md](README.md) — Project overview, architecture, setup, security, API reference
