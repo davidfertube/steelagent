@@ -87,7 +87,7 @@ async function queryRAG(
 ): Promise<{ response: string; sources: { content_preview: string }[] }> {
   const res = await fetch(`${BASE_URL}/api/chat`, {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
+    headers: { "Content-Type": "application/json", "Origin": BASE_URL },
     body: JSON.stringify({ query, stream: false }),
   });
 

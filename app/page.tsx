@@ -313,6 +313,7 @@ export default function Home() {
   const step3Ref = useRef<HTMLDivElement>(null);
 
   // Prevent hydration mismatch for theme toggle
+  // eslint-disable-next-line react-hooks/set-state-in-effect
   useEffect(() => { setMounted(true); }, []);
 
   // Auto-scroll to Step 2 when upload completes

@@ -274,7 +274,7 @@ async function queryRAG(query: string): Promise<{ data: RAGResponse; latencyMs: 
   try {
     const res = await fetch(`${BASE_URL}/api/chat`, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: { "Content-Type": "application/json", "Origin": BASE_URL },
       body: JSON.stringify({ query, stream: false }),
       signal: controller.signal,
     });

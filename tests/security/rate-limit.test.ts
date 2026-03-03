@@ -4,7 +4,7 @@
  * Tests rate limit enforcement, IP extraction, and edge cases.
  */
 
-import { describe, it, expect, beforeEach } from 'vitest';
+import { describe, it, expect } from 'vitest';
 import { checkRateLimit, getClientIp, getRateLimitHeaders } from '@/lib/rate-limit';
 
 describe('Rate Limiting', () => {

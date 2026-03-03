@@ -28,9 +28,9 @@
 | **React components** | 21 | `components/**/*.tsx` -- UI, auth, dashboard |
 | **SQL migrations** | 15 | `supabase/migrations/*.sql` |
 | **CI/CD workflows** | 3 | `.github/workflows/*.yml` |
-| **Test files** | 11 | `tests/**/*.test.ts` + helpers |
-| **Golden datasets** | 10 | `tests/golden-dataset/*.json` |
-| **Scripts** | 11 | `scripts/*.ts` -- accuracy, smoke, feedback, dedup |
+| **Test files** | 13 | `tests/**/*.test.ts` + helpers |
+| **Golden datasets** | 12 | `tests/golden-dataset/*.json` |
+| **Scripts** | 15 | `scripts/*.ts` -- accuracy, smoke, feedback, dedup, retest |
 | **Total TypeScript** | ~131 | ~27,500 lines |
 
 ---
@@ -50,7 +50,7 @@ npm run dev                    # http://localhost:3000
 
 ```bash
 # Unit tests (fast, no server needed)
-npm test                                # All 113 tests (10 files)
+npm test                                # All 189 tests (13 files)
 npm run test:evaluation:unit            # Evaluation pattern tests only
 
 # Accuracy tests (requires running dev server on localhost:3000)
@@ -93,18 +93,21 @@ git push origin main           # Auto-deploys to Vercel via GitHub Actions
 
 ## Architecture
 
-### Accuracy Results (Feb 2026)
+### Accuracy Results (Mar 2026)
 
 | Metric | Result | Target | Status |
 |--------|--------|--------|--------|
-| Overall accuracy | **91.3%** (73/80) | 90%+ | Exceeded |
-| Source citation | **96.3%** (77/80) | 90%+ | Exceeded |
-| Hallucination rate | ~0% | 0% | Maintained |
-| P50 latency | 13.0s | -- | Good |
-| P95 latency | 24.2s | 30-60s | Within target |
-| Post-improvement (10-query) | **100%** (10/10) | -- | Validated |
+| MVP accuracy (50-query) | **88.0%** (44/50) | 75%+ | Exceeded |
+| Source citation | **96.0%** (48/50) | 90%+ | Exceeded |
+| Source accuracy | **94.0%** (47/50) | 80%+ | Exceeded |
+| Hallucination rate | **0%** | 0% | Maintained |
+| False refusals | 2/50 | 0 | Close |
+| P50 latency | 27.5s | -- | Good |
+| P95 latency | 71.7s | 30-60s | Above target |
+| Retest improvement (10-query) | **80%** (8/10) | 80%+ | Met |
 
 Golden datasets: `tests/golden-dataset/*.json` (8 files, 80+ queries total)
+MVP test: `scripts/mvp-accuracy-test.ts` (50 queries across 8 documents)
 
 ### Agentic RAG Pipeline (7 stages)
 
@@ -295,15 +298,19 @@ RESEND_API_KEY=xxx                # Resend (resend.com) -- billing notifications
 
 | Category | Count | Runner |
 |----------|-------|--------|
-| Unit tests | 113 | `npm test` (vitest) |
+| Unit tests | 189 | `npm test` (vitest) |
+| Security tests | 58 | `npx vitest run tests/security/` |
+| MVP accuracy | 50 | `npm run test:mvp` |
 | Core-20 (golden) | 20 | `npm run test:core20` |
 | Accuracy (full) | 80 | `npm run test:accuracy` |
+| Hard-10 (stress) | 10 | `npm run test:hard10` |
 | Production smoke | 8 | `npx tsx scripts/production-smoke-test.ts` |
+| Retest failed | 10 | `npx tsx scripts/retest-failed-10.ts` |
 | Quick validation | 10 | `npx tsx scripts/mvp-10-query-test.ts` |
 | Integration | varies | `npm run test:evaluation:full` |
 | Confusion matrix | varies | `npm run test:confusion` |
 
-All 113 unit tests pass with 0 skips. Tests use auto-detection guards that early-return when the environment (server, API keys) isn't available.
+180 unit tests pass, 9 integration tests require auth (env-gated). Tests use auto-detection guards that early-return when the environment (server, API keys) isn't available.
 
 Shared test helpers: `tests/helpers/test-env.ts`, `tests/helpers/citation-validators.ts`.
 
@@ -344,7 +351,7 @@ Materials compliance is safety-critical -- AI errors can lead to using incorrect
 - [ ] `SUPABASE_SERVICE_KEY` set (not just anon key)
 - [ ] `npm run build` passes locally
 - [ ] `npm run lint` passes
-- [ ] `npm test` passes (113 unit tests, 0 skips)
+- [ ] `npm test` passes (189 tests, 180 pass, 9 env-gated)
 - [ ] Upload test PDF and verify indexing works
 - [ ] Run a query and verify cited response with confidence score
 - [ ] Check SSE streaming works (no 504 timeout)

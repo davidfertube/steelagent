@@ -150,7 +150,8 @@ export async function middleware(request: NextRequest) {
   const isWebhookRoute = pathname.startsWith('/api/webhooks/');
 
   // CSRF Protection for state-changing methods
-  if (['POST', 'PUT', 'DELETE', 'PATCH'].includes(method) && !isWebhookRoute) {
+  // Skip CSRF for anonymous-allowed API routes (programmatic/CLI access can't set Origin)
+  if (['POST', 'PUT', 'DELETE', 'PATCH'].includes(method) && !isWebhookRoute && !isAnonymousAllowed) {
     const origin = request.headers.get('origin');
     const referer = request.headers.get('referer');
 

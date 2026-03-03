@@ -12,6 +12,8 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
+    // Python venv contains large bundled JS files that cause OOM
+    "dspy-optimize/**",
   ]),
 ]);
 

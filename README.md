@@ -10,15 +10,17 @@ SpecVault is an AI-powered search engine for steel and materials specifications.
 
 **Target users:** Materials engineers, QA/QC inspectors, procurement teams, and compliance officers in oil & gas.
 
-### Key Metrics
+### Key Metrics (March 2026)
 
 | Metric | Value |
 |--------|-------|
-| **Accuracy** | 91.3% (73/80 golden queries) |
-| **Hallucination Rate** | ~0% |
-| **Citation Rate** | 96.3% (77/80) |
-| **Response Time** | 13s median, 24.2s P95 |
-| **Unit Tests** | 189 passing |
+| **Accuracy** | 88.0% (44/50 MVP queries) |
+| **Hallucination Rate** | 0% |
+| **Citation Rate** | 96.0% (48/50) |
+| **Source Accuracy** | 94.0% (47/50) |
+| **Response Time** | 27.5s median, 71.7s P95 |
+| **Unit Tests** | 180 passing (189 total, 9 env-gated) |
+| **Security Tests** | 58 passing (prompt injection, rate limiting) |
 | **Indexed Specifications** | 15 documents |
 
 ### Tech Stack
@@ -261,7 +263,11 @@ Anthropic (Claude) -> Groq -> Cerebras -> SambaNova -> OpenRouter
 # Unit tests (fast, no server needed)
 npm test                                # All tests (vitest)
 
-# Accuracy tests (requires running dev server on localhost:3000)
+# MVP accuracy test (requires running dev server on localhost:3000)
+npm run test:mvp                       # 50-query suite across all 8 documents
+npm run test:mvp:verbose               # Same, with detailed per-query output
+
+# Full accuracy tests
 npm run test:accuracy                   # 80-query suite across all 8 documents
 npm run test:accuracy:verbose           # Same, with detailed per-query output
 

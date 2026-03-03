@@ -314,9 +314,31 @@ export async function resolveSpecsToDocuments(
   // "S32205 yield" searches all documents
 
   if (rawAstmCodes.length === 0) {
-    // No ASTM code specified - don't filter
-    // This is intentional: if user just asks about S32205 without specifying
-    // which spec, we search all documents
+    // No ASTM code specified — try to infer from product-type keywords
+    // Only when combined with duplex/stainless context to avoid false matches
+    if (fullQuery) {
+      const PRODUCT_TYPE_HINTS: Record<string, string> = {
+        'pipe': 'A790',        // A790 = duplex pipe
+        'tubing': 'A789',      // A789 = duplex tubing
+        'tube': 'A789',
+        'forging': 'A1049',    // A1049 = duplex forgings
+        'casting': 'A872',     // A872 = cast duplex pipe
+        'centrifugal': 'A872',
+      };
+      const hasDuplexContext = /duplex|stainless|2205|2507|S322|S327/i.test(fullQuery);
+      if (hasDuplexContext) {
+        for (const [keyword, code] of Object.entries(PRODUCT_TYPE_HINTS)) {
+          if (new RegExp(`\\b${keyword}\\b`, 'i').test(fullQuery)) {
+            const ids = documentCache?.get(code);
+            if (ids && ids.length > 0) {
+              console.log(`[Document Mapper] Inferred ${code} from product-type "${keyword}" + duplex context`);
+              return ids;
+            }
+          }
+        }
+      }
+    }
+
     console.log(
       "[Document Mapper] No ASTM codes in query, searching all documents"
     );

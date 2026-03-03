@@ -731,7 +731,7 @@ async function querySteelAgent(query: string): Promise<{
   try {
     const response = await fetch("http://localhost:3000/api/chat", {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: { "Content-Type": "application/json", "Origin": "http://localhost:3000" },
       body: JSON.stringify({ query, stream: false })
     });
 
